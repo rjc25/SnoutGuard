@@ -107,19 +107,22 @@ export async function collectData(options: CollectorOptions): Promise<CollectedD
   } = options;
 
   const git = createGitClient(repoPath);
+  const isTeamScope = developer.toLowerCase() === 'team';
 
-  // Gather commits from git log
-  const commits = await collectCommits(git, developer, periodStart, periodEnd);
+  // Gather commits from git log (no author filter for team scope)
+  const commits = await collectCommits(git, isTeamScope ? undefined : developer, periodStart, periodEnd);
 
   // Gather per-developer stats
   const devStatsArray = await getDevStats(git, periodStart, periodEnd);
-  const gitStats = devStatsArray.find(
-    (s: { author: string; email: string }) => s.author.toLowerCase() === developer.toLowerCase()
-      || s.email.toLowerCase() === developer.toLowerCase()
-  ) ?? null;
+  const gitStats = isTeamScope
+    ? aggregateDevStats(devStatsArray)
+    : devStatsArray.find(
+        (s: { author: string; email: string }) => s.author.toLowerCase() === developer.toLowerCase()
+          || s.email.toLowerCase() === developer.toLowerCase()
+      ) ?? null;
 
-  // Collect all changed files across commits
-  const filesChanged = extractChangedFiles(commits, git, periodStart, periodEnd, developer);
+  // Collect all changed files across commits (no author filter for team scope)
+  const filesChanged = extractChangedFiles(commits, git, periodStart, periodEnd, isTeamScope ? undefined : developer);
   const allFiles = await filesChanged;
 
   // Group files into modules
@@ -178,11 +181,26 @@ export async function collectData(options: CollectorOptions): Promise<CollectedD
 }
 
 /**
- * Gather commits for a developer within a time period using git log.
+ * Aggregate stats across all developers into a single team summary.
+ */
+function aggregateDevStats(stats: DevGitStats[]): DevGitStats | null {
+  if (stats.length === 0) return null;
+  return {
+    author: 'team',
+    email: '',
+    commits: stats.reduce((sum, s) => sum + s.commits, 0),
+    additions: stats.reduce((sum, s) => sum + s.additions, 0),
+    deletions: stats.reduce((sum, s) => sum + s.deletions, 0),
+    filesChanged: stats.reduce((sum, s) => sum + s.filesChanged, 0),
+  };
+}
+
+/**
+ * Gather commits for a developer (or all developers) within a time period using git log.
  */
 async function collectCommits(
   git: GitClient,
-  developer: string,
+  developer: string | undefined,
   since: string,
   until: string
 ): Promise<CommitInfo[]> {
@@ -190,7 +208,7 @@ async function collectCommits(
     const log = await getLog(git, {
       since,
       until,
-      author: developer,
+      ...(developer ? { author: developer } : {}),
     });
 
     return log.all.map((entry: { hash: string; message: string; date: string }) => ({
@@ -216,17 +234,18 @@ async function extractChangedFiles(
   git: GitClient,
   since: string,
   until: string,
-  developer: string
+  developer?: string
 ): Promise<string[]> {
   try {
-    const raw = await git.raw([
+    const args = [
       'log',
       `--since=${since}`,
       `--until=${until}`,
-      `--author=${developer}`,
+      ...(developer ? [`--author=${developer}`] : []),
       '--name-only',
       '--pretty=format:',
-    ]);
+    ];
+    const raw = await git.raw(args);
 
     const rawStr = String(raw);
     const files: string[] = rawStr
