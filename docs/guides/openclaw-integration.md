@@ -34,6 +34,16 @@ OpenClaw reads `CLAUDE.md` from your project root and includes it in every agent
 
 No configuration needed. No prompt engineering. Just run sync and your agents are aligned.
 
+### Built-In Workflow Enforcement
+
+The generated context files include a **Workflow** section that instructs agents to:
+
+1. **Before coding** — call `get_architectural_guidance` (if MCP is configured) or review relevant constraints in the context file
+2. **After changes** — run `archguard review --diff <branch>` to catch violations
+3. **After significant refactors** — re-run `archguard analyze` then `archguard sync` to keep context files current
+
+This means enforcement is baked into the context file itself — every agent session that loads CLAUDE.md gets the workflow rules automatically. You don't need to remember to tell your agent to check architecture; it's already in its instructions.
+
 ### Sub-Agent Alignment
 
 This is where it gets powerful. When you spawn sub-agents for parallel work:
@@ -47,23 +57,30 @@ That sub-agent gets your `CLAUDE.md` in its context. It knows:
 - Which layers can depend on which
 - What technologies are approved and how they're used
 - What constraints are non-negotiable
+- **What workflow to follow** (check guidance before coding, review after)
 
 Without ArchGuard, that sub-agent would make reasonable but uninformed decisions. With it, the sub-agent follows your architecture from the first line of code.
 
 ### Pre-Flight and Post-Flight Checks
 
-For critical work, add architectural review to your workflow:
+For critical work, the MCP server provides real-time guidance:
 
 **Before coding:**
 ```bash
-# Get relevant architectural constraints for a task
-archguard serve  # Start MCP server
-
-# Then ask your agent:
-# "Before you start, call get_architectural_guidance with a description of your task"
+# Start MCP server (configure in .claude/settings.json or equivalent)
+archguard serve --transport stdio
 ```
 
-The MCP server's `get_architectural_guidance` tool returns only the decisions relevant to the task at hand — not the entire architecture document.
+The MCP server exposes four tools:
+
+| Tool | What It Does |
+|------|-------------|
+| `get_architectural_guidance` | Describe a task, get all relevant decisions and constraints |
+| `get_architectural_decisions` | Search decisions by keyword, category, or file path |
+| `check_architectural_compliance` | Validate a code snippet against architectural constraints |
+| `get_dependency_graph` | Query the dependency graph for coupling metrics |
+
+`get_architectural_guidance` is the most valuable — it takes a plain-English task description and returns only the decisions relevant to the task at hand.
 
 **After coding:**
 ```bash
@@ -73,13 +90,15 @@ archguard review --diff main
 
 This catches violations before they're merged. The review uses Claude Sonnet to check your diff against every known architectural decision and flags violations with severity levels.
 
+> ArchGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
+
 ### Sprint Reviews
 
 Track what your agents (and humans) are actually building:
 
 ```bash
 # Team sprint review with velocity metrics
-archguard summary --type sprint_review --period sprint
+archguard summary --type sprint_review
 
 # Individual developer standup
 archguard summary --type standup --dev alice
@@ -106,21 +125,22 @@ cd ~/your-project
 export ANTHROPIC_API_KEY=sk-ant-...
 
 archguard init      # Creates .archguard.yml
-archguard analyze   # Extracts decisions (~$0.50-3.00, uses Opus)
-archguard sync      # Generates CLAUDE.md (~$0.10-0.50, uses Opus)
+archguard analyze   # Extracts decisions (Opus ~$10-16, Sonnet ~$2-3)
+archguard sync      # Generates CLAUDE.md (Opus ~$0.10-0.50)
 ```
 
 ### 3. Configure (Optional)
 
-Edit `.archguard.yml` to customize:
+Edit `.archguard.yml` to customize. See the full [Configuration Reference](../configuration.md) for all options.
 
 ```yaml
 llm:
   models:
-    analyze: claude-opus-4-6    # Deep analysis
+    analyze: claude-opus-4-6    # Deep analysis (or claude-sonnet-4-6 for ~$2-3)
     sync: claude-opus-4-6       # Context compression
     review: claude-sonnet-4-6   # PR review
     summary: claude-sonnet-4-6  # Work summaries
+  max_cost_per_run: 10.00       # Safety limit in USD
 
 sync:
   formats:
@@ -128,9 +148,6 @@ sync:
     - cursorrules       # .cursorrules for Cursor
   max_context_tokens: 8192    # Token budget for context files
   use_llm: true               # Opus compression (false = template-only, free)
-
-summaries:
-  sprint_length_days: 14      # Your sprint cadence
 ```
 
 ### 4. MCP Server (Optional)
@@ -149,11 +166,6 @@ For real-time architectural guidance during agent sessions:
 }
 ```
 
-This gives agents access to:
-- `get_architectural_decisions` — search decisions by keyword
-- `check_architectural_compliance` — validate code against all decisions
-- `get_architectural_guidance` — get constraints relevant to a specific task
-
 ## Why LLM-Powered Sync Matters
 
 The old approach was template-based: dump every decision into a markdown file. It was free but produced bloated, repetitive context files that wasted tokens in every agent session.
@@ -163,24 +175,24 @@ The new approach sends your decisions to Opus, which intelligently compresses th
 | Metric | Template | LLM-Powered |
 |--------|----------|-------------|
 | Output size | ~1.5KB per decision | Configurable budget (default 8192 tokens) |
-| 18 decisions | 22KB | 7.4KB |
-| 100 decisions | ~120KB | ~8KB (same budget) |
+| 133 decisions | ~200KB | ~8KB |
 | Quality | Mechanical dump | Prioritized, merged, imperative rules |
 | Cost | Free | ~$0.30 per sync |
 
 A single Opus sync call costs ~$0.30. That compressed context file then saves tokens across every agent session that loads it — potentially hundreds per day. The ROI is immediate.
 
-Use `--no-llm` if you want free, deterministic output.
+Use `archguard sync --no-llm` if you want free, deterministic output.
 
 ## Cost Breakdown
 
 | What | Cost | When |
 |------|------|------|
-| `archguard analyze` | $0.50 - $3.00 | After major changes, weekly |
-| `archguard sync` | $0.10 - $0.50 | After analyze |
-| `archguard review` | $0.01 - $0.10 | Per PR or branch |
-| `archguard summary` | $0.02 - $0.05 | Daily/weekly |
-| MCP queries | $0.005 - $0.02 | Per agent query |
+| `archguard analyze` (Opus) | $10 – $16 | After major changes, weekly |
+| `archguard analyze` (Sonnet) | $2 – $3 | After major changes, weekly |
+| `archguard sync` | $0.10 – $0.50 | After analyze |
+| `archguard review` | $0.01 – $0.10 | Per PR or branch |
+| `archguard summary` | $0.02 – $0.05 | Daily/weekly |
+| MCP queries | $0.005 – $0.02 | Per agent query |
 
 Typical monthly cost for an active team: **$15-40/month**. That's less than one hour of architectural cleanup after a week of unguided agent coding.
 
@@ -192,7 +204,8 @@ Paste this into your OpenClaw session to get started:
 Install ArchGuard from source (https://github.com/rjc25/ArchGuard). Clone the repo,
 install dependencies with pnpm, build all packages, and link the CLI globally. Then in
 my current project: run "archguard init", "archguard analyze", and "archguard sync" to
-generate CLAUDE.md. Show me the decisions found and the generated context file.
+generate CLAUDE.md. Configure "archguard serve" as an MCP server in .claude/settings.json.
+Show me the decisions found and the generated context file.
 ```
 
 Your agents will thank you. Your architecture will survive them.

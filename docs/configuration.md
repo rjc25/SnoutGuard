@@ -1,6 +1,6 @@
 # Configuration Reference
 
-ArchGuard is configured via `.archguard.yml` in your project root. Run `archguard init` to generate one with defaults.
+ArchGuard is configured via `.archguard.yml` in your project root. Run `archguard init` to generate one with sensible defaults.
 
 The config file uses `snake_case` keys (e.g. `max_file_size_kb`), which are automatically converted to camelCase internally.
 
@@ -14,7 +14,7 @@ Configuration schema version.
 
 ## server (optional)
 
-Connect to a remote ArchGuard server instance. Omit this section entirely for local-only usage.
+Connect to a remote ArchGuard server instance. Omit this section entirely for local-only CLI usage.
 
 | Field | Type | Default | Required |
 |-------|------|---------|----------|
@@ -33,51 +33,103 @@ Controls which files are analyzed and how.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `include` | string[] | `["src/**", "lib/**"]` | Glob patterns for files to analyze |
-| `exclude` | string[] | `["**/*.test.*", "**/*.spec.*", "**/node_modules/**", "**/dist/**"]` | Glob patterns to exclude |
-| `languages` | enum[] | `["typescript"]` | Languages to analyze: `typescript`, `javascript`, `python`, `go`, `rust`, `java` |
-| `max_file_size_kb` | number | `500` | Maximum file size in KB to analyze |
-| `llm_analysis` | boolean | `true` | Enable LLM-powered architectural pattern detection |
+| `include` | string[] | `["**"]` | Glob patterns for files to analyze |
+| `exclude` | string[] | *(see below)* | Glob patterns to exclude |
+| `languages` | enum[] | *(all supported)* | Languages to analyze: `typescript`, `javascript`, `python`, `go`, `rust`, `java` |
+| `max_file_size_kb` | number | `2048` | Maximum file size in KB to analyze |
 | `analysis_period_months` | number | `6` | Time window in months for architectural drift analysis |
+
+**Default exclude patterns:**
+```
+**/node_modules/**    **/dist/**          **/build/**
+**/out/**             **/.next/**         **/vendor/**
+**/target/**          **/__pycache__/**   **/.venv/**
+**/venv/**            **/*.min.js         **/*.bundle.js
+**/generated/**       **/coverage/**
+```
+
+**Default languages:** All six supported languages are enabled by default (`typescript`, `javascript`, `python`, `go`, `rust`, `java`).
 
 ```yaml
 analysis:
   include:
-    - "src/**"
-    - "lib/**"
+    - "**"
   exclude:
-    - "**/*.test.*"
-    - "**/*.spec.*"
     - "**/node_modules/**"
     - "**/dist/**"
+    - "**/build/**"
+    - "**/out/**"
+    - "**/.next/**"
+    - "**/vendor/**"
+    - "**/target/**"
+    - "**/__pycache__/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/*.min.js"
+    - "**/*.bundle.js"
+    - "**/generated/**"
+    - "**/coverage/**"
   languages:
     - typescript
+    - javascript
     - python
-  max_file_size_kb: 500
-  llm_analysis: true
+    - go
+    - rust
+    - java
+  max_file_size_kb: 2048
   analysis_period_months: 6
 ```
 
 ## llm
 
-LLM provider settings.
+LLM provider and model settings. ArchGuard uses **tiered models** — different models for different operations, each independently configurable.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `provider` | string | `"anthropic"` | LLM provider |
-| `model` | string | `"claude-sonnet-4-6"` | Model ID |
+| `provider` | string | `"anthropic"` | LLM provider (currently only `anthropic` supported) |
 | `api_key_env` | string | `"ANTHROPIC_API_KEY"` | Environment variable containing the API key |
-| `max_tokens_per_analysis` | number | `4096` | Max tokens per LLM request |
-| `cache_ttl_hours` | number | `24` | How long to cache LLM responses (hours) |
+| `models.analyze` | string | `"claude-opus-4-6"` | Model for codebase analysis |
+| `models.review` | string | `"claude-sonnet-4-6"` | Model for code review |
+| `models.mcp` | string | `"claude-sonnet-4-6"` | Model for MCP server queries |
+| `models.summary` | string | `"claude-sonnet-4-6"` | Model for work summaries |
+| `models.sync` | string | `"claude-opus-4-6"` | Model for context file generation |
+| `max_tokens_per_analysis` | number | `32768` | Max output tokens per LLM request |
+| `cache_ttl_hours` | number | `720` | How long to cache file hashes (hours). 720h = 30 days |
+| `max_retries` | number | `3` | Max retries on LLM API failures |
+| `retry_base_delay_ms` | number | `1000` | Base delay for exponential backoff (ms) |
+| `request_timeout_ms` | number | `120000` | Timeout per LLM request (ms) |
+| `max_cost_per_run` | number | `10.00` | Safety limit in USD per run. Set to `0` for unlimited |
 
 ```yaml
 llm:
   provider: anthropic
-  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
-  max_tokens_per_analysis: 4096
-  cache_ttl_hours: 24
+  models:
+    analyze: claude-opus-4-6        # Deep codebase analysis (runs infrequently)
+    sync: claude-opus-4-6           # Context file compression (loaded into every session)
+    review: claude-sonnet-4-6       # PR review (runs on every PR)
+    mcp: claude-sonnet-4-6          # MCP server queries (fast responses)
+    summary: claude-sonnet-4-6      # Work summaries (summarization)
+  max_tokens_per_analysis: 32768
+  cache_ttl_hours: 720
+  max_retries: 3
+  retry_base_delay_ms: 1000
+  request_timeout_ms: 120000
+  max_cost_per_run: 10.00
 ```
+
+### Estimated Costs
+
+| Operation | Typical Cost | Frequency |
+|-----------|-------------|-----------|
+| Full analysis (Opus) | $10 – $16 | Weekly or on-demand |
+| Full analysis (Sonnet) | $2 – $3 | Weekly or on-demand |
+| Context sync (Opus) | $0.10 – $0.50 | After analysis or major refactors |
+| PR review (Sonnet) | $0.01 – $0.10 | Per PR |
+| Work summary (Sonnet) | $0.02 – $0.05 | Daily/weekly |
+| MCP query (Sonnet) | $0.005 – $0.02 | Per query |
+
+Use `archguard costs` to see cost estimates based on your configuration.
 
 ## sync
 
@@ -90,6 +142,8 @@ Controls AI agent context file generation.
 | `preserve_user_sections` | boolean | `true` | Keep user-added sections when re-syncing |
 | `auto_commit` | boolean | `false` | Auto-commit generated context files |
 | `auto_pr` | boolean | `false` | Auto-create PRs for context file changes |
+| `max_context_tokens` | number | `8192` | Token budget for generated context files (min 512, max 32768) |
+| `use_llm` | boolean | `true` | Use Opus to intelligently compress decisions. `false` = template-only (free) |
 
 ```yaml
 sync:
@@ -103,7 +157,11 @@ sync:
   preserve_user_sections: true
   auto_commit: false
   auto_pr: false
+  max_context_tokens: 8192
+  use_llm: true
 ```
+
+> **Why `use_llm: true` is the default:** The context file is loaded into every agent session. A ~$0.30 Opus call that produces a 60-70% smaller file saves far more in cumulative token costs across hundreds of agent interactions. Use `use_llm: false` for free, deterministic template-based output.
 
 ## mcp
 
@@ -112,12 +170,10 @@ MCP server settings for real-time architectural guidance.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `transport` | enum | `"stdio"` | Transport method: `stdio` or `sse` |
-| `llm_enhanced` | boolean | `true` | Enable LLM-enhanced guidance responses |
 
 ```yaml
 mcp:
   transport: stdio
-  llm_enhanced: true
 ```
 
 ## review
@@ -129,7 +185,7 @@ Architectural code review settings.
 | `severity_threshold` | enum | `"warning"` | Minimum severity to report: `error`, `warning`, `info` |
 | `max_violations` | number | `50` | Max violations per review |
 | `auto_fix_suggestions` | boolean | `true` | Include fix suggestions in output |
-| `auto_review_prs` | boolean | `true` | Auto-review PRs (requires GitHub App) |
+| `auto_review_prs` | boolean | `true` | Auto-review PRs (requires GitHub App integration) |
 
 ```yaml
 review:
@@ -139,9 +195,63 @@ review:
   auto_review_prs: true
 ```
 
+> ArchGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
+
+## layers
+
+Layer definitions for dependency enforcement. Dependencies are checked against `allowed_dependencies` — if module A is in the "presentation" layer and imports from a module in the "infrastructure" layer, that's a violation (unless "infrastructure" is in `allowed_dependencies`).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | yes | Layer name (referenced by `allowed_dependencies`) |
+| `patterns` | string[] | yes | Glob patterns that identify files in this layer |
+| `allowed_dependencies` | string[] | yes | Which layers this layer may depend on (empty = no dependencies) |
+
+**Default layers** (Clean Architecture):
+
+```yaml
+layers:
+  - name: presentation
+    patterns:
+      - "**/presentation/**"
+      - "**/ui/**"
+      - "**/pages/**"
+      - "**/components/**"
+      - "**/views/**"
+    allowed_dependencies:
+      - application
+      - domain
+
+  - name: application
+    patterns:
+      - "**/application/**"
+      - "**/services/**"
+      - "**/use-cases/**"
+      - "**/usecases/**"
+    allowed_dependencies:
+      - domain
+
+  - name: domain
+    patterns:
+      - "**/domain/**"
+      - "**/entities/**"
+      - "**/models/**"
+    allowed_dependencies: []
+
+  - name: infrastructure
+    patterns:
+      - "**/infrastructure/**"
+      - "**/repositories/**"
+      - "**/adapters/**"
+      - "**/db/**"
+    allowed_dependencies:
+      - domain
+      - application
+```
+
 ## velocity
 
-Team velocity tracking settings. The four weights should sum to 1.0.
+Team velocity tracking settings. The four weights auto-normalize to 1.0 but should ideally sum to 1.0.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -173,6 +283,7 @@ AI-generated work summary settings.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `enabled` | boolean | `true` | Enable work summaries |
+| `sprint_length_days` | number | `14` | Sprint length in days (used by `sprint_review` summaries). Min 1, max 90 |
 | `schedules` | object[] | `[]` | Scheduled summary rules (see below) |
 
 Each schedule entry:
@@ -186,6 +297,7 @@ Each schedule entry:
 ```yaml
 summaries:
   enabled: true
+  sprint_length_days: 14
   schedules:
     - type: standup
       cron: "0 10 * * *"
@@ -252,55 +364,111 @@ rules:
     severity: warning
 ```
 
-## Full example
+## Full Example
+
+This is the default config generated by `archguard init`:
 
 ```yaml
 version: 1
 
 analysis:
   include:
-    - "src/**"
-    - "lib/**"
+    - "**"
   exclude:
-    - "**/*.test.*"
-    - "**/*.spec.*"
     - "**/node_modules/**"
     - "**/dist/**"
+    - "**/build/**"
+    - "**/out/**"
+    - "**/.next/**"
+    - "**/vendor/**"
+    - "**/target/**"
+    - "**/__pycache__/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/*.min.js"
+    - "**/*.bundle.js"
+    - "**/generated/**"
+    - "**/coverage/**"
   languages:
     - typescript
+    - javascript
     - python
-  max_file_size_kb: 500
-  llm_analysis: true
+    - go
+    - rust
+    - java
+  max_file_size_kb: 2048
   analysis_period_months: 6
 
 llm:
   provider: anthropic
-  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
-  max_tokens_per_analysis: 4096
-  cache_ttl_hours: 24
+  models:
+    analyze: claude-opus-4-6
+    sync: claude-opus-4-6
+    review: claude-sonnet-4-6
+    mcp: claude-sonnet-4-6
+    summary: claude-sonnet-4-6
+  max_tokens_per_analysis: 32768
+  cache_ttl_hours: 720
+  max_retries: 3
+  retry_base_delay_ms: 1000
+  request_timeout_ms: 120000
+  max_cost_per_run: 10.00
 
 sync:
   formats:
     - cursorrules
     - claude
-    - copilot
-    - windsurf
-    - kiro
   output_dir: "."
   preserve_user_sections: true
   auto_commit: false
   auto_pr: false
+  max_context_tokens: 8192
+  use_llm: true
 
 mcp:
   transport: stdio
-  llm_enhanced: true
 
 review:
   severity_threshold: warning
   max_violations: 50
   auto_fix_suggestions: true
   auto_review_prs: true
+
+layers:
+  - name: presentation
+    patterns:
+      - "**/presentation/**"
+      - "**/ui/**"
+      - "**/pages/**"
+      - "**/components/**"
+      - "**/views/**"
+    allowed_dependencies:
+      - application
+      - domain
+  - name: application
+    patterns:
+      - "**/application/**"
+      - "**/services/**"
+      - "**/use-cases/**"
+      - "**/usecases/**"
+    allowed_dependencies:
+      - domain
+  - name: domain
+    patterns:
+      - "**/domain/**"
+      - "**/entities/**"
+      - "**/models/**"
+    allowed_dependencies: []
+  - name: infrastructure
+    patterns:
+      - "**/infrastructure/**"
+      - "**/repositories/**"
+      - "**/adapters/**"
+      - "**/db/**"
+    allowed_dependencies:
+      - domain
+      - application
 
 velocity:
   enabled: true
@@ -314,30 +482,8 @@ velocity:
 
 summaries:
   enabled: true
-  schedules:
-    - type: standup
-      cron: "0 10 * * *"
-    - type: one_on_one
-      cron: "0 9 * * 1"
-      slack_channel: "#1-1-summaries"
+  sprint_length_days: 14
+  schedules: []
 
-slack:
-  bot_token_env: SLACK_BOT_TOKEN
-  signing_secret_env: SLACK_SIGNING_SECRET
-  notifications:
-    violations:
-      channel: "#arch-violations"
-      severity_threshold: warning
-    drift:
-      channel: "#arch-drift"
-      score_threshold: 0.3
-    blockers:
-      channel: "#dev-blockers"
-
-rules:
-  - name: "No direct DB access outside repositories"
-    pattern: "import.*from.*prisma"
-    allowed_in:
-      - "src/infrastructure/repositories/**"
-    severity: error
+rules: []
 ```

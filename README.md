@@ -159,7 +159,7 @@ This means the enforcement is **baked into the context file itself** — every a
 - Tools: `get_architectural_decisions`, `check_architectural_compliance`, `get_architectural_guidance`, `get_dependency_graph`
 - Resources: decisions, patterns, constraints, dependencies
 - Works with Claude Code, Cursor, Windsurf, and other MCP-compatible agents
-- Supports stdio and SSE transports
+- Supports stdio, SSE, and streamable HTTP transports
 - Uses Claude Sonnet for fast query responses
 
 **Architectural Code Review** (`archguard review`)
@@ -326,17 +326,30 @@ version: 1
 
 analysis:
   include:
-    - "src/**"
-    - "lib/**"
+    - "**"
   exclude:
-    - "**/*.test.*"
-    - "**/*.spec.*"
     - "**/node_modules/**"
     - "**/dist/**"
+    - "**/build/**"
+    - "**/out/**"
+    - "**/.next/**"
+    - "**/vendor/**"
+    - "**/target/**"
+    - "**/__pycache__/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/*.min.js"
+    - "**/*.bundle.js"
+    - "**/generated/**"
+    - "**/coverage/**"
   languages:
     - typescript
+    - javascript
     - python
-  max_file_size_kb: 500
+    - go
+    - rust
+    - java
+  max_file_size_kb: 2048
   analysis_period_months: 6
 
 llm:
@@ -344,10 +357,11 @@ llm:
   api_key_env: ANTHROPIC_API_KEY
   models:
     analyze: claude-opus-4-6
+    sync: claude-opus-4-6
     review: claude-sonnet-4-6
     mcp: claude-sonnet-4-6
     summary: claude-sonnet-4-6
-  max_tokens_per_analysis: 8192
+  max_tokens_per_analysis: 32768
   cache_ttl_hours: 720
   max_retries: 3
   retry_base_delay_ms: 1000
@@ -358,9 +372,6 @@ sync:
   formats:
     - cursorrules
     - claude
-    - copilot
-    - windsurf
-    - kiro
   output_dir: "."
   preserve_user_sections: true
   auto_commit: false
@@ -377,32 +388,42 @@ review:
   auto_fix_suggestions: true
   auto_review_prs: true
 
-# Layer hierarchy for violation detection
+# Layer hierarchy for dependency enforcement
+# Dependencies flow: presentation -> application -> domain <- infrastructure
 layers:
   - name: presentation
     patterns:
-      - "src/ui/**"
-      - "src/pages/**"
-      - "src/components/**"
+      - "**/presentation/**"
+      - "**/ui/**"
+      - "**/pages/**"
+      - "**/components/**"
+      - "**/views/**"
     allowed_dependencies:
       - application
+      - domain
   - name: application
     patterns:
-      - "src/services/**"
-      - "src/usecases/**"
+      - "**/application/**"
+      - "**/services/**"
+      - "**/use-cases/**"
+      - "**/usecases/**"
     allowed_dependencies:
       - domain
   - name: domain
     patterns:
-      - "src/domain/**"
-      - "src/models/**"
+      - "**/domain/**"
+      - "**/entities/**"
+      - "**/models/**"
     allowed_dependencies: []
   - name: infrastructure
     patterns:
-      - "src/infrastructure/**"
-      - "src/repositories/**"
+      - "**/infrastructure/**"
+      - "**/repositories/**"
+      - "**/adapters/**"
+      - "**/db/**"
     allowed_dependencies:
       - domain
+      - application
 
 velocity:
   enabled: true
@@ -416,6 +437,7 @@ velocity:
 
 summaries:
   enabled: true
+  sprint_length_days: 14
   schedules:
     - type: standup
       cron: "0 10 * * *"
