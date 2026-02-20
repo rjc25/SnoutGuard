@@ -45,6 +45,7 @@ export {
   LlmRateLimitError,
   LlmValidationError,
   LlmCostLimitError,
+  getFailureReason,
   type AnalysisOptions,
   type LlmOperation,
 } from './llm.js';
@@ -74,6 +75,16 @@ export {
   isRoleAtLeast,
   type Permission,
 } from './auth.js';
+
+// Logger
+export {
+  Logger,
+  initLogger,
+  getLogger,
+  type LogLevel,
+  type LogEntry,
+  type LoggerOptions,
+} from './logger.js';
 
 // Utils
 export {

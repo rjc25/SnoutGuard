@@ -30,6 +30,7 @@ import {
   resetRunCost,
   getRunCost,
   getCallHistory,
+  getLogger,
   type LlmCallRecord,
 } from '@archguard/core';
 import { scanCodebase } from './scanner.js';
@@ -57,6 +58,16 @@ export interface AnalysisResult {
   };
 }
 
+/** Progress callback for real-time CLI updates */
+export type AnalysisProgressCallback = (event: AnalysisProgressEvent) => void;
+
+export interface AnalysisProgressEvent {
+  step: number;
+  totalSteps: number;
+  phase: string;
+  detail?: string;
+}
+
 /**
  * Run a full codebase analysis.
  * This is the main entry point for the analyzer package.
@@ -70,9 +81,17 @@ export async function runAnalysis(
   options: {
     repoId: string;
     previousSnapshot?: ArchSnapshot;
+    onProgress?: AnalysisProgressCallback;
   }
 ): Promise<AnalysisResult> {
-  const { repoId, previousSnapshot } = options;
+  const { repoId, previousSnapshot, onProgress } = options;
+  const log = getLogger();
+  const totalSteps = 6;
+
+  function progress(step: number, phase: string, detail?: string): void {
+    log.info('analysis', `Step ${step}/${totalSteps}: ${phase}`, detail ? { detail } : undefined);
+    onProgress?.({ step, totalSteps, phase, detail });
+  }
 
   // Reset cost tracking for this run
   resetRunCost();
@@ -81,12 +100,32 @@ export async function runAnalysis(
   const client = createLlmClient(config);
 
   // Step 1: Scan codebase
+  progress(1, 'Scanning codebase', `Discovering source files in ${projectDir}`);
   const scanResult = await scanCodebase(projectDir, config);
+  log.info('scan', 'Scan complete', {
+    totalFiles: scanResult.totalFiles,
+    totalLines: scanResult.totalLines,
+    languages: Object.keys(scanResult.languageBreakdown),
+  });
 
   // Step 2: Build dependency graph (with tsconfig resolution)
+  progress(2, 'Building dependency graph', `${scanResult.totalFiles} files`);
   const dependencyGraph = buildDependencyGraph(scanResult.files, repoId, projectDir);
+  log.info('deps', 'Dependency graph built', {
+    totalModules: dependencyGraph.totalModules,
+    circularDeps: dependencyGraph.circularDeps.length,
+    avgCoupling: dependencyGraph.avgCoupling.toFixed(3),
+  });
 
   // Step 3: Extract architectural decisions using LLM
+  progress(3, 'Extracting architectural decisions', `Sending ${scanResult.totalFiles} files to LLM`);
+  log.llmRequest({
+    operation: 'analyze',
+    model: config.llm.models.analyze,
+    inputTokens: 0, // will be logged at the llm layer
+    filesIncluded: scanResult.totalFiles,
+    filesList: scanResult.files.slice(0, 50).map((f) => f.filePath),
+  });
   const decisions = await extractDecisions(
     client,
     config,
@@ -94,15 +133,19 @@ export async function runAnalysis(
     scanResult.directoryTree,
     dependencyGraph
   );
+  log.info('analysis', `Extracted ${decisions.length} architectural decisions`);
 
   // Step 4: Detect layer violations
+  progress(4, 'Detecting layer violations');
   const layerViolations = detectLayerViolations(
     dependencyGraph,
     scanResult.files,
     config.layers
   );
+  log.info('layers', `Found ${layerViolations.length} layer violations`);
 
   // Step 5: Detect drift
+  progress(5, 'Detecting architectural drift');
   const git = createGitClient(projectDir);
   let commitSha: string;
   try {
@@ -119,10 +162,18 @@ export async function runAnalysis(
     previousSnapshot,
     layerViolations
   );
+  log.info('drift', `Drift score: ${(drift.driftScore * 100).toFixed(0)}%, events: ${drift.events.length}`);
 
   // Step 6: Generate reports
+  progress(6, 'Generating reports');
   const markdownReport = generateMarkdownReport(scanResult, decisions, dependencyGraph, drift, layerViolations);
   const jsonReport = generateJsonReport(scanResult, decisions, dependencyGraph, drift, layerViolations);
+
+  log.info('analysis', 'Analysis complete', {
+    totalCost: `$${getRunCost().toFixed(4)}`,
+    apiCalls: getCallHistory().filter((c) => !c.cacheHit).length,
+    cacheHits: getCallHistory().filter((c) => c.cacheHit).length,
+  });
 
   return {
     scanResult,

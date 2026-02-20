@@ -18,6 +18,7 @@ import * as crypto from 'node:crypto';
 import { z, type ZodSchema } from 'zod';
 import type { ArchGuardConfig, LlmCallRecord } from './types.js';
 import { generateId, now, sleep } from './utils.js';
+import { getLogger } from './logger.js';
 
 // ─── Error Types ───────────────────────────────────────────────────
 
@@ -58,6 +59,28 @@ export class LlmValidationError extends LlmError {
     super(message, 'VALIDATION_FAILED');
     this.name = 'LlmValidationError';
   }
+}
+
+/**
+ * Map an error to a human-readable failure reason for the final
+ * "Analysis failed" message.
+ */
+export function getFailureReason(error: unknown): string {
+  if (error instanceof LlmAuthError) return 'API key invalid or missing';
+  if (error instanceof LlmRateLimitError) return 'API rate limited';
+  if (error instanceof LlmCostLimitError) return 'Cost limit reached';
+  if (error instanceof LlmValidationError) {
+    if (error.zodErrors) return 'JSON schema validation failed';
+    return 'JSON parse failed — could not extract valid JSON from LLM response';
+  }
+  if (error instanceof LlmError) {
+    if (error.code === 'CONTEXT_OVERFLOW') return 'Context window exceeded';
+    if (error.code === 'AUTH_FAILED') return 'API authentication failed';
+    if (error.code === 'MAX_RETRIES') return 'LLM call failed after retries';
+    return `LLM error (${error.code})`;
+  }
+  if (error instanceof Error) return error.message;
+  return String(error);
 }
 
 export class LlmCostLimitError extends LlmError {
@@ -247,10 +270,18 @@ export async function analyzeWithLlm(
   const maxRetries = config.llm.maxRetries;
   const baseDelay = config.llm.retryBaseDelayMs;
   let lastError: Error | undefined;
+  const log = getLogger();
+
+  log.llmRequest({
+    operation,
+    model,
+    inputTokens: inputEstimate,
+  });
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     if (attempt > 0) {
       const delay = baseDelay * Math.pow(2, attempt - 1);
+      log.debug('llm', `Retry attempt ${attempt}/${maxRetries} after ${delay}ms delay`);
       await sleep(delay);
     }
 
@@ -277,7 +308,7 @@ export async function analyzeWithLlm(
       const cost = estimateCost(model, inputTokens, outputTokens);
       runCostAccumulator += cost;
 
-      callHistory.push({
+      const record: LlmCallRecord = {
         id: generateId(),
         model,
         inputTokens,
@@ -287,6 +318,17 @@ export async function analyzeWithLlm(
         operation,
         cacheHit: false,
         timestamp: now(),
+      };
+      callHistory.push(record);
+
+      log.llmResponse({
+        operation,
+        model,
+        inputTokens,
+        outputTokens,
+        latencyMs,
+        cost,
+        cacheHit: false,
       });
 
       // Cache the response
@@ -299,9 +341,25 @@ export async function analyzeWithLlm(
       return response;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
+      const latencyMs = Date.now() - startTime;
+
+      // Extract Anthropic API error details if available
+      const apiError = error as { status?: number; error?: { type?: string; message?: string } };
+      const statusCode = apiError.status;
+      const errorType = apiError.error?.type;
+
+      log.llmError({
+        operation,
+        model,
+        statusCode,
+        errorType,
+        errorMessage: lastError.message,
+        attempt: attempt + 1,
+        maxAttempts: maxRetries + 1,
+      });
 
       // Don't retry auth errors
-      if (lastError.message.includes('401') || lastError.message.includes('authentication')) {
+      if (statusCode === 401 || lastError.message.includes('401') || lastError.message.includes('authentication')) {
         throw new LlmError(
           `Anthropic API authentication failed. Check your API key (${config.llm.apiKeyEnv}).`,
           'AUTH_FAILED'
@@ -314,8 +372,9 @@ export async function analyzeWithLlm(
       }
 
       // Rate limit — respect retry-after header if available
-      if (lastError.message.includes('429')) {
+      if (statusCode === 429 || lastError.message.includes('429')) {
         const retryAfter = baseDelay * Math.pow(2, attempt + 1);
+        log.warn('llm', `Rate limited. Waiting ${retryAfter}ms before retry.`);
         if (attempt === maxRetries) {
           throw new LlmRateLimitError(retryAfter);
         }
@@ -348,6 +407,7 @@ export async function analyzeWithLlmValidated<T>(
   operation: LlmOperation = 'analyze'
 ): Promise<T> {
   const maxValidationRetries = 2;
+  const log = getLogger();
 
   for (let attempt = 0; attempt <= maxValidationRetries; attempt++) {
     const promptToUse = attempt === 0
@@ -360,10 +420,15 @@ export async function analyzeWithLlmValidated<T>(
             `No markdown, no code fences, no explanatory text — pure JSON only.`,
         };
 
+    if (attempt > 0) {
+      log.warn('llm', `JSON validation retry ${attempt}/${maxValidationRetries} — re-prompting LLM`);
+    }
+
     const raw = await analyzeWithLlm(client, config, promptToUse, operation);
     const jsonStr = extractJson(raw);
 
     if (!jsonStr) {
+      log.jsonParseFailure(raw, 'Could not extract JSON object/array from response');
       if (attempt === maxValidationRetries) {
         throw new LlmValidationError(
           `Could not extract valid JSON from LLM response after ${maxValidationRetries + 1} attempts`,
@@ -376,8 +441,13 @@ export async function analyzeWithLlmValidated<T>(
     try {
       const parsed = JSON.parse(jsonStr);
       const result = schema.parse(parsed);
+      log.debug('llm', 'JSON validation passed');
       return result;
     } catch (error) {
+      const parseMsg = error instanceof z.ZodError
+        ? error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')
+        : String(error);
+      log.jsonParseFailure(raw, parseMsg);
       if (attempt === maxValidationRetries) {
         throw new LlmValidationError(
           `LLM response failed schema validation after ${maxValidationRetries + 1} attempts`,
