@@ -24,6 +24,8 @@ import {
   initLogger,
   getLogger,
   getFailureReason,
+  initializeDatabase,
+  schema,
   LlmAuthError,
   LlmValidationError,
   type LogEntry,
@@ -200,6 +202,68 @@ export function registerAnalyzeCommand(program: Command): void {
                 );
               }
             }
+          }
+
+          // Persist decisions to local database so `archguard sync` can use them
+          try {
+            const db = initializeDatabase();
+            const now = new Date().toISOString();
+            const localOrgId = 'local-org';
+            let localRepoId = repoId;
+
+            // Ensure a local organization exists
+            const existingOrg = db.select().from(schema.organizations).all();
+            if (existingOrg.length === 0) {
+              db.insert(schema.organizations).values({
+                id: localOrgId,
+                name: 'Local',
+                slug: 'local',
+                plan: 'free',
+                createdAt: now,
+                updatedAt: now,
+              }).run();
+            }
+
+            // Ensure a local repository entry exists
+            const existingRepo = db.select().from(schema.repositories).all();
+            if (existingRepo.length > 0) {
+              localRepoId = existingRepo[0].id;
+            } else {
+              db.insert(schema.repositories).values({
+                id: localRepoId,
+                orgId: existingOrg.length > 0 ? existingOrg[0].id : localOrgId,
+                name: path.basename(projectDir),
+                fullName: projectDir,
+                provider: 'local',
+                providerId: 'local',
+                defaultBranch: 'main',
+                cloneUrl: projectDir,
+                createdAt: now,
+              }).run();
+            }
+
+            // Clear previous decisions and insert fresh ones
+            db.delete(schema.decisions).run();
+            for (const decision of result.decisions) {
+              db.insert(schema.decisions).values({
+                id: decision.id ?? generateId(),
+                repoId: localRepoId,
+                title: decision.title,
+                description: decision.description,
+                category: decision.category,
+                status: 'detected',
+                confidence: decision.confidence,
+                constraints: JSON.stringify(decision.constraints ?? []),
+                relatedDecisions: JSON.stringify(decision.relatedDecisions ?? []),
+                tags: JSON.stringify(decision.tags ?? []),
+                detectedAt: now,
+                updatedAt: now,
+              }).run();
+            }
+            logger.info('analysis', `Persisted ${result.decisions.length} decisions to local database`);
+          } catch (dbError: unknown) {
+            const dbMsg = dbError instanceof Error ? dbError.message : String(dbError);
+            logger.warn('analysis', `Could not persist decisions to database: ${dbMsg}`);
           }
 
           // Output handling
