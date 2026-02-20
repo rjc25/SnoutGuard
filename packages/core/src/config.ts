@@ -93,6 +93,7 @@ const configSchema = z.object({
           review: z.string().default('claude-sonnet-4-6'),
           mcp: z.string().default('claude-sonnet-4-6'),
           summary: z.string().default('claude-sonnet-4-6'),
+          sync: z.string().default('claude-opus-4-6'),
         })
         .default({}),
       maxTokensPerAnalysis: z.number().default(16384),
@@ -122,6 +123,8 @@ const configSchema = z.object({
       preserveUserSections: z.boolean().default(true),
       autoCommit: z.boolean().default(false),
       autoPr: z.boolean().default(false),
+      maxContextTokens: z.number().min(512).max(32768).default(8192),
+      useLlm: z.boolean().default(true),
     })
     .default({}),
   mcp: z
@@ -279,6 +282,8 @@ llm:
     mcp: claude-sonnet-4-6
     # Sonnet for work summaries (summarization)
     summary: claude-sonnet-4-6
+    # Opus for context file generation (intelligent compression of decisions)
+    sync: claude-opus-4-6
   max_tokens_per_analysis: 16384
   cache_ttl_hours: 24
   max_retries: 3
@@ -294,6 +299,8 @@ sync:
   output_dir: "."
   preserve_user_sections: true
   auto_commit: false
+  max_context_tokens: 8192   # Token budget for generated context files (LLM is told this limit)
+  use_llm: true              # Use Opus to intelligently compress decisions (false = template-only)
 
 # MCP server
 mcp:

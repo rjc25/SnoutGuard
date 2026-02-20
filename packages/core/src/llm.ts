@@ -165,7 +165,7 @@ function getContextWindow(model: string): number {
 // ─── Client Creation ───────────────────────────────────────────────
 
 /** LLM operation type for model selection */
-export type LlmOperation = 'analyze' | 'review' | 'mcp' | 'summary';
+export type LlmOperation = 'analyze' | 'review' | 'mcp' | 'summary' | 'sync';
 
 /**
  * Validate that the API key is configured.

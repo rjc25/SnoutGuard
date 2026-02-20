@@ -22,6 +22,10 @@ export { generateKiroSteering } from './generators/kiro.js';
 export { generateCustom, DEFAULT_CUSTOM_TEMPLATE } from './generators/custom.js';
 export type { CustomTemplateOptions } from './generators/custom.js';
 
+// ─── LLM-Powered Sync ─────────────────────────────────────────────
+
+export { generateWithLlm } from './llm-sync.js';
+
 // ─── Sync Engine ──────────────────────────────────────────────────
 
 export { SyncEngine } from './sync-engine.js';

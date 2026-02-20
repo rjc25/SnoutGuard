@@ -28,6 +28,7 @@ import { generateCopilotInstructions } from './generators/copilot.js';
 import { generateWindsurfRules } from './generators/windsurf.js';
 import { generateKiroSteering } from './generators/kiro.js';
 import { generateCustom, type CustomTemplateOptions } from './generators/custom.js';
+import { generateWithLlm } from './llm-sync.js';
 import { extractUserSections, insertUserSections } from './templates.js';
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -113,7 +114,7 @@ export class SyncEngine {
    * Run a full sync: generate all configured format files.
    * Returns SyncRecord[] for each successfully generated file.
    */
-  sync(): SyncResult {
+  async sync(): Promise<SyncResult> {
     const formats = this.config.sync.formats;
     const outputDir = path.resolve(this.projectRoot, this.config.sync.outputDir);
     const records: SyncRecord[] = [];
@@ -121,7 +122,7 @@ export class SyncEngine {
 
     for (const format of formats) {
       try {
-        const record = this.generateFormat(format, outputDir);
+        const record = await this.generateFormat(format, outputDir);
         records.push(record);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -135,9 +136,11 @@ export class SyncEngine {
   /**
    * Generate a single format file.
    */
-  private generateFormat(format: SyncFormat, outputDir: string): SyncRecord {
-    // Generate content
-    const content = this.renderFormat(format);
+  private async generateFormat(format: SyncFormat, outputDir: string): Promise<SyncRecord> {
+    // Generate content — use LLM if configured, otherwise template
+    const content = this.config.sync.useLlm && format !== 'custom'
+      ? await this.renderFormatLlm(format)
+      : this.renderFormat(format);
 
     // Determine output path
     const outputPath = getOutputPath(format, outputDir);
@@ -177,8 +180,17 @@ export class SyncEngine {
   }
 
   /**
+   * Render a format using LLM-powered intelligent compression.
+   * Sends all decisions to the sync model (Opus by default) which
+   * prioritizes, compresses, and organizes them within the token budget.
+   */
+  async renderFormatLlm(format: SyncFormat): Promise<string> {
+    return generateWithLlm(this.decisions, this.config, format);
+  }
+
+  /**
    * Render a format to a string without writing to disk.
-   * Useful for previewing output.
+   * Uses template-based generation (no LLM). Useful for previewing output.
    */
   renderFormat(format: SyncFormat): string {
     switch (format) {
@@ -244,10 +256,11 @@ export class SyncEngine {
       }
 
       debounceTimer = setTimeout(() => {
-        const result = this.sync();
-        if (onChange) {
-          onChange(result);
-        }
+        void this.sync().then((result) => {
+          if (onChange) {
+            onChange(result);
+          }
+        });
       }, DEBOUNCE_MS);
     });
   }

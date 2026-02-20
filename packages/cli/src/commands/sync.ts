@@ -12,6 +12,7 @@ import {
   loadConfig,
   initializeDatabase,
   findProjectRoot,
+  getModelForOperation,
   type SyncFormat,
   type ArchDecision,
   type ArchCategory,
@@ -39,12 +40,14 @@ export function registerSyncCommand(program: Command): void {
     .option('--path <dir>', 'Project directory', '.')
     .option('--output <dir>', 'Output directory for generated files')
     .option('--dry-run', 'Show what would be generated without writing files')
+    .option('--no-llm', 'Use template-based generation instead of LLM')
     .action(
       async (options: {
         format: string;
         path: string;
         output?: string;
         dryRun?: boolean;
+        llm?: boolean;
       }) => {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
@@ -69,8 +72,14 @@ export function registerSyncCommand(program: Command): void {
           formats = [requested];
         }
 
+        // Handle --no-llm flag
+        if (options.llm === false) {
+          config.sync.useLlm = false;
+        }
+
+        const mode = config.sync.useLlm ? 'LLM-powered' : 'template';
         console.log(
-          chalk.bold(`\n  Syncing context files for: ${chalk.cyan(formats.join(', '))}\n`)
+          chalk.bold(`\n  Syncing context files (${mode}): ${chalk.cyan(formats.join(', '))}\n`)
         );
 
         const spinner = ora('Loading architectural decisions...').start();
@@ -143,8 +152,10 @@ export function registerSyncCommand(program: Command): void {
             spinner.succeed('Dry run complete');
           } else {
             // Run the sync
-            spinner.text = 'Generating context files...';
-            const syncResult = engine.sync();
+            spinner.text = config.sync.useLlm
+              ? `Generating context files with ${getModelForOperation(config, 'sync')}...`
+              : 'Generating context files...';
+            const syncResult = await engine.sync();
 
             for (const err of syncResult.errors) {
               console.log(chalk.yellow(`\n  Skipped ${err.format}: ${err.error}`));

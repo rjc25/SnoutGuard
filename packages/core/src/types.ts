@@ -398,6 +398,8 @@ export interface ArchGuardConfig {
       mcp: string;
       /** Model for work summaries — summarization. Default: sonnet */
       summary: string;
+      /** Model for context file generation — intelligent compression. Default: opus */
+      sync: string;
     };
     maxTokensPerAnalysis: number;
     cacheTtlHours: number;
@@ -412,6 +414,10 @@ export interface ArchGuardConfig {
     preserveUserSections: boolean;
     autoCommit: boolean;
     autoPr: boolean;
+    /** Max tokens for the generated context file body. LLM is told this limit. Default: 8192 */
+    maxContextTokens: number;
+    /** Use LLM (Opus) to intelligently compress decisions into context files. Default: true */
+    useLlm: boolean;
   };
   mcp: {
     transport: McpTransport;

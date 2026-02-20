@@ -51,10 +51,12 @@ export function registerCostsCommand(program: Command): void {
         const analyzeModel = getModelForOperation(config, 'analyze');
         const reviewModel = getModelForOperation(config, 'review');
         const summaryModel = getModelForOperation(config, 'summary');
+        const syncModel = getModelForOperation(config, 'sync');
 
         const analyzePricing = MODEL_PRICING[analyzeModel] ?? { input: 3, output: 15 };
         const reviewPricing = MODEL_PRICING[reviewModel] ?? { input: 3, output: 15 };
         const summaryPricing = MODEL_PRICING[summaryModel] ?? { input: 3, output: 15 };
+        const syncPricing = MODEL_PRICING[syncModel] ?? { input: 3, output: 15 };
 
         // Typical analysis: ~50k input tokens, ~4k output tokens
         const analyzeCost = (50_000 / 1_000_000) * analyzePricing.input + (4_000 / 1_000_000) * analyzePricing.output;
@@ -62,6 +64,10 @@ export function registerCostsCommand(program: Command): void {
         const reviewCost = (20_000 / 1_000_000) * reviewPricing.input + (2_000 / 1_000_000) * reviewPricing.output;
         // Typical summary: ~10k input, ~1k output
         const summaryCost = (10_000 / 1_000_000) * summaryPricing.input + (1_000 / 1_000_000) * summaryPricing.output;
+        // Typical sync: ~30k input (all decisions), ~8k output (compressed context)
+        const syncCost = config.sync.useLlm
+          ? (30_000 / 1_000_000) * syncPricing.input + (8_000 / 1_000_000) * syncPricing.output
+          : 0;
 
         console.log(
           `    ${chalk.cyan('analyze'.padEnd(10))} ~$${analyzeCost.toFixed(4)} per run ` +
@@ -75,10 +81,17 @@ export function registerCostsCommand(program: Command): void {
           `    ${chalk.cyan('summary'.padEnd(10))} ~$${summaryCost.toFixed(4)} per run ` +
           chalk.gray('(~10k input + ~1k output tokens)')
         );
-        console.log(
-          `    ${chalk.cyan('sync'.padEnd(10))} ${chalk.green('$0.00')} ` +
-          chalk.gray('(no LLM — pure templating)')
-        );
+        if (config.sync.useLlm) {
+          console.log(
+            `    ${chalk.cyan('sync'.padEnd(10))} ~$${syncCost.toFixed(4)} per run ` +
+            chalk.gray(`(~30k input + ~8k output, ${syncModel})`)
+          );
+        } else {
+          console.log(
+            `    ${chalk.cyan('sync'.padEnd(10))} ${chalk.green('$0.00')} ` +
+            chalk.gray('(template-only, no LLM)')
+          );
+        }
 
         // Monthly estimate
         const monthlyEstimate =
