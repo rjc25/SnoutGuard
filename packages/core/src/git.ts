@@ -63,18 +63,24 @@ export async function getLog(
     file?: string;
   }
 ): Promise<LogResult> {
-  const args: string[] = [];
-  if (options?.maxCount) args.push(`--max-count=${options.maxCount}`);
-  if (options?.since) args.push(`--since=${options.since}`);
-  if (options?.until) args.push(`--until=${options.until}`);
-  if (options?.author) args.push(`--author=${options.author}`);
+  // simple-git's LogOptions supports maxCount and file natively, but
+  // --since/--until/--author must be passed as custom string args.
+  const customArgs: string[] = [];
+  if (options?.since) customArgs.push(`--since=${options.since}`);
+  if (options?.until) customArgs.push(`--until=${options.until}`);
+  if (options?.author) customArgs.push(`--author=${options.author}`);
 
-  const logOptions: Record<string, unknown> = {};
-  if (args.length > 0) {
-    logOptions['--no-walk'] = null;
+  const logOptions: any = {};
+  if (options?.maxCount) logOptions.maxCount = options.maxCount;
+  if (options?.file) logOptions.file = options.file;
+
+  // When we have custom args, pass them as the first argument (string array)
+  // and structured options as second. simple-git merges both.
+  if (customArgs.length > 0) {
+    return git.log([...customArgs] as any);
   }
 
-  return git.log(options);
+  return git.log(logOptions);
 }
 
 /** Get the current HEAD commit SHA */
