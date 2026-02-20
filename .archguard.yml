@@ -1,0 +1,125 @@
+version: 1
+
+# Analysis settings
+# By default scans all common project structures and all supported languages.
+# Test files ARE included so testing architecture decisions can be detected.
+analysis:
+  include:
+    - "**"
+  exclude:
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/out/**"
+    - "**/.next/**"
+    - "**/vendor/**"
+    - "**/target/**"
+    - "**/__pycache__/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/*.min.js"
+    - "**/*.bundle.js"
+    - "**/generated/**"
+    - "**/coverage/**"
+  languages:
+    - typescript
+    - python
+    - javascript
+  max_file_size_kb: 2048
+  analysis_period_months: 6
+
+# LLM settings — an Anthropic API key is required
+# Get one at https://console.anthropic.com
+llm:
+  provider: anthropic
+  api_key_env: ANTHROPIC_API_KEY
+  models:
+    # Opus for deep analysis (runs infrequently, quality matters most)
+    analyze: claude-sonnet-4-5-20250514
+    # Sonnet for PR review (runs on every PR, speed matters)
+    review: claude-sonnet-4-6
+    # Sonnet for MCP server queries (fast responses)
+    mcp: claude-sonnet-4-6
+    # Sonnet for work summaries (summarization)
+    summary: claude-sonnet-4-6
+  max_tokens_per_analysis: 16384
+  cache_ttl_hours: 24
+  max_retries: 3
+  retry_base_delay_ms: 1000
+  request_timeout_ms: 300000
+  max_cost_per_run: 5.00
+
+# Context file sync (no LLM needed — pure templating)
+sync:
+  formats:
+    - claude
+  output_dir: "."
+  preserve_user_sections: true
+  auto_commit: false
+
+# MCP server
+mcp:
+  transport: stdio
+
+# Architectural review
+review:
+  severity_threshold: warning
+  max_violations: 50
+  auto_fix_suggestions: true
+  auto_review_prs: true
+
+# Velocity tracking
+velocity:
+  enabled: true
+  calculation_schedule: "0 0 * * *"
+  complexity_weight: 0.4
+  arch_impact_weight: 0.3
+  review_weight: 0.15
+  refactoring_weight: 0.15
+  stale_pr_days: 3
+  long_branch_days: 7
+
+# Work summaries
+summaries:
+  enabled: true
+  schedules: []
+
+# Layer definitions for dependency enforcement
+# Dependencies flow: presentation -> application -> domain <- infrastructure
+layers:
+  - name: presentation
+    patterns:
+      - "**/presentation/**"
+      - "**/ui/**"
+      - "**/pages/**"
+      - "**/components/**"
+      - "**/views/**"
+    allowed_dependencies:
+      - application
+      - domain
+  - name: application
+    patterns:
+      - "**/application/**"
+      - "**/services/**"
+      - "**/use-cases/**"
+      - "**/usecases/**"
+    allowed_dependencies:
+      - domain
+  - name: domain
+    patterns:
+      - "**/domain/**"
+      - "**/entities/**"
+      - "**/models/**"
+    allowed_dependencies: []
+  - name: infrastructure
+    patterns:
+      - "**/infrastructure/**"
+      - "**/repositories/**"
+      - "**/adapters/**"
+      - "**/db/**"
+    allowed_dependencies:
+      - domain
+      - application
+
+# Custom architectural rules
+rules: []

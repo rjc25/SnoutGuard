@@ -6,6 +6,8 @@
  * from codebase structure, AST data, and dependency graphs.
  */
 
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { z } from 'zod';
 import {
   analyzeWithLlmValidated,
@@ -56,9 +58,11 @@ const MAX_PROMPT_TOKENS = 150_000;
 const PROMPT_OVERHEAD_TOKENS = 8_000;
 // Token budget available for file content in the prompt
 const FILE_CONTENT_BUDGET_TOKENS = MAX_PROMPT_TOKENS - PROMPT_OVERHEAD_TOKENS;
-// Maximum tokens of file content per batch — keeps each LLM call fast
-// and enables parallelism across batches
-const MAX_TOKENS_PER_BATCH = 30_000;
+// Maximum tokens of file content per batch.
+// Larger batches = fewer LLM calls = lower cost (especially with Opus).
+// Opus handles 200K context; we target ~100K per call to balance cost
+// and quality (LLM attention degrades at extreme lengths).
+const MAX_TOKENS_PER_BATCH = 100_000;
 // Maximum parallel LLM calls during analysis
 const MAX_PARALLEL_BATCHES = 3;
 
@@ -233,27 +237,27 @@ export async function extractDecisions(
   const fullSet = new Set(fullCandidates);
   const summaryOnly = allScored.filter((s) => !fullSet.has(s));
 
-  // Calculate shared overhead: tree, dep summary, file paths, system prompt, etc.
+  // Calculate per-call overhead: everything that repeats in every batch call
+  // (system prompt, few-shot, tree, dep summary, all file paths, summary-only files)
   const treeStr = formatDirectoryTree(directoryTree);
   const depSummary = dependencyGraph ? buildDependencyContext(dependencyGraph) : '';
   const allPaths = files.map((f) => f.filePath).join('\n');
-  const sharedOverhead =
+  const totalSummaryTokens = summaryOnly.reduce((sum, s) => sum + s.summaryTokens, 0);
+  // Also count summaries for full-content files that appear as summaries in OTHER batches
+  const fullCandidateSummaryTokens = fullCandidates.reduce((sum, s) => sum + s.summaryTokens, 0);
+  const perCallOverhead =
     PROMPT_OVERHEAD_TOKENS +
     estimateTokens(treeStr) +
     estimateTokens(depSummary) +
     estimateTokens(allPaths) +
-    summaryOnly.reduce((sum, s) => sum + s.summaryTokens, 0);
+    totalSummaryTokens +
+    fullCandidateSummaryTokens; // full candidates not in this batch appear as summaries
 
-  // Total budget per batch = MAX_TOKENS_PER_BATCH minus the shared overhead
-  // (summaries, tree, dep graph) that appears in every call.
-  // This ensures each batch's TOTAL prompt stays reasonable, not just
-  // the full-content portion.
-  const totalSummaryTokens = summaryOnly.reduce((sum, s) => sum + s.summaryTokens, 0);
-  const perCallOverhead = sharedOverhead + totalSummaryTokens;
-  const contextBudget = FILE_CONTENT_BUDGET_TOKENS - perCallOverhead;
-  const budgetPerCall = Math.min(
-    contextBudget,
-    Math.max(MAX_TOKENS_PER_BATCH - perCallOverhead, 5_000)
+  // Budget for full-content file tokens per batch call.
+  // Cap at both the absolute prompt limit and the per-batch target.
+  const budgetPerCall = Math.max(
+    Math.min(FILE_CONTENT_BUDGET_TOKENS, MAX_TOKENS_PER_BATCH) - perCallOverhead,
+    5_000
   );
 
   // Greedily pack full-content files into batches
@@ -679,8 +683,6 @@ function estimateFileSummaryTokens(file: ParsedFile): number {
 
 function readFileContent(filePath: string, projectRoot?: string): string | null {
   try {
-    const fs = require('node:fs');
-    const path = require('node:path');
     const resolved = projectRoot && !path.isAbsolute(filePath)
       ? path.resolve(projectRoot, filePath)
       : filePath;
