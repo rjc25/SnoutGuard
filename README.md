@@ -342,7 +342,7 @@ llm:
     mcp: claude-sonnet-4-6
     summary: claude-sonnet-4-6
   max_tokens_per_analysis: 8192
-  cache_ttl_hours: 24
+  cache_ttl_hours: 720
   max_retries: 3
   retry_base_delay_ms: 1000
   request_timeout_ms: 120000

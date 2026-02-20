@@ -43,7 +43,7 @@ llm:
     # Sonnet for work summaries (summarization)
     summary: claude-sonnet-4-6
   max_tokens_per_analysis: 32768
-  cache_ttl_hours: 24
+  cache_ttl_hours: 720
   max_retries: 3
   retry_base_delay_ms: 1000
   request_timeout_ms: 300000
