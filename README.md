@@ -60,6 +60,14 @@ docker-compose up -d
 # API server at http://localhost:3000
 ```
 
+## Setup via Claude Code or OpenClaw
+
+Copy and paste this prompt into [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [OpenClaw](https://github.com/nicobailon/openclaw) to set up ArchGuard automatically:
+
+```
+Clone https://github.com/rjc25/ArchGuard, install dependencies with pnpm, build the project, then run "archguard init" in my current repo to analyze the codebase and generate AI agent context files. Configure the MCP server for whatever coding agent I'm using (Cursor, Claude Code, Copilot, Windsurf, or Kiro). Use Sonnet 4.6 as the default model. Walk me through setting my ANTHROPIC_API_KEY if I don't have one.
+```
+
 ## Features
 
 ### Architecture Agent
