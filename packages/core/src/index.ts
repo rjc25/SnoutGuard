@@ -17,6 +17,9 @@ export {
   type DbClient,
 } from './db/index.js';
 
+// Database Seed
+export { seedDatabase, seedTestData } from './db/seed.js';
+
 // LLM
 export {
   createLlmClient,

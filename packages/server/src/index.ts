@@ -23,6 +23,7 @@ import { standardLimit } from './middleware/rate-limit.js';
 
 // Auth handlers
 import { handleLogin, handleSignup, handleLogout, handleMe } from './auth/index.js';
+import { handleSamlLogin, handleSamlMetadata } from './auth/saml.js';
 
 // Route factories
 import { createDecisionsRouter } from './routes/decisions.js';
@@ -33,6 +34,7 @@ import { createSummariesRouter } from './routes/summaries.js';
 import { createTeamsRouter } from './routes/teams.js';
 import { createReposRouter } from './routes/repos.js';
 import { createSettingsRouter } from './routes/settings.js';
+import { createSyncRouter } from './routes/sync.js';
 import { createWebhooksRouter } from './routes/webhooks.js';
 import { createSSERouter } from './routes/sse.js';
 
@@ -87,6 +89,11 @@ app.post('/api/auth/login', (c) => handleLogin(c, db));
 app.post('/api/auth/signup', (c) => handleSignup(c, db));
 app.post('/api/auth/logout', (c) => handleLogout(c));
 
+// ─── SAML Routes (public) ────────────────────────────────────────
+
+app.get('/api/auth/saml/:orgSlug/login', (c) => handleSamlLogin(c, db));
+app.get('/api/auth/saml/:orgSlug/metadata', (c) => handleSamlMetadata(c));
+
 // ─── Webhook Routes (public, signature-verified) ──────────────────
 
 app.route('/api/webhooks', createWebhooksRouter(db));
@@ -116,6 +123,7 @@ app.route('/api/summaries', createSummariesRouter(db));
 app.route('/api/teams', createTeamsRouter(db));
 app.route('/api/repos', createReposRouter(db));
 app.route('/api/settings', createSettingsRouter(db));
+app.route('/api/sync', createSyncRouter(db));
 app.route('/api/events', createSSERouter());
 
 // ─── 404 Handler ──────────────────────────────────────────────────
