@@ -1,0 +1,2900 @@
+{
+  "filesHash": "9d11864d6f504567d84bf0bab45cdbb8c3cd9d52330b221dd484f0f490e4c908",
+  "fileHashes": {
+    "packages/dashboard/tailwind.config.ts": "66811532d81e6e132cac1a47b4953d6648524e48672ae987ba42bbde0fd34bcf",
+    "packages/dashboard/postcss.config.js": "fa650b380adfabb151a0b352f7135e107e6352345f899060f1c5c231228f94bf",
+    "packages/dashboard/next.config.js": "b98503a136e11ad31696aace30e33102409ad34a95c1dc108225be7d691ffe6e",
+    "packages/dashboard/next-env.d.ts": "9dd9d642cdb87d4d5b3173217e0c45429b3e47a6f5cf5fb0ead6c644ec5fed01",
+    "packages/work-summary/src/summarizer.ts": "97928c17df17df1870806d94888372963ea8e42acef7ac53a5317a5850f97411",
+    "packages/work-summary/src/scheduler.ts": "421e7f4f7ff3687da411d480c8c1ea107ebf61ecc7dc4ca0c5254cc653ac5744",
+    "packages/work-summary/src/index.ts": "9eabca06020ffb2cd627d91cbc2aab0d2873a7f684bcf95c6f091df27a1d8797",
+    "packages/work-summary/src/collector.ts": "9faab093b196cec78fa598fe12a4d1e46b1f65c97c1a2345400e2e7000ef6c51",
+    "packages/velocity/src/types.ts": "62754dc9c335a2b18aed0635f5425ab3193ddc502064ae4da3665fc60484b107",
+    "packages/velocity/src/index.ts": "0a571843cbff4f10762853af21b26b446de0093df5c195c19dd6b87f6abe08bf",
+    "packages/server/src/index.ts": "d09d0a8b08307fc7681fda2f496bd14bacf4f63123ebbacd663e54fd85afce6f",
+    "packages/server/src/hono-env.d.ts": "d94f6e7361059499520dcb625b48791c3604faa8d65fa2a1cfc6e043fd34b002",
+    "packages/reviewer/src/severity.ts": "5d2287a315247a3322f913e762cf9a52edde5935fd688ebc0c73c81d79752fd7",
+    "packages/reviewer/src/rule-engine.ts": "6dbdca0d3e9d81a233af430456aa730a752c8cba1e6b21a9d71322d07f9f4948",
+    "packages/reviewer/src/llm-reviewer.ts": "75af44bf2ca0f87d5b93a78e06bd5fe82bf195f9f989093b5a9ece0c377842a8",
+    "packages/reviewer/src/index.ts": "7b0929fbcea63568cfa3d8c23e05f101dabc23f5879231083786e3005d292050",
+    "packages/reviewer/src/diff-analyzer.ts": "e3924176ad52ae0025c0b15c581f152ee861ce2aca9c84843694c40d533c924f",
+    "packages/mcp-server/src/index.ts": "8d231c49542f3056bc43f30dab596f05084e5aba82a5c8fe4def9e4084b64ac5",
+    "packages/integrations/src/index.ts": "4e7ab26bb15ce91180e80eefa81b8d14eff1822ba21ecd306c79c64b84027bb3",
+    "packages/core/src/utils.ts": "fc04b4ec76f11cb0cafcaced1757eaca77f788a52f5a3d50d5a0a730887f2be8",
+    "packages/core/src/types.ts": "55585a9a26d87e1c66b1f4d212b43772496aaf85e06458c23a874c2b36512369",
+    "packages/core/src/logger.ts": "7d438bb5387fb1aa94f975ba826715e4b0b1258d53530fbe13f9a554975d37eb",
+    "packages/core/src/llm.ts": "38c2df4b2c6930e508038540dd8b8ff3d11cacf817b46547986c9252904549b6",
+    "packages/core/src/index.ts": "c32d3cba0c9b68ad2f3fe2901a2d5232a55f7315347ad4d26f9e7dcc73c87086",
+    "packages/core/src/git.ts": "486f0c5af21c6c278ce10f05c0ba41d826205347eccae16e8d9944a9108b8d7a",
+    "packages/core/src/config.ts": "928ae49901a4cb8243680c3c71fcd12d65f86a6ddcc46f536f5f36c2519d2eb1",
+    "packages/core/src/auth.ts": "a2878a1ea1ae42f10611c12a8fcf4686f5a68313e705a40e6f95603017648da3",
+    "packages/context-sync/src/templates.ts": "c6a4ef4d25f5258a190c9a620c2e6db0052762cddcc68ef08adca1e775da6513",
+    "packages/context-sync/src/sync-engine.ts": "d95dd294a074b1d02d0eebf716a5b9dc81f17892362db7e4bc9536356d407123",
+    "packages/context-sync/src/llm-sync.ts": "51d3336200b23cff0bac924d14d6862878d70e27352d83a6f860afd6d78d35d7",
+    "packages/context-sync/src/index.ts": "b1c600a899c8757dea98318efd88054d53c581fdacbfeeb319ba96ce7dacfc2f",
+    "packages/cli/src/tapir-spinner.ts": "78ff7d2476faae75538f18be5d6120e6ba8aab42d08010b57335076203b68e4b",
+    "packages/cli/src/index.ts": "1625d804e9a320ea660d06933d6063e34664092e395a53653110efed0ef8867a",
+    "packages/analyzer/src/trend-analyzer.ts": "867c94173ce14668a80c7f50d315c7bcfc054e1af0c1f201b7baa3ffa7389e9f",
+    "packages/analyzer/src/scanner.ts": "345bd776447a46067e3d69fabf1a80407ced488b5e01c4c71778420c1561164d",
+    "packages/analyzer/src/pattern-detector.ts": "95c0910494a93f89eccfb9d1f7f0fe9ae0c9be879665454fa50d511b7fb76fdc",
+    "packages/analyzer/src/layer-detector.ts": "179e3d9357a397e06b11e7a170ff0ffd6788148ef827aa77cbd86741183ff4e0",
+    "packages/analyzer/src/index.ts": "424ba0797ce7c873e88dccd7e116264974fc3e33882b981d59bd0b878cad06c7",
+    "packages/analyzer/src/drift-detector.ts": "99fa50785e32e90c4ce57cbfbb96c6aa45da02361d13c2587a3b55c75a3e4961",
+    "packages/analyzer/src/dependency-mapper.ts": "7fad462ef8800394ed67630585304bd111b1f7a8fbf08036da833eef4feaa8cb",
+    "packages/analyzer/src/decision-extractor.ts": "93610055a1642b2ad6606c79e1d1fb7b7f252c17b979c4bf4473091906f43837",
+    "packages/analyzer/src/cache.ts": "9231272767c0f2bd592beda00d91a680b391b70d6317f7ff3167785f2e9cb542",
+    "packages/work-summary/src/templates/standup.ts": "d9aa3fba94bc596ad5413edc0601251c9aa2d28184abd1639964355d3e963694",
+    "packages/work-summary/src/templates/sprint-review.ts": "41a5aac651a38df35a9ed81ed3d56159c6d91eea82be4b6b503d3167f9307845",
+    "packages/work-summary/src/templates/progress-report.ts": "256115edc5ab8a267ce26856573ccd3d8ee6501bc8b7ece8a66dcbca6b9b0799",
+    "packages/work-summary/src/templates/one-on-one.ts": "1f60e94fc2bdcec615e286c6f7b51edad889b672ea1c21f8209ff7706b4527b7",
+    "packages/velocity/src/scoring/velocity-calculator.ts": "1d1ce18dc77369f47575cda677ca7da4ee6dbddae5d3ec5038a687c63338497f",
+    "packages/velocity/src/scoring/impact-score.ts": "247b3fec5815a97948afb8d7824bb61dbd051c94ebf02e6996328828b4491708",
+    "packages/velocity/src/scoring/effort-model.ts": "d270a3a1f042e758886f7f50e8fc55f742eb74a4592c13ba3950fe6abc5e15ca",
+    "packages/velocity/src/collectors/pr-metrics.ts": "10464facf587db5fc457c501a287c825196b1a3a40d1661bb0b27052bda6c1ca",
+    "packages/velocity/src/collectors/issue-tracker.ts": "98ffa15c52e1e4269bc970b04f67c12b983cf085aa7043b22dc18c5c598eb9e0",
+    "packages/velocity/src/collectors/git-stats.ts": "56d6eab4f643ef7f0bbb16c92b6d58d8dc0cb272ea5c01922fcf2de96a5f0a2f",
+    "packages/velocity/src/collectors/complexity.ts": "81b017ee3cfe964e23d3a293da75d9f1a24551826bf8ccdeba0d0d5a29953aca",
+    "packages/velocity/src/blockers/detector.ts": "49ca06e8ded17c8569a4010ced8643b48c9aef3cc082de2f7db7c469e0f5bcb6",
+    "packages/velocity/src/blockers/alerts.ts": "98b842cb3e0c93218231482d6eb3a9c84469d53e18d7b6aefa6c8d5fedd57bd7",
+    "packages/server/src/routes/webhooks.ts": "fccc3f7941f39def2cad1733bc1a2503664ed210dea40d101df625f1168e50bb",
+    "packages/server/src/routes/velocity.ts": "66ba7d72c98cb6075dd3a0e545f57f807f20385afcfd34e7cdd04956fc8739a2",
+    "packages/server/src/routes/teams.ts": "b8cef85daf8337ad388bb65adbc397463a02957420336e17fbff46d86cb9be25",
+    "packages/server/src/routes/sync.ts": "f9449d3977744e8a14df48606747975c932f0826f23b4646ac53cbab37e42ad0",
+    "packages/server/src/routes/summaries.ts": "45646029d8ecd2de42bca421fc6591036972f7202c3d37f3e520c89b745bd396",
+    "packages/server/src/routes/sse.ts": "fe9fbe9050256cb6363c5fbe99187f6c339fc82449dbf68981c4bff66eeb322e",
+    "packages/server/src/routes/settings.ts": "1e221f06b80077968b78200374b8da1ae7f28803002fc7b88705dc4fa93b891e",
+    "packages/server/src/routes/reviews.ts": "ec0a1a773f686e05689f0b3434d942f1af15c3c90dda65c6067e01ec24054b9a",
+    "packages/server/src/routes/repos.ts": "3b4fcce11a16fd9087807ba642dd85ac4646148a9fd90cd9877aea761ad5045e",
+    "packages/server/src/routes/decisions.ts": "6f466af299edc69bc1f84be0edb331fe1ab26848db1050dbdf4e0648d8db619c",
+    "packages/server/src/routes/analysis.ts": "f5a38faa984b5ae9272f1877d07a4774ac94a6de61b3bcc5dd0a288474adaccc",
+    "packages/server/src/middleware/rbac.ts": "9973cfd152c35995874fd1486d8dd288ba37dc6f77b61674b4e4d5a4dc9461cc",
+    "packages/server/src/middleware/rate-limit.ts": "f2f4cb6a5dcbcd0c3ddfa31210a7a61a65da578ddac10dfb7650cd92b74686dd",
+    "packages/server/src/middleware/org-context.ts": "aa7cb38b3ba65bd932df2e83b282ab5914891e4fce08e00a8624d6cfc90ad98c",
+    "packages/server/src/middleware/auth.ts": "cce2222721a306460c1e37dab009d73467cb945c060de7bc0c4160f2ac0fb392",
+    "packages/server/src/jobs/velocity.job.ts": "d63d218fbfd11e838062e6042abf7fd5d28a83f5eac656b9ab190b44a9804577",
+    "packages/server/src/jobs/sync.job.ts": "d5edacec589a7a015b037fe774cb4a13899b9922d7763d089c8f2d34b608c382",
+    "packages/server/src/jobs/summary.job.ts": "54ae572454a7dde4135ca4cc8fee23e318b3699500f0e1cf39c345bf41563fdf",
+    "packages/server/src/jobs/review.job.ts": "fb32dd565eee488ee1e7b117932a2526da94c26a15eecd271b1e7bea362ccd1f",
+    "packages/server/src/jobs/queue.ts": "dc0f14e2eb7a9ee290bbd9bdf0f1acee6e4fd69c0bf263fd2f908a4b0bd0c5e0",
+    "packages/server/src/jobs/analyze.job.ts": "b27ef63085100c37b7751bfb8f39431c757b59249b8c58b590d4712daf173d22",
+    "packages/server/src/auth/saml.ts": "c2a799a252da7dd880e00fdbd7f439dbcd6b3212e8917bd0080bce66d1110ce4",
+    "packages/server/src/auth/roles.ts": "0b45b111d28d9d0582ba6d0340f13b2bf56242d9a0501d3360a756ac88a86768",
+    "packages/server/src/auth/rbac.ts": "ea6442224cc89e51b1ed0183a184a2b1ca82b1ea461ce14714d36876b8ef47c8",
+    "packages/server/src/auth/index.ts": "c72b013fc3170fe1db701cb08f236016b35a6fa43f67334af37977890bf0f5e5",
+    "packages/reviewer/src/formatters/terminal.ts": "b3a09709599444278a3b83b6cc14186a5c6d07a331c5e418653ac82d50c19c97",
+    "packages/reviewer/src/formatters/json.ts": "c46950455aafece32e71fd39df052244cc139b17707351e73eaac7c956df7c1d",
+    "packages/reviewer/src/formatters/github-pr.ts": "3f91daee7132880a58344db64200a830361db2f0abea0b4b7e5652a83ea561a5",
+    "packages/reviewer/src/formatters/bitbucket-pr.ts": "cae8973ef9e783c8733eb6044aa62104f121ba57168a29d07390062d5b75834d",
+    "packages/mcp-server/src/tools/suggest-approach.ts": "f28b69fb385b0c3ce2b71345338289f5ccb175e3cbc47cc23434cac0946ba35c",
+    "packages/mcp-server/src/tools/get-dependencies.ts": "dd384f00b81f51c84a2e4c2b624c137443b2a7d547a5644e2cb5707b68e73130",
+    "packages/mcp-server/src/tools/get-decisions.ts": "e59e7f29bf945486355fef1771ba8cfa60661f232f0d5b8dda5fdd6d9964fe73",
+    "packages/mcp-server/src/tools/check-pattern.ts": "2f6cb1862159f87d27bd36cfe6032a8d5ec902f5b7b0e4f8498f5e6520aa453f",
+    "packages/mcp-server/src/resources/patterns.ts": "9a79ddfacc106532c8409eb56c48c1c161e2fff9e0966ed08f6f39bcb3b231d9",
+    "packages/mcp-server/src/resources/decisions.ts": "cba66a8629c3afef8a0957a4916cf7071a8de62747ef96656015a047a872993a",
+    "packages/integrations/src/slack/notifications.ts": "d5379f5c5477f098816395de9777f56af5a6136b8ef2f7cca3c37aa6289a84dc",
+    "packages/integrations/src/slack/commands.ts": "6640ebd5b82dff8f5cdbf548d03737256e1ee178d4653207360ebc8c6912d5ba",
+    "packages/integrations/src/slack/blocks.ts": "e0fbdc1c9db651cace35eda5a3a3a0016799aa81fb51de63b3517a74becc6e00",
+    "packages/integrations/src/slack/app.ts": "4433be988680602a15d223dd1a127daab22ac83b0335d0dd9de0ad5dda4330fd",
+    "packages/integrations/src/github/pr-bot.ts": "994bb0de970ae69f0f7e1a4844db086ca7fb87f2924b9bbabde4872c1bf1802f",
+    "packages/integrations/src/github/check-run.ts": "7b3349eaeaa2f67b60f771cb2e9237ddac45b3c7827dcef7582f7238d98d3682",
+    "packages/integrations/src/github/app.ts": "cd3b772fcefc1ef44456b1dd5ce1acfddaa84f94578319eb802748e5dd02d09b",
+    "packages/integrations/src/github/api.ts": "1772522eb513f6c600f2b83b3a67517898d2db5412cf6edf51c9545d859c7d5d",
+    "packages/integrations/src/bitbucket/webhook.ts": "ad1e86fb156a7bcd1fd8e61b1d18598ba4933351e4282b784a54440cca85147b",
+    "packages/integrations/src/bitbucket/pr-bot.ts": "b299738be55a7290e243923047c7afa3de38098dcd1cca861a2e3ae47b570843",
+    "packages/integrations/src/bitbucket/api.ts": "091a7c0e3d376bc064ad80cce202d056cc90ad89b016c62d640211bb6c509588",
+    "packages/dashboard/src/lib/utils.ts": "acb0d31a3eb1c631a655b79e3a2d935cec90eeaac426baa5c89494eb0c758462",
+    "packages/dashboard/src/lib/sse.ts": "16e51f1a17f558ade78c92756e2475c73a8ce40286899be670905dc171fbf420",
+    "packages/dashboard/src/lib/auth.ts": "c15cb4842e104a59c147f7fe0178d25fdbe10417c38d6cdf6ee736684e2a52cd",
+    "packages/dashboard/src/lib/api.ts": "e1497df5f991d8f3d28c519dd63159b035efc02ecfcbf5e85f54dbcf8884921e",
+    "packages/dashboard/src/hooks/use-velocity.ts": "e04f8983d1c5121afa58a44bf874b99bb666a232b744c439990230c3101cbec3",
+    "packages/dashboard/src/hooks/use-sse.ts": "b9ea7db5255218729bed9a285ee565b192d8b1ba7e3c6667d652a7935b3ac125",
+    "packages/dashboard/src/hooks/use-reviews.ts": "e1dbc89a3c9c5db806836e46fb1b80188029bb172f3d8a3bb3d1530a2bfeabfe",
+    "packages/dashboard/src/hooks/use-decisions.ts": "1e3d000add841104469148da98430e0ca6826a67072ebba0bff48dfee6019248",
+    "packages/dashboard/src/app/page.tsx": "1f2e1d1ffbe82ef332b74ee5e0b08642782b26ed723993fa37e2569ce8921d36",
+    "packages/dashboard/src/app/layout.tsx": "9fb4c297986494f088bb7f66bc3e784608b2146ca199ee511f940b2185d79ce1",
+    "packages/core/src/db/seed.ts": "6da2dcdfbd5cfc910aafe1b4c93e352e1547a5a84a1a4e70d75d832f396400ca",
+    "packages/core/src/db/schema.ts": "fb554c851257c5c11ca492ea8987954a4c7ddc8a270ae047ce3cee3a0ebb48ed",
+    "packages/core/src/db/index.ts": "273dae88a32916d52abf20f2342d2a7eacd5125af9e8fc5cc9a3c025c6ac1a21",
+    "packages/context-sync/src/generators/windsurf.ts": "cdf5647018be09af328e1084b617b3bcd5f30910fa0dd731807822de238ca5dd",
+    "packages/context-sync/src/generators/kiro.ts": "92f40a22553de0dd206479391d0d23b1a269b58fbf2745bc6576585b3409c30c",
+    "packages/context-sync/src/generators/custom.ts": "283502ad7ae2d415b9e362f42f0425abc49c5545977904d1596bccdbece1cefa",
+    "packages/context-sync/src/generators/cursorrules.ts": "e111f6c41b4cae4759d66c22c9df8e2c9c967ecc445d1cf0e5cb2dbeab916559",
+    "packages/context-sync/src/generators/copilot.ts": "f89b84ce6d1bc0510221ffcfe502d145bc2bb8851e4fe2c155256dcbd8e00464",
+    "packages/context-sync/src/generators/claude-md.ts": "3789f791e1f4513e8ca027b1c7653666a83543b4126db834fabaa857ef058518",
+    "packages/context-sync/src/generators/agents-md.ts": "6f3971f6e09ba20779786216a9b846316721e296cb5fb6ae2845fc1b609bcfd5",
+    "packages/cli/src/commands/watch.ts": "f0aade12faecbfc2cd1e414e0a3baf12fb4b0391665a48150cef6dfdb859674c",
+    "packages/cli/src/commands/velocity.ts": "ac8022d17c054de1b0ac37fc2b200e57dceaa19db69c0f60f4a8bf66cb136945",
+    "packages/cli/src/commands/sync.ts": "35510d444cea04f33adb1f444276b4756d41e29a7fc846e04f243e372e8a2b94",
+    "packages/cli/src/commands/summary.ts": "f517193a52d48305c40ee9964d9ec4bee658a8c0d1500480f5a6a79c3c65c621",
+    "packages/cli/src/commands/server.ts": "ea9b4951a6a351a74742458f73684fac603f3640da736343d8896c390fa0ce52",
+    "packages/cli/src/commands/serve.ts": "202698d51e8e951f4b7572a864f3865111712d2702cf92343cfb94d084a51cae",
+    "packages/cli/src/commands/review.ts": "259c068e6bb0d062426ff0abc04324fdf61482b55beeab1e6dacdef41f5e9c15",
+    "packages/cli/src/commands/login.ts": "d7dccb24dd57728e925022ecac54b243c0d771475b87207e37cbbc3d460b1051",
+    "packages/cli/src/commands/init.ts": "f7605dd9e75d98a4057454a0bcaad3dcdd0b4a7034397a26dcf34dc8ff725779",
+    "packages/cli/src/commands/decisions.ts": "24fe74e29e332af57a7f9109a067bc30bbf62ffaab3f524c02042d3215245661",
+    "packages/cli/src/commands/costs.ts": "0c2c0fe2b6740c98eadfae785f5f9499ee72c0ef74ac1511efab9dcff776ed7b",
+    "packages/cli/src/commands/analyze.ts": "617a13ed8b9d47537bf57f80ce9b77f3ad2d8012c52849ecd825776c2034e715",
+    "packages/analyzer/src/reporters/markdown.ts": "cb1a277eecf4c4ebab745cd297c9a96fec1f8db0745193db580ad23aed418e24",
+    "packages/analyzer/src/reporters/json.ts": "a1045391fce4f6f76f0a45c3c0c92b2ce8289ea48ac87ebf6a2fb094719b4f6d",
+    "packages/dashboard/src/components/velocity/velocity-card.tsx": "d4627225fbac5f9b39aa96b99f5e3fbf19d70f27e2ff4fb33fdd6469006e2688",
+    "packages/dashboard/src/components/velocity/dev-profile.tsx": "e4b13dd8f795137cbe340b499b7629b236564b0e0a24fe2dc74fa2c55b0de65e",
+    "packages/dashboard/src/components/velocity/blocker-list.tsx": "a337da430641e8d236c156f2819bf1e697320b1779c8e9fc86c0845ea7769141",
+    "packages/dashboard/src/components/summaries/summary-editor.tsx": "95edf2e876a36d8c488056d90052891ee3107eed969c48b45cbbde1c41350a77",
+    "packages/dashboard/src/components/summaries/summary-card.tsx": "9b252fe6636350d7ba4be51760fc09d06bf05510855fdcfcba9dcf61f295ad23",
+    "packages/dashboard/src/components/reviews/violation-list.tsx": "0053f3ca2f20714b0d92e492864cb86e35c06e0ee6e9854c7a50fe506665ddc9",
+    "packages/dashboard/src/components/reviews/review-summary.tsx": "b5e356c6b63623dfdb20face0b5e5f1e7e8d8243fe16a9f7e7e4607b6f34f476",
+    "packages/dashboard/src/components/reviews/diff-viewer.tsx": "6d8f27f116da46b14f4482ddbcee815e1855b465ef8003453a41385012420cf7",
+    "packages/dashboard/src/components/layout/sidebar.tsx": "408a718d802167242f449bf2e2409a263298f56c3fc6fee7d801dd9fd40c3793",
+    "packages/dashboard/src/components/layout/org-switcher.tsx": "ed83c053d72015150d25e8e945177cef0a541e5f6b7a2ded42c207643f2fa9c8",
+    "packages/dashboard/src/components/layout/header.tsx": "37009a204a4ca6a9a74e35948950a479f9a40434115c4c264ae7d3acd552748c",
+    "packages/dashboard/src/components/graphs/dependency-graph.tsx": "67969790dde4b3af808a6f811478ad3f7fd51a8a3a67ef270715b7fa880a37bb",
+    "packages/dashboard/src/components/decisions/evidence-viewer.tsx": "106b749b6b5a60f54f3a6d3bb729e71446be23a75383fb3468944c2b781222c9",
+    "packages/dashboard/src/components/decisions/decision-table.tsx": "36d9ebcdaf2af57229c5304761fa9409cec41f092f302cc9d7323a336716ac0c",
+    "packages/dashboard/src/components/decisions/decision-editor.tsx": "a83d195b1107aeb0cefdd82c6a5a08a1f14ac238fd4d36f573959e36b94f73dd",
+    "packages/dashboard/src/components/decisions/decision-card.tsx": "f373288d89f331165b2e61d4288bc53ac632576bae9ae4feba272a8c15b239a9",
+    "packages/dashboard/src/components/charts/violation-breakdown.tsx": "8ea3a45fd2da042eeafd8b6fd743eccd6326a48742de98ed52425f40119d4209",
+    "packages/dashboard/src/components/charts/velocity-chart.tsx": "e90b89318bbcfa42c651a1e80d56b2c6b0bac34c729ce1d0cf0855d8b5c2bc4a",
+    "packages/dashboard/src/components/charts/drift-timeline.tsx": "b9aaf49ebe7c07fb9b0b5aa36e199a365ce9468acef8b45e49e4465c7b536e07",
+    "packages/dashboard/src/components/charts/contribution-chart.tsx": "5a5bf9a36cc677e75d647618c8c5201e98bb9cb2c0706dfa23c6563d1fca1a2b",
+    "packages/dashboard/src/components/charts/complexity-heatmap.tsx": "5243858425a59e28ff154a05efc7e7f61cfc953f619a869c1dfd2c87bd59aba9",
+    "packages/dashboard/src/app/(app)/layout.tsx": "d386849899b3e27aa9749b17dfae9d2671c2564ac01cd663015a3b3f040a5513",
+    "packages/dashboard/src/app/(auth)/signup/page.tsx": "f71031cb19548c0dce16c63567331992302505b7c7c4ce792b8171c794c20e85",
+    "packages/dashboard/src/app/(auth)/sso/page.tsx": "3962751ad859018a1ad48e8120faae9b40ef1bb63470e36eb912f5cc3a9d0e84",
+    "packages/dashboard/src/app/(auth)/login/page.tsx": "38669fdcf371a104ddb5ad89904ef8062b5e169c8c3b3dc1c9fbec9e052f5823",
+    "packages/dashboard/src/app/(app)/velocity/page.tsx": "c993ff2e2f011791f5aea9328f48519788285f2636c7bda7cb6d0edd2b98e039",
+    "packages/dashboard/src/app/(app)/team/page.tsx": "e85b637293040c7144723b41ec666e8481f0972a7f395cdb4f0ac0f91d664c75",
+    "packages/dashboard/src/app/(app)/summaries/page.tsx": "46c59060ec63e856856065eb025ae5c35f2955006ea62bd35aee373c409ba411",
+    "packages/dashboard/src/app/(app)/settings/page.tsx": "391048e44f547dc1ce6f4541277d8ecf1a48291d7755c8794aef094b61985203",
+    "packages/dashboard/src/app/(app)/reviews/page.tsx": "b464686dba825c18517eb90a878b0ae6024d9bf098c94744e335a0610dadcfdb",
+    "packages/dashboard/src/app/(app)/repos/page.tsx": "b271f39bb8ad729e61063840abfa4b84012757b5c1ccab362f54b10ac9e5b30a",
+    "packages/dashboard/src/app/(app)/drift/page.tsx": "1f435c5a5bd138e1e5671fe904a9fd628aa10dc5d92f0e9978207de9fc0ec005",
+    "packages/dashboard/src/app/(app)/dependencies/page.tsx": "f747dd8a118d1a293b1895f391749c2623e708e7018bebe3e99e858b6a708f25",
+    "packages/dashboard/src/app/(app)/decisions/page.tsx": "eae8a6dee39e0868cd747c35f32c1927e9843054a0eabef5a93e020e6c3fa2d4",
+    "packages/dashboard/src/app/(app)/dashboard/page.tsx": "e4d7a03775b17f2294c0fcefdb27121ae65d4f1534d620252bf42b57a9d7ae77",
+    "packages/dashboard/src/app/(app)/velocity/[devId]/page.tsx": "070132ec7c41d394ec36635b92476266900f4bce2203f7e62e14be2bc798e8a8",
+    "packages/dashboard/src/app/(app)/team/invite/page.tsx": "8866dfa2b0ccc994d3476cdc18a07f8c2d6ceeec2126c5e986a712e1329d3f47",
+    "packages/dashboard/src/app/(app)/summaries/[id]/page.tsx": "2ff6017343f421ea0648435d26b49df7e239199462be64910831123bd6b24f08",
+    "packages/dashboard/src/app/(app)/settings/sso/page.tsx": "582c424b1814d506fa904ced0a725c4ee41001e7c597defc69dfd0d438d4d02c",
+    "packages/dashboard/src/app/(app)/settings/rules/page.tsx": "50f3dad1b58ba4b26e3e0efccf29e8e716aa56946552d29b0d18883b23ee2597",
+    "packages/dashboard/src/app/(app)/settings/integrations/page.tsx": "a8584f73d28ea87a1aecc59e8b80824282ba55b0327bc5188f0034bebd80f324",
+    "packages/dashboard/src/app/(app)/reviews/[id]/page.tsx": "a1ddbbc354f4f12da7416b73d4e4534f487a32ae74db6ed82ced8edde175bf93",
+    "packages/dashboard/src/app/(app)/repos/[id]/page.tsx": "40d81a96938cac2c11a2bbea289ab5b8194a018406b8da1d022260b92b99b5f6",
+    "packages/dashboard/src/app/(app)/decisions/[id]/page.tsx": "ebe90458f14720c540382874361acfcc7f894979238c96e534ce711e9b87e8c3"
+  },
+  "decisions": [
+    {
+      "id": "6g2jwcj5ZACl6euM0gnAr",
+      "title": "Monorepo with Package-Based Modularization",
+      "description": "The codebase is organized as a monorepo with distinct packages for different concerns: analyzer (LLM-powered analysis), reviewer (code review), integrations (external services), dashboard (UI), server (API), cli (command-line interface), and supporting packages. Each package has clear boundaries and responsibilities.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.95,
+      "reasoning": "The directory structure clearly shows packages/ with 11 distinct packages, each with their own package.json, src/ directories, and focused responsibilities. The dependency analysis shows module-level separation. This is clearly intentional architectural organization, not accidental.",
+      "evidence": [
+        {
+          "filePath": "packages/analyzer/src/index.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "export { scanCodebase, formatDirectoryTree, type ScanResult, type DirectoryNode } from './scanner.js';\nexport { extractDecisions } from './decision-extractor.js';",
+          "explanation": "Analyzer package exports show focused responsibility for codebase analysis and decision extraction"
+        },
+        {
+          "filePath": "packages/reviewer/src/index.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export { reviewChanges } from './index.js';\nexport { analyzeDiff, categorizeChanges } from './diff-analyzer.js';",
+          "explanation": "Reviewer package has distinct responsibility for code review functionality"
+        },
+        {
+          "filePath": "packages/integrations/src/slack/app.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "import { App, type AppOptions } from '@slack/bolt';\nimport { createArchGuardCommandHandler } from './commands.js';",
+          "explanation": "Integrations package handles external service integrations like Slack"
+        }
+      ],
+      "constraints": [
+        "Each package must maintain clear boundaries and not directly access internals of other packages",
+        "Cross-package communication must happen through exported APIs",
+        "Package dependencies should follow the established hierarchy (core as foundation)"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.615Z",
+      "tags": [
+        "monorepo",
+        "modularization",
+        "separation-of-concerns"
+      ]
+    },
+    {
+      "id": "I3waI_YHTvH3hgDzmS6d5",
+      "title": "LLM-First Architecture with Anthropic Claude Integration",
+      "description": "The system is built around LLM capabilities as a core architectural principle, with Anthropic Claude as the primary LLM provider. The analyzer package uses LLM for decision extraction, the reviewer uses LLM for code review, and multiple packages have LLM integration points.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.98,
+      "reasoning": "Multiple files show deep integration with Anthropic's SDK, sophisticated LLM cost tracking, model selection per operation, and the core comment 'the LLM IS the product' in analyzer/src/index.ts. This is clearly an intentional architectural decision to build an LLM-native system.",
+      "evidence": [
+        {
+          "filePath": "packages/analyzer/src/index.ts",
+          "lineRange": [
+            10,
+            15
+          ],
+          "snippet": "* Requires an Anthropic API key — the LLM IS the product.",
+          "explanation": "Explicit statement that LLM is central to the product architecture"
+        },
+        {
+          "filePath": "packages/core/src/llm.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import Anthropic from '@anthropic-ai/sdk';\nexport class LlmError extends Error\nexport class LlmAuthError extends LlmError\nexport class LlmRateLimitError extends LlmError",
+          "explanation": "Sophisticated LLM client with custom error handling and cost tracking"
+        },
+        {
+          "filePath": "packages/core/src/types.ts",
+          "lineRange": [
+            500,
+            520
+          ],
+          "snippet": "models: {\n  analyze: string;\n  review: string;\n  mcp: string;\n  summary: string;\n  sync: string;\n}",
+          "explanation": "Configuration shows different models for different operations, indicating sophisticated LLM usage"
+        }
+      ],
+      "constraints": [
+        "All LLM operations must go through the core LLM client",
+        "API key management must be centralized",
+        "Cost tracking must be implemented for all LLM calls",
+        "Different models should be used for different operations based on requirements"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.615Z",
+      "tags": [
+        "llm-first",
+        "anthropic",
+        "ai-native"
+      ]
+    },
+    {
+      "id": "L6sFUY1sJ0r5yqNXiw0XL",
+      "title": "Event-Driven Architecture with Server-Sent Events",
+      "description": "The system uses Server-Sent Events (SSE) for real-time communication between the server and dashboard, with a centralized event broadcasting system. The server package implements SSE endpoints and the dashboard subscribes to real-time updates.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "The server/src/routes/sse.ts file shows a complete SSE implementation with event broadcasting, client management, and typed events. The dashboard hooks show SSE consumption. This is clearly intentional for real-time updates.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/routes/sse.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export interface SSEEvent {\n  type: SSEEventType;\n  data: unknown;\n  timestamp: string;\n}\n\nexport function broadcastEvent(event: SSEEvent): void",
+          "explanation": "Structured SSE event system with broadcasting capabilities"
+        },
+        {
+          "filePath": "packages/dashboard/src/hooks/use-sse.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "export interface SSEOptions {\n  url: string;\n  onMessage?: (message: SSEMessage) => void;\n  onError?: (error: Event) => void;\n}",
+          "explanation": "Dashboard has dedicated SSE consumption hooks"
+        }
+      ],
+      "constraints": [
+        "All real-time updates must use the SSE system",
+        "SSE events must follow the defined type structure",
+        "Client connections must be properly managed to prevent memory leaks"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.615Z",
+      "tags": [
+        "event-driven",
+        "real-time",
+        "sse"
+      ]
+    },
+    {
+      "id": "1gW1fDjruJys0-TlxcQWh",
+      "title": "Multi-Provider Integration Architecture",
+      "description": "The integrations package implements a multi-provider pattern supporting GitHub, Bitbucket, and Slack with consistent interfaces. Each provider has its own API client, webhook handlers, and bot implementations following the same patterns.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.94,
+      "reasoning": "The integrations package shows clear separation by provider (github/, bitbucket/, slack/) with consistent patterns across each. Each has api.ts, webhook handling, and bot functionality. This is intentional design for multi-provider support.",
+      "evidence": [
+        {
+          "filePath": "packages/integrations/src/github/api.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export interface GitHubClientOptions {\n  token: string;\n  baseUrl?: string;\n}\n\nexport function createGitHubClient(options: GitHubClientOptions): Octokit",
+          "explanation": "Standardized client creation pattern for GitHub"
+        },
+        {
+          "filePath": "packages/integrations/src/bitbucket/api.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export interface BitbucketClientOptions {\n  token: string;\n  workspace: string;\n  baseUrl?: string;\n}\n\nexport function createBitbucketClient(options: BitbucketClientOptions): BitbucketClient",
+          "explanation": "Similar client pattern for Bitbucket, showing consistent interface design"
+        },
+        {
+          "filePath": "packages/integrations/src/slack/app.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export interface SlackAppConfig {\n  botToken: string;\n  signingSecret: string;\n  appToken?: string;\n}\n\nexport function createSlackApp(config: SlackAppConfig)",
+          "explanation": "Consistent configuration and factory pattern for Slack"
+        }
+      ],
+      "constraints": [
+        "Each provider must implement consistent interfaces for common operations",
+        "Provider-specific features should be clearly documented and optional",
+        "Authentication patterns must be standardized across providers"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.615Z",
+      "tags": [
+        "multi-provider",
+        "integration",
+        "consistency"
+      ]
+    },
+    {
+      "id": "zmRxYp9D1Cg-f6PeSxoU0",
+      "title": "Job Queue Architecture with BullMQ",
+      "description": "The server implements an asynchronous job processing system using BullMQ with Redis, supporting different job types (analysis, review, velocity, summary, sync) with proper error handling, retries, and monitoring.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.96,
+      "reasoning": "The server/src/jobs/ directory shows a complete job queue implementation with queue.ts managing multiple named queues, individual job processors, and sophisticated retry/error handling. This is clearly intentional for scalable async processing.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/jobs/queue.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import { Queue, Worker, type Job, type Processor } from 'bullmq';\nimport IORedis from 'ioredis';\n\nexport const QUEUE_NAMES = {\n  ANALYSIS: 'archguard:analysis',\n  REVIEW: 'archguard:review',\n  VELOCITY: 'archguard:velocity',\n  SUMMARY: 'archguard:summary',\n  SYNC: 'archguard:sync',\n} as const;",
+          "explanation": "Structured job queue system with named queues for different operations"
+        },
+        {
+          "filePath": "packages/server/src/jobs/analyze.job.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "export async function registerAnalysisWorker(): Promise<Worker> {\n  return registerWorker(QUEUE_NAMES.ANALYSIS, processAnalysis, 1);\n}",
+          "explanation": "Individual job processors following consistent patterns"
+        }
+      ],
+      "constraints": [
+        "All long-running operations must be processed through job queues",
+        "Job processors must handle failures gracefully with proper retry logic",
+        "Redis connection must be shared across all queues"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.615Z",
+      "tags": [
+        "job-queue",
+        "async",
+        "bullmq",
+        "scalability"
+      ]
+    },
+    {
+      "id": "hMlIIs6WarN0qnmcaQ_Zv",
+      "title": "Role-Based Access Control (RBAC) with Hierarchical Permissions",
+      "description": "The system implements a four-tier role hierarchy (viewer, member, admin, owner) with granular permissions mapped to specific operations, enforced through middleware and checked at the API level.",
+      "category": "security",
+      "status": "detected",
+      "confidence": 0.94,
+      "reasoning": "The server/src/auth/roles.ts and rbac.ts files show a complete RBAC implementation with role hierarchy, permission mappings, and middleware enforcement. The permission system is consistently used across all API routes.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/auth/roles.ts",
+          "lineRange": [
+            10,
+            30
+          ],
+          "snippet": "export const PERMISSIONS = {\n  decisions: ['decisions:read', 'decisions:write', 'decisions:confirm', 'decisions:deprecate', 'decisions:delete'],\n  analysis: ['analysis:trigger', 'analysis:read'],\n  reviews: ['reviews:read', 'reviews:trigger'],\n  velocity: ['velocity:read'],\n  summaries: ['summaries:read', 'summaries:generate', 'summaries:edit'],\n  team: ['team:read', 'team:invite', 'team:remove', 'team:changeRole'],\n  repos: ['repos:read', 'repos:connect', 'repos:disconnect'],\n  settings: ['settings:read', 'settings:write'],\n  webhooks: ['webhooks:manage'],\n  integrations: ['integrations:read', 'integrations:write'],\n} as const;\n\nexport const ROLE_HIERARCHY: Role[] = ['viewer', 'member', 'admin', 'owner'];",
+          "explanation": "Comprehensive permission system with hierarchical roles and granular operation permissions"
+        },
+        {
+          "filePath": "packages/server/src/auth/rbac.ts",
+          "lineRange": [
+            20,
+            40
+          ],
+          "snippet": "export function requirePermission(\n  permission: Permission,\n  options?: { ownerIdParam?: string }\n) {\n  return async (c: Context, next: Next) => {\n    if (isAuthDisabled()) { await next(); return; }\n\n    const user = c.get('user') as AuthUser | undefined;\n    if (!user) {\n      return c.json({ error: 'Authentication required' }, 401);\n    }\n\n    const allowed = hasPermission(user.role, permission, ownerId, user.id);\n    if (!allowed) {\n      return c.json(\n        { error: 'Forbidden', message: `Insufficient permissions. Required: ${permission}` },\n        403\n      );\n    }",
+          "explanation": "Middleware-based permission enforcement with proper error handling and auth bypass for local mode"
+        }
+      ],
+      "constraints": [
+        "All API endpoints must use RBAC middleware for authorization",
+        "Permission checks must happen after authentication",
+        "Role hierarchy must be respected (higher roles inherit lower role permissions)",
+        "Owner-specific resources must check ownership in addition to role permissions"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "rbac",
+        "security",
+        "authorization",
+        "permissions"
+      ]
+    },
+    {
+      "id": "r4e2nceIA23flp4-EdVp9",
+      "title": "Velocity Tracking with Multi-Dimensional Scoring",
+      "description": "The velocity package implements a sophisticated developer velocity tracking system that combines git metrics, complexity analysis, PR metrics, and architectural impact into weighted scores with trend analysis and blocker detection.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The velocity package shows a complete multi-dimensional scoring system with separate collectors for different metrics, sophisticated scoring algorithms, and trend analysis. This is clearly intentional for comprehensive developer productivity measurement.",
+      "evidence": [
+        {
+          "filePath": "packages/velocity/src/index.ts",
+          "lineRange": [
+            100,
+            150
+          ],
+          "snippet": "// Step 5: Calculate effort scores (LOC weighted by complexity)\nconst effortScores = calculateEffortScores(gitMetrics, complexityDeltas);\n\n// Step 6: Calculate impact scores (architectural boundary analysis)\nconst impactScores = calculateImpactScores(",
+          "explanation": "Multi-dimensional scoring system combining different metrics"
+        },
+        {
+          "filePath": "packages/velocity/src/types.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "export interface VelocityScore {\n  developerId: string;\n  commits: number;\n  weightedEffort: number;\n  architecturalImpact: number;\n  refactoringRatio: number;\n  velocityScore: number;\n  trend: VelocityTrend;\n  blockers: Blocker[];\n}",
+          "explanation": "Comprehensive velocity scoring with multiple dimensions"
+        }
+      ],
+      "constraints": [
+        "Velocity calculations must consider multiple dimensions (effort, impact, refactoring)",
+        "Scoring algorithms must be configurable through weights",
+        "Trend analysis must use historical data for accuracy"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.616Z",
+      "tags": [
+        "velocity",
+        "metrics",
+        "multi-dimensional",
+        "productivity"
+      ]
+    },
+    {
+      "id": "XFbP8sx_3n617Nas0_0h_",
+      "title": "Context Synchronization with Multi-Format Code Generation",
+      "description": "The context-sync package implements a system to generate context files in multiple formats (Cursor rules, Claude markdown, Copilot instructions, etc.) from architectural decisions, with template-based generation and LLM-powered compression.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.89,
+      "reasoning": "The context-sync package shows generators for multiple IDE/AI tools with consistent template-based approach and LLM integration for intelligent compression. This is intentional for broad AI tool compatibility.",
+      "evidence": [
+        {
+          "filePath": "packages/context-sync/src/sync-engine.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "import { generateCursorRules } from './generators/cursorrules.js';\nimport { generateClaudeMd } from './generators/claude-md.js';\nimport { generateAgentsMd } from './generators/agents-md.js';\nimport { generateCopilotInstructions } from './generators/copilot.js';",
+          "explanation": "Multiple format generators for different AI tools"
+        },
+        {
+          "filePath": "packages/context-sync/src/templates.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export function registerHelpers(): void {\n  Handlebars.registerHelper('groupByCategory', groupByCategory);\n  Handlebars.registerHelper('groupByStatus', groupByStatus);",
+          "explanation": "Template-based generation system with helpers"
+        }
+      ],
+      "constraints": [
+        "All generators must use the common template system",
+        "Format-specific features must be clearly documented",
+        "LLM compression must respect token limits for each format"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.616Z",
+      "tags": [
+        "context-sync",
+        "multi-format",
+        "templates",
+        "ai-tools"
+      ]
+    },
+    {
+      "id": "GDCx5N5RRL1HvUuw5I1Ac",
+      "title": "MCP (Model Context Protocol) Server Implementation",
+      "description": "The system implements the Model Context Protocol for AI agent integration, providing tools and resources that AI agents can use to query architectural decisions, check compliance, and get guidance.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.96,
+      "reasoning": "The mcp-server package is entirely dedicated to MCP implementation with proper tool and resource definitions. The tools follow MCP conventions with JSON schemas and structured responses. The server supports multiple transport types (stdio, SSE, HTTP).",
+      "evidence": [
+        {
+          "filePath": "packages/mcp-server/src/index.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import { Server } from '@modelcontextprotocol/sdk/server/mcp.js';\nimport { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';\nconst server = new Server(\n  {\n    name: 'archguard',\n    version: '1.0.0',\n  },\n  {\n    capabilities: {\n      tools: {},\n      resources: {},\n    },\n  }\n);",
+          "explanation": "Proper MCP server setup with capabilities declaration"
+        },
+        {
+          "filePath": "packages/mcp-server/src/tools/check-pattern.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export const checkPatternInputSchema = {\n  type: 'object' as const,\n  properties: {\n    code: {\n      type: 'string' as const,\n      description: 'The code to check for architectural compliance.',\n    },",
+          "explanation": "MCP tool with proper JSON schema definition for input validation"
+        }
+      ],
+      "constraints": [
+        "All MCP tools must have JSON schema definitions",
+        "Tool responses must follow MCP protocol standards",
+        "Resources must be properly registered with the MCP server",
+        "Multiple transport types must be supported"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "mcp",
+        "ai-agents",
+        "protocol-implementation",
+        "tool-integration"
+      ]
+    },
+    {
+      "id": "FGrUdYNEEBSYN3va2gOsP",
+      "title": "Layered Architecture with Dependency Injection",
+      "description": "The codebase follows a layered architecture pattern with clear separation between presentation (dashboard), application (server routes), domain (core types), and infrastructure (integrations, database). Dependencies are injected through constructor parameters and factory functions.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "The package structure and import patterns show clear layered separation. The core package defines domain types, server implements application logic, dashboard handles presentation, and integrations manage external dependencies. Factory functions and dependency injection patterns are consistent throughout.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/types.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "export interface ArchDecision {\n  id: string;\n  title: string;\n  description: string;\n  category: ArchCategory;\n  status: DecisionStatus;",
+          "explanation": "Core domain types defined in the core package"
+        },
+        {
+          "filePath": "packages/server/src/routes/decisions.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "import { eq, and, desc } from 'drizzle-orm';\nimport { schema, type DbClient } from '@archguard/core';\nimport { requirePermission } from '../auth/rbac.js';",
+          "explanation": "Application layer importing from core and using dependency injection"
+        }
+      ],
+      "constraints": [
+        "Core package must not depend on other packages",
+        "Dependencies must flow inward toward the core",
+        "External dependencies must be abstracted through interfaces"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:44.616Z",
+      "tags": [
+        "layered-architecture",
+        "dependency-injection",
+        "separation-of-concerns"
+      ]
+    },
+    {
+      "id": "7RtAmmz-6dn3RDh7JnG5G",
+      "title": "Monorepo Package Architecture with Layered Dependencies",
+      "description": "The codebase is organized as a monorepo with 10 distinct packages (analyzer, cli, context-sync, core, dashboard, integrations, mcp-server, reviewer, server, velocity, work-summary) following a layered dependency structure where core provides shared utilities, and higher-level packages depend on lower-level ones.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.95,
+      "reasoning": "The directory structure clearly shows packages/ with distinct functional boundaries. The dependency analysis shows clean separation with core being imported by multiple packages but having minimal dependencies itself. This is a deliberate architectural choice for modularity and reusability.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/index.ts",
+          "lineRange": [
+            1,
+            106
+          ],
+          "snippet": "export { loadConfig, writeDefaultConfig, getDefaultConfig } from './config.js';\nexport { createSqliteClient, initializeDatabase, schema, eq, and, or, desc, asc, sql, type DbClient } from './db/index.js';",
+          "explanation": "Core package exports foundational utilities used across all other packages"
+        },
+        {
+          "filePath": "packages/analyzer/src/decision-extractor.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "import {\n  analyzeWithLlmValidated,\n  generateId,\n  now,\n  truncate,\n  estimateTokens,\n  getLogger,\n  type ArchGuardConfig,\n  type ParsedFile,\n} from '@archguard/core';",
+          "explanation": "Higher-level packages consistently import from @archguard/core, showing intentional layered dependency structure"
+        }
+      ],
+      "constraints": [
+        "Core package must remain dependency-free of other packages",
+        "Package dependencies must flow in one direction (no circular dependencies between packages)",
+        "Each package must have a clear single responsibility",
+        "Cross-package imports must use the @archguard/* namespace"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "monorepo",
+        "layered-architecture",
+        "package-organization"
+      ]
+    },
+    {
+      "id": "L5mQqsxtNpUUU565KrOhW",
+      "title": "Dependency Injection with NestJS-Style Decorators",
+      "description": "The system uses dependency injection patterns with decorators like @Injectable, @Controller, and @InjectRepository, following NestJS conventions for service registration and dependency resolution.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "Multiple files show decorator usage (@Injectable, @Controller, @InjectRepository) and the pattern-detector specifically identifies this as a dependency injection pattern. The core/src/db/seed.ts shows concrete usage of these patterns.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/db/seed.ts",
+          "lineRange": [
+            380,
+            400
+          ],
+          "snippet": "@Injectable()\nexport class UserService {\n  constructor(\n    @InjectRepository(User)\n    private readonly userRepository: Repository<User>,\n  ) {}\n\n  async findByEmail(email: string): Promise<User | null> {\n    return this.userRepository.findOne({ where: { email } });\n  }",
+          "explanation": "Concrete example of dependency injection with decorators and constructor injection"
+        },
+        {
+          "filePath": "packages/analyzer/src/pattern-detector.ts",
+          "lineRange": [
+            150,
+            170
+          ],
+          "snippet": "const diFiles = files.filter(\n    (f) =>\n      f.decorators.some((d) =>\n        ['Injectable', 'Inject', 'Component', 'Service', 'Module'].includes(d)\n      ) ||\n      f.imports.some(\n        (i) =>\n          i.includes('inversify') ||\n          i.includes('tsyringe') ||\n          i.includes('@nestjs')\n      )\n  );",
+          "explanation": "Pattern detector specifically looks for dependency injection decorators and frameworks"
+        }
+      ],
+      "constraints": [
+        "Services must be marked with @Injectable decorator",
+        "Dependencies must be injected through constructors",
+        "Repository dependencies must use @InjectRepository decorator",
+        "Controllers must use @Controller decorator for HTTP routing"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "dependency-injection",
+        "decorators",
+        "nestjs-style",
+        "ioc"
+      ]
+    },
+    {
+      "id": "j5-Gt06NusTcEOBqe2QmB",
+      "title": "Multi-Transport MCP Server Architecture",
+      "description": "The Model Context Protocol (MCP) server supports multiple transport mechanisms (stdio, SSE, streamable-http) to integrate with different AI coding tools like Claude Code, Cursor, and other MCP-compatible clients.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.96,
+      "reasoning": "The mcp-server/src/index.ts file shows a sophisticated multi-transport architecture with clear separation of concerns and support for different protocol versions. This is clearly intentional to support various AI tool integrations.",
+      "evidence": [
+        {
+          "filePath": "packages/mcp-server/src/index.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "/**\n * @archguard/mcp-server - MCP server entrypoint\n *\n * Creates an MCP server that exposes architectural decisions, compliance\n * checking, guidance, and dependency information to AI coding agents.\n *\n * Supports three transports:\n * - stdio: For Claude Code, Cursor, and other MCP-compatible tools (default)\n * - sse: Legacy HTTP+SSE transport (deprecated protocol version 2024-11-05)\n * - streamable-http: Modern Streamable HTTP transport with resumability\n */",
+          "explanation": "Clear documentation of multi-transport support for different AI tool integrations"
+        },
+        {
+          "filePath": "packages/mcp-server/src/index.ts",
+          "lineRange": [
+            60,
+            80
+          ],
+          "snippet": "export async function startMcpServer(options: {\n  projectDir?: string;\n  dbPath?: string;\n  transport?: TransportType | string;\n  port?: number;\n  host?: string;\n} = {}): Promise<void> {\n  const transport = (options.transport ?? 'stdio') as TransportType;\n  \n  switch (transport) {\n    case 'stdio':\n      return startStdioServer(db, config);\n    case 'sse':\n      return startSseServer(db, config, port, host);\n    case 'streamable-http':\n      return startStreamableHttpServer(db, config, port, host);",
+          "explanation": "Transport selection logic showing intentional support for multiple protocols"
+        }
+      ],
+      "constraints": [
+        "All transports must expose the same MCP tools and resources",
+        "Transport selection must be configurable at startup",
+        "Each transport must handle its own connection management and error handling",
+        "MCP protocol compliance must be maintained across all transports"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "mcp",
+        "multi-transport",
+        "ai-integration",
+        "protocol-support"
+      ]
+    },
+    {
+      "id": "FFdV7IsmqSdiQBSyu_P6g",
+      "title": "Comprehensive Integration Layer for Git Platforms",
+      "description": "The system provides a unified integration layer supporting GitHub and Bitbucket through consistent APIs for PR comments, check runs, webhooks, and build statuses, with platform-specific implementations behind common interfaces.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.93,
+      "reasoning": "The integrations package shows parallel implementations for GitHub and Bitbucket with consistent patterns for PR bots, webhooks, and API clients. The interfaces and error handling are standardized across platforms.",
+      "evidence": [
+        {
+          "filePath": "packages/integrations/src/github/pr-bot.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "/**\n * GitHub PR comment integration for ArchGuard.\n * Posts inline comments and creates check runs on pull requests\n * when architectural violations are found.\n */\n\nexport interface PREventContext {\n  octokit: Octokit;\n  repo: RepoRef;\n  prNumber: number;\n  headSha: string;\n  action: 'opened' | 'synchronize';\n}",
+          "explanation": "Standardized PR bot interface for GitHub integration"
+        },
+        {
+          "filePath": "packages/integrations/src/bitbucket/pr-bot.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "/**\n * Bitbucket PR comment integration for ArchGuard.\n * Posts inline comments on pull requests via the Bitbucket API when\n * architectural violations are found. Uses Bitbucket Code Insights API\n * to create build statuses reflecting review pass/fail.\n */\n\nexport interface BitbucketPREventContext {\n  client: BitbucketClient;\n  repoRef: BitbucketRepoRef;\n  prRef: BitbucketPRRef;\n  action: 'created' | 'updated';\n}",
+          "explanation": "Parallel Bitbucket implementation with similar interface structure"
+        }
+      ],
+      "constraints": [
+        "Platform integrations must implement consistent interfaces",
+        "Error handling must be standardized across platforms",
+        "Webhook signature verification must be implemented for security",
+        "API rate limiting must be respected for each platform"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "integration-layer",
+        "github",
+        "bitbucket",
+        "git-platforms"
+      ]
+    },
+    {
+      "id": "2o6CIXUimu0sBBSqFIj_v",
+      "title": "Sophisticated Dependency Analysis with Coupling Metrics",
+      "description": "The system implements Robert C. Martin's coupling metrics (afferent/efferent coupling, instability, abstractness, distance from main sequence) alongside circular dependency detection and import resolution across multiple languages.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.97,
+      "reasoning": "The dependency-mapper.ts file shows a comprehensive implementation of software metrics theory with proper mathematical calculations, multi-language support, and sophisticated import resolution including TypeScript path aliases and monorepo packages.",
+      "evidence": [
+        {
+          "filePath": "packages/analyzer/src/dependency-mapper.ts",
+          "lineRange": [
+            600,
+            650
+          ],
+          "snippet": "/**\n * Calculate Robert C. Martin coupling metrics for every module.\n *\n * - Afferent coupling (Ca): number of modules that depend on this module\n * - Efferent coupling (Ce): number of modules this module depends on\n * - Instability (I): Ce / (Ca + Ce).  0 = maximally stable, 1 = maximally unstable\n * - Abstractness (A): ratio of abstract types (interfaces + abstract classes)\n *   to total declared types (interfaces + abstract classes + concrete classes + type aliases)\n * - Distance from main sequence (D): |A + I - 1|.  0 = ideal balance\n */\nfunction calculateCouplingMetrics(\n  nodes: Map<string, DependencyNode>,\n  filesByPath: Map<string, ParsedFile>\n): Map<string, CouplingMetrics> {",
+          "explanation": "Implementation of formal software engineering coupling metrics with proper mathematical definitions"
+        },
+        {
+          "filePath": "packages/analyzer/src/dependency-mapper.ts",
+          "lineRange": [
+            100,
+            150
+          ],
+          "snippet": "/**\n * Resolve an import path to a file in the codebase.\n * Handles relative imports, TypeScript path aliases, Python relative imports,\n * Go module paths, and monorepo cross-package imports.\n */\nfunction resolveImport(\n  fromFile: string,\n  importPath: string,\n  filesByPath: Map<string, ParsedFile>,\n  tsConfig: TsConfigPaths | null,\n  projectDir: string,\n  workspacePackages: Map<string, string>\n): string | null {",
+          "explanation": "Sophisticated import resolution supporting multiple languages and project structures"
+        }
+      ],
+      "constraints": [
+        "Dependency analysis must support all configured programming languages",
+        "Import resolution must handle TypeScript path aliases and monorepo packages",
+        "Coupling metrics must follow Robert C. Martin's formal definitions",
+        "Circular dependency detection must be accurate and complete"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "dependency-analysis",
+        "coupling-metrics",
+        "robert-martin",
+        "circular-dependencies"
+      ]
+    },
+    {
+      "id": "VOtyr2brBE_OO0wjqGH0S",
+      "title": "Context-Aware AI Tool Integration with Multiple Formats",
+      "description": "The system generates AI context files in multiple formats (Cursor rules, Claude markdown, GitHub Copilot instructions, Windsurf rules, Kiro steering) from architectural decisions, with user section preservation and LLM-powered intelligent compression.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The context-sync package shows a comprehensive system for generating AI tool context files with format-specific generators, user content preservation, and LLM-powered compression. This addresses the need to keep AI tools informed about architectural decisions.",
+      "evidence": [
+        {
+          "filePath": "packages/context-sync/src/sync-engine.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "/**\n * SyncEngine - Orchestrates generation of AI context files from architectural decisions.\n *\n * Responsibilities:\n * - Generates all configured format files (cursorrules, claude, copilot, etc.)\n * - Preserves user sections between archguard comment markers\n * - Supports watch mode with chokidar (debounced at 5 seconds)\n * - Returns SyncRecord[] for each sync operation\n */",
+          "explanation": "Comprehensive AI context file generation system with multiple format support"
+        },
+        {
+          "filePath": "packages/context-sync/src/sync-engine.ts",
+          "lineRange": [
+            80,
+            120
+          ],
+          "snippet": "function getOutputPath(format: SyncFormat, outputDir: string): string {\n  switch (format) {\n    case 'cursorrules':\n      return path.join(outputDir, '.cursorrules');\n    case 'claude':\n      return path.join(outputDir, 'CLAUDE.md');\n    case 'copilot':\n      return path.join(outputDir, '.github', 'copilot-instructions.md');\n    case 'agents':\n      return path.join(outputDir, 'agents.md');\n    case 'windsurf':\n      return path.join(outputDir, '.windsurfrules');\n    case 'kiro':\n      return path.join(outputDir, '.kiro', 'steering.md');",
+          "explanation": "Support for multiple AI tool formats with proper file naming conventions"
+        }
+      ],
+      "constraints": [
+        "Each AI tool format must have a dedicated generator",
+        "User-written content must be preserved between regenerations",
+        "File watching must be debounced to avoid excessive regeneration",
+        "LLM compression must respect token limits for each format"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "ai-context",
+        "multi-format",
+        "cursor",
+        "copilot",
+        "claude"
+      ]
+    },
+    {
+      "id": "NiZiVCNFUgySruA6YW6EG",
+      "title": "Production-Grade Queue System with BullMQ",
+      "description": "The system uses BullMQ with Redis for background job processing, supporting analysis, review, velocity calculation, summary generation, and sync operations with proper error handling and job status tracking.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.89,
+      "reasoning": "The server/src/jobs/queue.ts file shows a complete queue system implementation with Redis connection management, worker registration, and typed job data interfaces. Multiple job processors show consistent usage patterns.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/jobs/queue.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "/**\n * Job queue management using BullMQ.\n * Handles background processing for analysis, reviews, velocity calculation,\n * summary generation, and context synchronization.\n */\n\nimport { Queue, Worker, Job } from 'bullmq';\nimport Redis from 'ioredis';\n\nexport const QUEUE_NAMES = {\n  ANALYSIS: 'analysis',\n  REVIEW: 'review', \n  VELOCITY: 'velocity',\n  SUMMARY: 'summary',\n  SYNC: 'sync',\n} as const;",
+          "explanation": "Comprehensive queue system with typed queue names and Redis integration"
+        },
+        {
+          "filePath": "packages/server/src/jobs/analyze.job.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "/**\n * Analysis job processor.\n * Runs codebase analysis in the background and stores results.\n */\n\nimport { Job } from 'bullmq';\nimport { eq } from 'drizzle-orm';\nimport { getLogger, type DbClient } from '@archguard/core';\nimport { registerWorker, type AnalysisJobData } from './queue.js';\nimport { runAnalysis } from '@archguard/analyzer';",
+          "explanation": "Consistent job processor pattern with typed data interfaces and error handling"
+        }
+      ],
+      "constraints": [
+        "All background operations must use the queue system",
+        "Job data must be typed with specific interfaces",
+        "Workers must implement proper error handling and logging",
+        "Redis connection must be properly managed and reused"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:47:14.915Z",
+      "tags": [
+        "queue-system",
+        "bullmq",
+        "redis",
+        "background-jobs"
+      ]
+    },
+    {
+      "id": "B2Ow8I-_yfpZWCglFHD-7",
+      "title": "Monorepo with Package-Based Modular Architecture",
+      "description": "The codebase is organized as a monorepo with distinct packages for different concerns: analyzer, cli, context-sync, core, dashboard, integrations, mcp-server, reviewer, server, velocity, and work-summary. Each package has clear boundaries and responsibilities.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.95,
+      "reasoning": "The directory structure shows a clear packages/ folder with 11 distinct packages. Each package has its own package.json, src/ directory, and focused responsibility. The dependency analysis shows clean module boundaries with minimal circular dependencies (0 detected). This is clearly intentional as it requires deliberate tooling setup and coordination.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/next.config.js",
+          "lineRange": [
+            1,
+            15
+          ],
+          "snippet": "transpilePackages: ['@archguard/core', '@archguard/api', '@archguard/shared']",
+          "explanation": "Next.js config explicitly transpiles internal packages, proving intentional monorepo setup"
+        },
+        {
+          "filePath": "packages/core/src/index.ts",
+          "lineRange": [
+            1,
+            106
+          ],
+          "snippet": "export { loadConfig, writeDefaultConfig } from './config.js'; export { createSqliteClient, initializeDatabase } from './db/index.js';",
+          "explanation": "Core package exports shared utilities used across other packages"
+        }
+      ],
+      "constraints": [
+        "New functionality must be placed in the appropriate package based on its domain",
+        "Cross-package dependencies must go through exported public APIs",
+        "Shared utilities must be placed in the core package",
+        "Each package must maintain its own build and test configuration"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "monorepo",
+        "modular-architecture",
+        "package-boundaries"
+      ]
+    },
+    {
+      "id": "cwFtozTwtnOQHdnsnPV7V",
+      "title": "Hono-Based HTTP Server with Middleware Pipeline",
+      "description": "The server uses Hono framework with a structured middleware pipeline including CORS, logging, authentication, organization context, and rate limiting applied in a specific order.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "The server/src/index.ts shows deliberate middleware ordering and configuration. The middleware is applied globally with specific ordering (logger, CORS, rate limiting, auth, org context). Custom middleware modules exist for each concern, indicating intentional architectural choice rather than ad-hoc additions.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/index.ts",
+          "lineRange": [
+            45,
+            65
+          ],
+          "snippet": "app.use('*', logger()); app.use('*', cors({...})); app.use('/api/*', standardLimit); app.use('/api/*', authMiddleware(db)); app.use('/api/*', orgContextMiddleware(db));",
+          "explanation": "Deliberate middleware ordering with global and route-specific application"
+        },
+        {
+          "filePath": "packages/server/src/middleware/org-context.ts",
+          "lineRange": [
+            20,
+            40
+          ],
+          "snippet": "export function orgContextMiddleware(db: DbClient) { return async (c: Context, next: Next) => { const user = c.get('user') as AuthUser | undefined;",
+          "explanation": "Custom middleware for multi-tenant organization resolution"
+        }
+      ],
+      "constraints": [
+        "All API routes must go through the authentication middleware",
+        "Organization context must be resolved after authentication",
+        "Rate limiting must be applied before business logic",
+        "New middleware must be inserted at the appropriate point in the pipeline"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "hono",
+        "middleware",
+        "http-server",
+        "authentication"
+      ]
+    },
+    {
+      "id": "UOfVgG2zoa0E7EQJt1VxS",
+      "title": "Multi-Tenant Organization-Based Access Control",
+      "description": "The system implements multi-tenancy where users belong to organizations, and all data access is scoped by organization ID. RBAC permissions are evaluated within organizational boundaries.",
+      "category": "security",
+      "status": "detected",
+      "confidence": 0.94,
+      "reasoning": "The org-context middleware, database schema, and RBAC implementation all consistently enforce organization-based isolation. The schema shows orgId foreign keys on major entities, and the middleware ensures all requests are scoped to the user's organization. This is clearly intentional given the complexity and consistency of implementation.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/middleware/org-context.ts",
+          "lineRange": [
+            40,
+            60
+          ],
+          "snippet": "const orgContext: OrgContext = { id: org.id, name: org.name, slug: org.slug, plan: org.plan, settings }; c.set('org', orgContext); c.set('orgId', org.id);",
+          "explanation": "Middleware attaches organization context to every authenticated request"
+        },
+        {
+          "filePath": "packages/core/src/db/schema.ts",
+          "lineRange": [
+            50,
+            70
+          ],
+          "snippet": "orgId: text('org_id').notNull().references(() => organizations.id)",
+          "explanation": "Database schema enforces organization-based data isolation with foreign key constraints"
+        }
+      ],
+      "constraints": [
+        "All business data must be scoped by organization ID",
+        "Users can only access data within their organization",
+        "API endpoints must validate organization membership",
+        "Database queries must include organization filtering"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "multi-tenancy",
+        "rbac",
+        "data-isolation",
+        "security"
+      ]
+    },
+    {
+      "id": "FgCCD1sNKqfHrbDqTSqnO",
+      "title": "LLM-Powered Analysis with Anthropic Claude Integration",
+      "description": "The system uses Anthropic's Claude API for architectural decision extraction, code review, and work summary generation. LLM operations are centralized in the core package with cost tracking, caching, and error handling.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.96,
+      "reasoning": "The core/src/llm.ts file shows sophisticated LLM integration with cost tracking, caching, error handling, and operation-specific model selection. Multiple packages use this for different AI-powered features. The decision-extractor.ts and summarizer.ts files show complex prompt engineering, indicating this is a core architectural choice.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/llm.ts",
+          "lineRange": [
+            400,
+            450
+          ],
+          "snippet": "export async function analyzeWithLlm(client: LlmClient, config: ArchGuardConfig, options: AnalysisOptions, operation: LlmOperation): Promise<string>",
+          "explanation": "Centralized LLM analysis function with operation-specific handling"
+        },
+        {
+          "filePath": "packages/analyzer/src/decision-extractor.ts",
+          "lineRange": [
+            200,
+            250
+          ],
+          "snippet": "const response = await analyzeWithLlm(client, config, { systemPrompt, userPrompt, maxTokens: config.llm.maxTokensPerAnalysis }, 'analyze');",
+          "explanation": "Decision extraction uses LLM analysis with structured prompts"
+        }
+      ],
+      "constraints": [
+        "All LLM operations must go through the centralized client",
+        "Cost tracking must be implemented for all LLM calls",
+        "LLM responses must be validated and parsed consistently",
+        "API keys must be managed securely through configuration"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "llm",
+        "anthropic",
+        "claude",
+        "ai-powered",
+        "cost-tracking"
+      ]
+    },
+    {
+      "id": "yAbd0QYNnHpAuH4ksKM9J",
+      "title": "Event-Driven Architecture with BullMQ Job Queue",
+      "description": "Asynchronous processing is handled through BullMQ job queues with Redis. Different job types (analysis, review, velocity, summary, sync) are processed by dedicated workers with proper error handling and retry logic.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The server/src/jobs/ directory contains dedicated job processors and queue management. The queue.ts file shows structured job types and worker registration. Webhook handlers enqueue jobs rather than processing synchronously, indicating intentional async architecture design.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/jobs/queue.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "export const QUEUE_NAMES = { analysis: 'analysis', review: 'review', velocity: 'velocity', summary: 'summary', sync: 'sync' } as const;",
+          "explanation": "Structured job queue types with dedicated processing"
+        },
+        {
+          "filePath": "packages/server/src/routes/webhooks.ts",
+          "lineRange": [
+            80,
+            120
+          ],
+          "snippet": "await enqueueReview({ repoId: repo.id, orgId: repo.orgId, prNumber, ref: headRef, triggeredBy: 'webhook' });",
+          "explanation": "Webhooks enqueue jobs for async processing rather than blocking"
+        }
+      ],
+      "constraints": [
+        "Long-running operations must be processed asynchronously via job queues",
+        "Job processors must handle failures gracefully with retry logic",
+        "Redis must be available for job queue functionality",
+        "Job data must be serializable and include necessary context"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "event-driven",
+        "job-queue",
+        "bullmq",
+        "redis",
+        "async-processing"
+      ]
+    },
+    {
+      "id": "7WnLs-u8DJ7kaFCsUPxk6",
+      "title": "Next.js App Router with Server-Side Rendering Dashboard",
+      "description": "The dashboard uses Next.js 13+ App Router with server-side rendering, API routes, and a component-based architecture. Authentication state is managed client-side with server-side validation.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.93,
+      "reasoning": "The dashboard directory structure follows Next.js App Router conventions with (app) and (auth) route groups, page.tsx files, and layout.tsx files. The next.config.js shows standalone output configuration. Components are organized by feature with clear separation of concerns.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/src/app/(app)/layout.tsx",
+          "lineRange": [
+            1,
+            17
+          ],
+          "snippet": "import { Sidebar } from '@/components/layout/sidebar'; import { Header } from '@/components/layout/header';",
+          "explanation": "App Router layout with structured component imports"
+        },
+        {
+          "filePath": "packages/dashboard/src/lib/api.ts",
+          "lineRange": [
+            30,
+            60
+          ],
+          "snippet": "function getAuthToken(): string | null { const raw = localStorage.getItem('archguard_session'); return session?.accessToken ?? null; }",
+          "explanation": "Client-side authentication token management for API calls"
+        }
+      ],
+      "constraints": [
+        "All pages must follow App Router conventions",
+        "Authentication must be handled consistently across routes",
+        "API calls must include proper error handling and loading states",
+        "Components must be organized by feature domain"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "nextjs",
+        "app-router",
+        "ssr",
+        "react",
+        "dashboard"
+      ]
+    },
+    {
+      "id": "uuHp0lXITAKjvmRHncFbF",
+      "title": "Drizzle ORM with SQLite Database Schema",
+      "description": "Data persistence uses Drizzle ORM with SQLite, featuring a well-defined schema with proper foreign key relationships, indexes, and multi-tenant data isolation through organization scoping.",
+      "category": "data",
+      "status": "detected",
+      "confidence": 0.94,
+      "reasoning": "The core/src/db/schema.ts file shows a comprehensive database schema with proper relationships. The db/index.ts shows Drizzle ORM configuration with SQLite. All major entities have orgId foreign keys for multi-tenancy. The schema is exported and used consistently across the application.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/db/schema.ts",
+          "lineRange": [
+            20,
+            50
+          ],
+          "snippet": "export const organizations = sqliteTable('organizations', { id: text('id').primaryKey(), name: text('name').notNull(), slug: text('slug').notNull().unique() });",
+          "explanation": "Well-defined database schema with proper constraints and relationships"
+        },
+        {
+          "filePath": "packages/core/src/db/index.ts",
+          "lineRange": [
+            20,
+            40
+          ],
+          "snippet": "export function createSqliteClient(dbPath?: string): DbClient { const sqlite = new Database(dbPath ?? getDefaultDbPath()); return drizzle(sqlite, { schema });",
+          "explanation": "Drizzle ORM configuration with schema integration"
+        }
+      ],
+      "constraints": [
+        "All database operations must use Drizzle ORM queries",
+        "New tables must include organization scoping where appropriate",
+        "Schema changes must be handled through migrations",
+        "Foreign key relationships must be properly defined"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "drizzle-orm",
+        "sqlite",
+        "database-schema",
+        "multi-tenant"
+      ]
+    },
+    {
+      "id": "Kv-_HZWgLGhXi27E-f_F0",
+      "title": "Handlebars Template Engine for Context File Generation",
+      "description": "AI context file generation uses Handlebars templating with custom helpers for formatting architectural decisions into various AI tool formats (Cursor, Claude, Copilot, etc.).",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.89,
+      "reasoning": "The context-sync package extensively uses Handlebars with custom helpers defined in templates.ts. Multiple generators use the same template system with consistent helper functions. The template approach allows for flexible context file generation across different AI tools.",
+      "evidence": [
+        {
+          "filePath": "packages/context-sync/src/templates.ts",
+          "lineRange": [
+            15,
+            50
+          ],
+          "snippet": "export function registerHelpers(): typeof Handlebars { Handlebars.registerHelper('uppercase', (str: string) => { return str?.toUpperCase() ?? ''; });",
+          "explanation": "Custom Handlebars helpers for template processing"
+        },
+        {
+          "filePath": "packages/context-sync/src/generators/custom.ts",
+          "lineRange": [
+            50,
+            80
+          ],
+          "snippet": "const hbs = registerHelpers(); const template = hbs.compile(options.template); return template(context);",
+          "explanation": "Template compilation and context rendering for custom formats"
+        }
+      ],
+      "constraints": [
+        "All context generators must use the shared Handlebars helpers",
+        "Template context must be consistent across generators",
+        "New AI tool formats must follow the established template pattern",
+        "Helper functions must handle null/undefined values gracefully"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "handlebars",
+        "templating",
+        "context-generation",
+        "ai-tools"
+      ]
+    },
+    {
+      "id": "u--lpmn8kcR7hLJQ2ZyXk",
+      "title": "Webhook-Driven Integration with GitHub and Bitbucket",
+      "description": "The system integrates with Git providers through webhook endpoints that validate signatures and trigger asynchronous job processing for PR reviews and repository analysis.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "The webhooks.ts route handler shows dedicated endpoints for GitHub and Bitbucket with signature verification, payload parsing, and job enqueueing. The integrations package provides API clients for both platforms. This is clearly intentional given the complexity of webhook handling and platform-specific implementations.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/routes/webhooks.ts",
+          "lineRange": [
+            50,
+            80
+          ],
+          "snippet": "const expectedSignature = `sha256=${hash(repo.webhookSecret + rawBody)}`; if (signature !== expectedSignature) { console.warn(`[webhook] Invalid signature for ${repoFullName}`); }",
+          "explanation": "Webhook signature verification for security"
+        },
+        {
+          "filePath": "packages/integrations/src/github/api.ts",
+          "lineRange": [
+            100,
+            150
+          ],
+          "snippet": "export function createGitHubClient(options: GitHubClientOptions): GitHubClient { const octokit = new Octokit({ auth: options.token });",
+          "explanation": "Dedicated GitHub API client for integration"
+        }
+      ],
+      "constraints": [
+        "Webhook endpoints must validate signatures for security",
+        "Webhook processing must be asynchronous to avoid timeouts",
+        "Integration clients must handle API rate limits and errors",
+        "Repository configuration must include webhook secrets"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "webhooks",
+        "github",
+        "bitbucket",
+        "integration",
+        "async-processing"
+      ]
+    },
+    {
+      "id": "cxlbglm0bC_X0gjShw358",
+      "title": "Server-Sent Events for Real-Time Dashboard Updates",
+      "description": "The dashboard receives real-time updates through Server-Sent Events (SSE) with automatic reconnection, event filtering, and authentication token validation.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "The server implements SSE endpoints with client management, and the dashboard has sophisticated SSE hooks with reconnection logic. The implementation includes authentication, event broadcasting, and proper connection lifecycle management, indicating intentional real-time architecture choice.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/routes/sse.ts",
+          "lineRange": [
+            50,
+            80
+          ],
+          "snippet": "export function broadcastEvent(event: SSEEvent, orgId?: string): void { for (const client of clients) { if (!orgId || client.orgId === orgId) { client.controller.enqueue(`data: ${JSON.stringify(event)}\\n\\n`); } }",
+          "explanation": "Server-side event broadcasting with organization filtering"
+        },
+        {
+          "filePath": "packages/dashboard/src/hooks/use-sse.ts",
+          "lineRange": [
+            80,
+            120
+          ],
+          "snippet": "source.onerror = () => { source.close(); updateStatus('error'); if (autoReconnect && retryCountRef.current < maxRetries) { const delay = retryDelay * Math.pow(2, retryCountRef.current);",
+          "explanation": "Client-side SSE with exponential backoff reconnection"
+        }
+      ],
+      "constraints": [
+        "SSE connections must be authenticated with valid tokens",
+        "Events must be filtered by organization membership",
+        "Client reconnection must use exponential backoff",
+        "Connection cleanup must be handled properly"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:46:43.939Z",
+      "tags": [
+        "sse",
+        "real-time",
+        "websockets-alternative",
+        "authentication"
+      ]
+    },
+    {
+      "id": "j6pVMeD0pRegEUmJSpJBC",
+      "title": "Layered Architecture with Dependency Injection (NestJS-style)",
+      "description": "The server package implements a strict layered architecture with Controllers, Services, Repositories, and Entities. Dependencies are injected via decorators like @Controller, @Injectable, and @InjectRepository, following NestJS patterns.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "Multiple files show consistent use of NestJS-style decorators and dependency injection patterns. The core/db/seed.ts file explicitly shows @Injectable decorator usage and constructor injection. The decision-extractor.ts shows recognition of these patterns as architectural decisions. This is clearly intentional design for testability and loose coupling.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/db/seed.ts",
+          "lineRange": [
+            400,
+            421
+          ],
+          "snippet": "@Injectable()\nexport class UserService {\n  constructor(\n    @InjectRepository(User) private userRepository: Repository<User>\n  ) {}",
+          "explanation": "Clear example of dependency injection pattern with decorators"
+        },
+        {
+          "filePath": "packages/analyzer/src/decision-extractor.ts",
+          "lineRange": [
+            600,
+            650
+          ],
+          "snippet": "class UserController {\n  constructor(private userService: UserService) {}\n}\n\nclass UserRepository {\n  constructor(@InjectRepository(User) private repo: Repository<User>) {}\n}",
+          "explanation": "Pattern recognition code identifies this as an architectural pattern"
+        }
+      ],
+      "constraints": [
+        "Controllers must not directly access repositories or entities",
+        "Business logic belongs in services, not controllers",
+        "All dependencies must be injected via constructors",
+        "Services must be marked with @Injectable decorator"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "layered-architecture",
+        "dependency-injection",
+        "nestjs",
+        "ioc"
+      ]
+    },
+    {
+      "id": "WCmQ_6pXxgNgok_lSB6-B",
+      "title": "Hono Framework for HTTP Server Implementation",
+      "description": "The server package uses Hono as the web framework instead of Express or Fastify. All route handlers are implemented as Hono middleware with consistent patterns for authentication, RBAC, and error handling.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.94,
+      "reasoning": "Every route file in packages/server/src/routes/ imports and uses Hono. The main server index.ts shows Hono app creation and middleware setup. The middleware files are all designed for Hono's context system. This is clearly an intentional framework choice, likely for performance and TypeScript support.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/routes/teams.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "import { Hono } from 'hono';\nimport { eq, and } from 'drizzle-orm';\nexport function createTeamsRouter(db: DbClient): Hono {\n  const router = new Hono();",
+          "explanation": "Consistent Hono usage pattern across all route files"
+        },
+        {
+          "filePath": "packages/server/src/middleware/auth.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "import type { Context, Next } from 'hono';\nexport function authMiddleware(db: DbClient) {\n  return async (c: Context, next: Next) => {",
+          "explanation": "Middleware designed specifically for Hono's context system"
+        }
+      ],
+      "constraints": [
+        "All HTTP handlers must use Hono's Context and Next types",
+        "Middleware must follow Hono's async (c, next) => pattern",
+        "Route organization must use Hono's router system"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "hono",
+        "web-framework",
+        "typescript",
+        "middleware"
+      ]
+    },
+    {
+      "id": "4MfEe3sdKgJDt_DQvLAzd",
+      "title": "Drizzle ORM with SQLite for Data Persistence",
+      "description": "The application uses Drizzle ORM with SQLite as the database solution. Schema is defined using Drizzle's schema builder, and all database operations use Drizzle's query builder with type safety.",
+      "category": "data",
+      "status": "detected",
+      "confidence": 0.96,
+      "reasoning": "The core/db/schema.ts file defines all tables using Drizzle's schema syntax. The core/db/index.ts shows SQLite client creation with Drizzle. All route files consistently use Drizzle query patterns (eq, and, desc, etc.). This is clearly intentional for type safety and simplicity.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/db/index.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "import { drizzle } from 'drizzle-orm/better-sqlite3';\nimport Database from 'better-sqlite3';\nexport function createSqliteClient(dbPath?: string): DbClient {\n  const sqlite = new Database(dbPath ?? getDefaultDbPath());",
+          "explanation": "SQLite database client creation with Drizzle ORM"
+        },
+        {
+          "filePath": "packages/server/src/routes/decisions.ts",
+          "lineRange": [
+            50,
+            70
+          ],
+          "snippet": "const allDecisions = await db\n  .select()\n  .from(schema.decisions)\n  .where(eq(schema.decisions.repoId, repoId))\n  .orderBy(desc(schema.decisions.detectedAt));",
+          "explanation": "Consistent use of Drizzle query builder patterns across all routes"
+        }
+      ],
+      "constraints": [
+        "All database schemas must be defined using Drizzle schema builder",
+        "Database queries must use Drizzle's type-safe query builder",
+        "No raw SQL queries should be used except for complex operations",
+        "Database migrations must be handled through Drizzle"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "drizzle-orm",
+        "sqlite",
+        "type-safety",
+        "database"
+      ]
+    },
+    {
+      "id": "zX6orbbUOB5GPhORdbAPp",
+      "title": "Role-Based Access Control (RBAC) with Permission System",
+      "description": "The server implements a comprehensive RBAC system with roles (owner, admin, member, viewer), permissions, and middleware for authorization. Each endpoint is protected with specific permission requirements.",
+      "category": "security",
+      "status": "detected",
+      "confidence": 0.93,
+      "reasoning": "The auth/rbac.ts and auth/roles.ts files define a complete permission system. Every route uses requirePermission middleware. The system has hierarchical roles with specific permissions mapped to each role. This is clearly intentional security architecture.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/auth/roles.ts",
+          "lineRange": [
+            1,
+            55
+          ],
+          "snippet": "export const PERMISSIONS = {\n  'decisions:read': 'View architectural decisions',\n  'decisions:write': 'Create and edit decisions',\n  'analysis:trigger': 'Trigger code analysis',\n  'team:invite': 'Invite team members'\n} as const;",
+          "explanation": "Comprehensive permission system with granular access controls"
+        },
+        {
+          "filePath": "packages/server/src/routes/teams.ts",
+          "lineRange": [
+            25,
+            35
+          ],
+          "snippet": "router.get('/', requirePermission('team:read'), async (c) => {\n  const orgId = c.get('orgId') as string;",
+          "explanation": "Consistent permission-based authorization on all endpoints"
+        }
+      ],
+      "constraints": [
+        "All protected endpoints must use requirePermission middleware",
+        "New permissions must be added to PERMISSIONS constant and role mappings",
+        "Role hierarchy must be respected in permission checks",
+        "User context must be attached to requests via auth middleware"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "rbac",
+        "authorization",
+        "permissions",
+        "security"
+      ]
+    },
+    {
+      "id": "6huwyDpROkCGpsaY9IiPY",
+      "title": "Anthropic Claude for LLM-Powered Analysis",
+      "description": "The system uses Anthropic's Claude API for AI-powered code analysis, decision extraction, and architectural guidance. The LLM integration includes cost tracking, rate limiting, and structured output validation.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The core/llm.ts file shows extensive Anthropic SDK integration with cost tracking and error handling. The analyzer/decision-extractor.ts uses Claude for extracting architectural decisions from code. Multiple files reference @anthropic-ai/sdk. This is clearly intentional for AI-powered analysis capabilities.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/llm.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import Anthropic from '@anthropic-ai/sdk';\nexport function createLlmClient(): Anthropic {\n  const apiKey = requireApiKey();\n  return new Anthropic({ apiKey });",
+          "explanation": "Direct integration with Anthropic's Claude API"
+        },
+        {
+          "filePath": "packages/analyzer/src/decision-extractor.ts",
+          "lineRange": [
+            400,
+            450
+          ],
+          "snippet": "const response = await analyzeWithLlmValidated(\n  buildAnalysisPromptFromScored(scoredFiles, dependencyContext),\n  extractionSchema,\n  { operation: 'decision-extraction' }\n);",
+          "explanation": "LLM used for extracting architectural decisions from code"
+        }
+      ],
+      "constraints": [
+        "All LLM calls must go through the centralized llm.ts module",
+        "Cost tracking must be implemented for all LLM operations",
+        "LLM responses must be validated against Zod schemas",
+        "API key must be properly configured and secured"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "anthropic",
+        "claude",
+        "llm",
+        "ai-analysis"
+      ]
+    },
+    {
+      "id": "jrtF6LsyeWvOpDccMyHJB",
+      "title": "Next.js with App Router for Dashboard Frontend",
+      "description": "The dashboard is built using Next.js 13+ with the App Router architecture. It uses TypeScript, Tailwind CSS, and follows React Server Components patterns with client-side interactivity where needed.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.95,
+      "reasoning": "The dashboard package structure shows clear App Router patterns with (app) and (auth) route groups. The layout.tsx files show the nested layout pattern. The use of 'use client' directives and Next.js imports throughout confirms this is intentional modern Next.js architecture.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/src/app/(app)/layout.tsx",
+          "lineRange": [
+            1,
+            17
+          ],
+          "snippet": "import { Sidebar } from '@/components/layout/sidebar';\nimport { Header } from '@/components/layout/header';\nexport default function AppLayout({ children }: { children: React.ReactNode }) {",
+          "explanation": "App Router layout pattern with nested layouts"
+        },
+        {
+          "filePath": "packages/dashboard/src/app/(auth)/login/page.tsx",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "'use client';\nimport Link from 'next/link';\nimport { useRouter } from 'next/navigation';",
+          "explanation": "Client component pattern with Next.js navigation hooks"
+        }
+      ],
+      "constraints": [
+        "All interactive components must use 'use client' directive",
+        "Routing must follow App Router file-based conventions",
+        "Layouts must be properly nested for route groups",
+        "Server and client components must be clearly separated"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "nextjs",
+        "app-router",
+        "react",
+        "typescript"
+      ]
+    },
+    {
+      "id": "M6zQLIUFr70DKKORzPKvh",
+      "title": "Multi-Format Context File Generation",
+      "description": "The context-sync package generates context files in multiple formats (Cursor Rules, Claude.md, GitHub Copilot, Windsurf, etc.) from architectural decisions. Each format has a dedicated generator with templates.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.89,
+      "reasoning": "The context-sync/generators/ directory has dedicated files for each format. The sync-engine.ts orchestrates multiple generators. The templates.ts provides shared templating utilities. This is clearly intentional to support different AI coding assistants with their preferred context formats.",
+      "evidence": [
+        {
+          "filePath": "packages/context-sync/src/sync-engine.ts",
+          "lineRange": [
+            100,
+            150
+          ],
+          "snippet": "const generators = {\n  cursorrules: generateCursorRules,\n  claude: generateClaudeMd,\n  copilot: generateCopilotInstructions,\n  windsurf: generateWindsurfRules,\n  kiro: generateKiroSteering\n};",
+          "explanation": "Multiple format generators orchestrated by sync engine"
+        },
+        {
+          "filePath": "packages/context-sync/src/generators/cursorrules.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export function generateCursorRules(\n  decisions: ArchDecision[],\n  options: { preserveUserSections?: boolean } = {}\n): string {",
+          "explanation": "Dedicated generator for Cursor Rules format"
+        }
+      ],
+      "constraints": [
+        "Each AI tool format must have its own dedicated generator",
+        "Generators must preserve user-added sections when updating",
+        "Template system must be used for consistent formatting",
+        "New formats require both generator and template implementation"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "context-generation",
+        "ai-tools",
+        "templates",
+        "multi-format"
+      ]
+    },
+    {
+      "id": "2ni1GkEOT3cvT7dhfeOtA",
+      "title": "BullMQ Job Queue with Redis for Background Processing",
+      "description": "The server uses BullMQ with Redis for background job processing including analysis, reviews, velocity calculations, and summaries. Jobs are processed by dedicated workers with proper error handling and retry logic.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "The jobs/queue.ts file shows BullMQ integration with Redis. Multiple job types are defined with dedicated workers. The server can run with or without workers (for local development). This is intentional architecture for scalable background processing.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/jobs/queue.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import { Queue, Worker } from 'bullmq';\nimport Redis from 'ioredis';\nexport const QUEUE_NAMES = {\n  ANALYSIS: 'analysis',\n  REVIEW: 'review',\n  VELOCITY: 'velocity'\n} as const;",
+          "explanation": "BullMQ queue system with multiple job types"
+        },
+        {
+          "filePath": "packages/server/src/jobs/analyze.job.ts",
+          "lineRange": [
+            150,
+            192
+          ],
+          "snippet": "export function registerAnalysisWorker(db: DbClient): Worker {\n  return registerWorker(QUEUE_NAMES.ANALYSIS, processAnalysis);",
+          "explanation": "Dedicated worker for analysis jobs with proper registration"
+        }
+      ],
+      "constraints": [
+        "All background processing must go through the job queue system",
+        "Redis must be available for production deployments with workers",
+        "Job data must be serializable and include proper error handling",
+        "Workers must be registered during server startup"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "bullmq",
+        "redis",
+        "job-queue",
+        "background-processing"
+      ]
+    },
+    {
+      "id": "jEu72JJkHp1OMt-UdsUwY",
+      "title": "Server-Sent Events (SSE) for Real-Time Updates",
+      "description": "The server implements SSE for real-time communication with the dashboard. Events are broadcasted to connected clients with organization-based filtering and proper connection management.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.87,
+      "reasoning": "The routes/sse.ts file implements a complete SSE system with client management and broadcasting. The dashboard has SSE hooks for consuming events. This is intentional for real-time updates without WebSocket complexity.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/routes/sse.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "export function broadcastEvent(event: SSEEvent, orgId?: string): void {\n  const message = `data: ${JSON.stringify(event)}\\n\\n`;\n  for (const client of clients) {\n    if (!orgId || client.orgId === orgId) {\n      client.controller.enqueue(message);\n    }\n  }",
+          "explanation": "SSE broadcasting system with organization-based filtering"
+        },
+        {
+          "filePath": "packages/dashboard/src/hooks/use-sse.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "export function useSSE(options: SSEOptions): {\n  status: SSEStatus;\n  lastMessage: SSEMessage | null;\n  error: string | null;\n} {",
+          "explanation": "React hook for consuming SSE events in the dashboard"
+        }
+      ],
+      "constraints": [
+        "SSE connections must be properly managed and cleaned up",
+        "Events must be filtered by organization membership",
+        "Client reconnection logic must handle network failures",
+        "Event payloads must be JSON serializable"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "sse",
+        "real-time",
+        "broadcasting",
+        "websockets-alternative"
+      ]
+    },
+    {
+      "id": "tnh6zSDHXgXTxCOl7vE4a",
+      "title": "Git Integration with Simple-Git Library",
+      "description": "The system uses the simple-git library for all Git operations including diff analysis, commit history, blame information, and repository statistics. Git operations are centralized in the core package.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "The core/git.ts file provides a comprehensive Git client wrapper using simple-git. Multiple packages import and use these Git utilities. The velocity package extensively uses Git stats for developer metrics. This is clearly intentional for consistent Git operations.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/git.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import simpleGit, { SimpleGit } from 'simple-git';\nexport function createGitClient(repoPath: string): SimpleGit {\n  return simpleGit(repoPath);",
+          "explanation": "Centralized Git client creation using simple-git"
+        },
+        {
+          "filePath": "packages/velocity/src/collectors/git-stats.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "import type { SimpleGit } from 'simple-git';\nimport { getDevStats, getLog } from '@archguard/core';\nexport async function collectGitStats(\n  git: SimpleGit,",
+          "explanation": "Velocity calculations using Git statistics through core utilities"
+        }
+      ],
+      "constraints": [
+        "All Git operations must go through the core/git.ts utilities",
+        "Git clients must be properly initialized with repository paths",
+        "Error handling must account for Git operation failures",
+        "Git operations should be async and handle large repositories"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "git",
+        "simple-git",
+        "version-control",
+        "repository-analysis"
+      ]
+    },
+    {
+      "id": "X1s11QANSuF2BuhePi2rB",
+      "title": "Model Context Protocol (MCP) Server Implementation",
+      "description": "The mcp-server package implements the Model Context Protocol for AI assistants to access architectural decisions and patterns. It provides tools and resources for querying decisions, checking patterns, and getting dependencies.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.85,
+      "reasoning": "The mcp-server package has dedicated tools and resources for MCP. The index.ts shows MCP server setup with multiple transport options. This is intentional for AI assistant integration following the MCP standard.",
+      "evidence": [
+        {
+          "filePath": "packages/mcp-server/src/index.ts",
+          "lineRange": [
+            400,
+            450
+          ],
+          "snippet": "import { Server } from '@modelcontextprotocol/sdk/server/mcp.js';\nconst server = new Server(\n  { name: 'archguard', version: '1.0.0' },\n  { capabilities: { tools: {}, resources: {} } }\n);",
+          "explanation": "MCP server implementation with tools and resources"
+        },
+        {
+          "filePath": "packages/mcp-server/src/tools/get-decisions.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export async function executeGetDecisions(\n  args: GetDecisionsInput\n): Promise<any> {\n  const db = initializeDatabase();",
+          "explanation": "MCP tool for querying architectural decisions"
+        }
+      ],
+      "constraints": [
+        "MCP tools must follow the protocol specification",
+        "All tools must have proper input validation with Zod schemas",
+        "Resources must be properly registered and accessible",
+        "Transport mechanisms must support stdio, SSE, and HTTP"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "mcp",
+        "ai-assistant",
+        "protocol",
+        "tools"
+      ]
+    },
+    {
+      "id": "fcywdQ2osHCzYoCVnNxg_",
+      "title": "Zod Schema Validation Throughout",
+      "description": "The codebase extensively uses Zod for runtime type validation, especially for LLM responses, API inputs, configuration files, and data transformation. Schemas are defined close to their usage points.",
+      "category": "data",
+      "status": "detected",
+      "confidence": 0.9,
+      "reasoning": "Multiple files show Zod schema definitions and validation. The LLM module uses Zod for validating AI responses. Configuration loading uses Zod schemas. MCP tools use Zod for input validation. This is clearly intentional for runtime type safety.",
+      "evidence": [
+        {
+          "filePath": "packages/analyzer/src/decision-extractor.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "const extractionSchema = z.object({\n  decisions: z.array(z.object({\n    title: z.string(),\n    category: z.enum(['structural', 'behavioral', 'api'])\n  }))\n});",
+          "explanation": "Zod schema for validating LLM-extracted architectural decisions"
+        },
+        {
+          "filePath": "packages/core/src/config.ts",
+          "lineRange": [
+            100,
+            150
+          ],
+          "snippet": "const configSchema = z.object({\n  include: z.array(z.string()).default(['**/*.ts', '**/*.js']),\n  exclude: z.array(z.string()).default(['node_modules/**'])\n});",
+          "explanation": "Configuration validation using Zod schemas"
+        }
+      ],
+      "constraints": [
+        "All external inputs must be validated with Zod schemas",
+        "LLM responses must be validated before processing",
+        "Configuration files must have corresponding Zod schemas",
+        "API endpoints should validate request bodies with Zod"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "zod",
+        "validation",
+        "type-safety",
+        "runtime-validation"
+      ]
+    },
+    {
+      "id": "zB1Q3pBqC3VJcd8n7LIn3",
+      "title": "Comprehensive Integration Support (GitHub, Bitbucket, Slack)",
+      "description": "The integrations package provides first-class support for GitHub, Bitbucket, and Slack with dedicated APIs, webhook handlers, PR bots, and notification systems. Each integration has its own sub-package with complete functionality.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.93,
+      "reasoning": "The integrations package has dedicated subdirectories for each platform with comprehensive APIs. GitHub and Bitbucket have PR bot implementations, webhook handlers, and API clients. Slack has command handlers and notification builders. This is clearly intentional for broad platform support.",
+      "evidence": [
+        {
+          "filePath": "packages/integrations/src/github/pr-bot.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "export async function handlePREvent(\n  context: PREventContext,\n  options: PRBotOptions = {}\n): Promise<PRBotResult> {",
+          "explanation": "Comprehensive GitHub PR bot implementation"
+        },
+        {
+          "filePath": "packages/integrations/src/slack/notifications.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "export async function sendViolationAlert(\n  client: SlackClient,\n  channel: string,\n  reviewResult: ReviewResult\n): Promise<NotificationResult> {",
+          "explanation": "Rich Slack notification system with multiple alert types"
+        }
+      ],
+      "constraints": [
+        "Each integration must provide complete API coverage for its use cases",
+        "Webhook handlers must include proper signature verification",
+        "PR bots must handle both inline comments and check runs",
+        "Notification systems must support rich formatting"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "integrations",
+        "github",
+        "bitbucket",
+        "slack",
+        "webhooks"
+      ]
+    },
+    {
+      "id": "Z6QJOf2hgTqew4MsBqQN6",
+      "title": "Architectural Drift Detection with Historical Comparison",
+      "description": "The analyzer implements drift detection by comparing current architectural snapshots with historical ones. It tracks decision changes, coupling trends, circular dependencies, and layer violations over time with severity scoring.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.86,
+      "reasoning": "The drift-detector.ts file implements comprehensive drift analysis comparing snapshots. It tracks multiple drift indicators with severity levels. The system stores snapshots for historical comparison. This is clearly intentional for architectural governance.",
+      "evidence": [
+        {
+          "filePath": "packages/analyzer/src/drift-detector.ts",
+          "lineRange": [
+            100,
+            150
+          ],
+          "snippet": "export function detectDrift(\n  repoId: string,\n  commitSha: string,\n  currentDecisions: ArchDecision[],\n  currentGraph: DependencyGraph,\n  previousSnapshot?: ArchSnapshot\n): DriftResult {",
+          "explanation": "Comprehensive drift detection comparing current state with historical snapshots"
+        }
+      ],
+      "constraints": [
+        "Drift detection must compare multiple architectural dimensions",
+        "Snapshots must be stored for historical comparison",
+        "Drift events must be categorized by severity",
+        "Drift scores must be calculated consistently"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "drift-detection",
+        "architectural-governance",
+        "historical-analysis"
+      ]
+    },
+    {
+      "id": "ghYBqAZvr4JRzPKUr80fr",
+      "title": "Custom Hook Pattern for Data Fetching in Dashboard",
+      "description": "The dashboard uses custom React hooks (use-decisions, use-reviews, use-velocity, use-sse) for data fetching and state management. Each hook encapsulates API calls, loading states, and error handling for specific domain areas.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The hooks directory contains dedicated hooks for each major data domain. Each hook follows consistent patterns for loading, error handling, and data transformation. Components consistently use these hooks rather than direct API calls. This is clearly intentional for reusable data access patterns.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/src/hooks/use-decisions.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "export function useDecisions(filters?: DecisionFilters) {\n  const [decisions, setDecisions] = useState<Decision[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);",
+          "explanation": "Consistent pattern for data fetching hooks with loading and error states"
+        },
+        {
+          "filePath": "packages/dashboard/src/hooks/use-velocity.ts",
+          "lineRange": [
+            50,
+            100
+          ],
+          "snippet": "export function useTeamVelocity(): {\n  data: TeamVelocityData | null;\n  loading: boolean;\n  error: string | null;\n} {",
+          "explanation": "Domain-specific hook for velocity data with consistent interface"
+        }
+      ],
+      "constraints": [
+        "Data fetching must go through custom hooks, not direct API calls",
+        "Hooks must provide consistent loading and error state interfaces",
+        "Each domain area should have its own dedicated hook",
+        "Hooks must handle data transformation and caching appropriately"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "react-hooks",
+        "data-fetching",
+        "state-management",
+        "reusability"
+      ]
+    },
+    {
+      "id": "YjichFAIW9Kqy1t0NKzEt",
+      "title": "Tailwind CSS with Custom Design System",
+      "description": "The dashboard uses Tailwind CSS with a custom design system including brand colors, custom animations, and consistent component styling. The design system is configured in tailwind.config.ts with custom utilities.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.89,
+      "reasoning": "The tailwind.config.ts shows extensive customization with brand colors, custom animations, and extended theme. Components consistently use Tailwind classes with custom design tokens. The lib/utils.ts provides a cn() utility for conditional classes. This is intentional design system architecture.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/tailwind.config.ts",
+          "lineRange": [
+            10,
+            40
+          ],
+          "snippet": "colors: {\n  brand: {\n    50: '#eef2ff',\n    100: '#e0e7ff',\n    500: '#6366f1',\n    600: '#4f46e5'\n  }\n},\nanimation: {\n  'fade-in': 'fadeIn 0.3s ease-in-out',\n  'slide-up': 'slideUp 0.2s ease-out'\n}",
+          "explanation": "Custom design system with brand colors and animations"
+        },
+        {
+          "filePath": "packages/dashboard/src/lib/utils.ts",
+          "lineRange": [
+            1,
+            20
+          ],
+          "snippet": "import { clsx } from 'clsx';\nimport { twMerge } from 'tailwind-merge';\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs));\n}",
+          "explanation": "Utility for conditional Tailwind classes with proper merging"
+        }
+      ],
+      "constraints": [
+        "All styling must use Tailwind classes, no custom CSS",
+        "Brand colors must be used consistently across components",
+        "Component styling must use the cn() utility for conditional classes",
+        "Custom animations must be defined in the Tailwind config"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "tailwind",
+        "design-system",
+        "styling",
+        "consistency"
+      ]
+    },
+    {
+      "id": "gYi-6tLqDMxNELnZevzcq",
+      "title": "Multi-Transport MCP Server with Protocol Flexibility",
+      "description": "The MCP server supports multiple transport mechanisms (stdio, SSE, streamable HTTP, Express) allowing different AI assistants to connect using their preferred protocol. Transport selection is configurable at startup.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.83,
+      "reasoning": "The mcp-server/index.ts shows support for multiple transport types with dedicated startup functions for each. This flexibility is clearly intentional to support different AI assistant connection preferences and deployment scenarios.",
+      "evidence": [
+        {
+          "filePath": "packages/mcp-server/src/index.ts",
+          "lineRange": [
+            400,
+            450
+          ],
+          "snippet": "async function startStdioServer() {\n  const transport = new StdioServerTransport();\n  await server.connect(transport);\n}\n\nasync function startSseServer(port: number) {\n  const transport = new SSEServerTransport('/message', server);",
+          "explanation": "Multiple transport implementations for different connection types"
+        }
+      ],
+      "constraints": [
+        "All transports must implement the same MCP protocol interface",
+        "Transport selection must be configurable via environment variables",
+        "Each transport must handle connection lifecycle properly",
+        "Protocol messages must be consistent across all transports"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "mcp",
+        "transport",
+        "protocol",
+        "flexibility"
+      ]
+    },
+    {
+      "id": "ICAQnluBfcZnidkeH5haQ",
+      "title": "Complexity Analysis with Cyclomatic and Cognitive Metrics",
+      "description": "The velocity package implements sophisticated code complexity analysis calculating both cyclomatic and cognitive complexity metrics. It analyzes function-level complexity and tracks complexity changes over time for refactoring detection.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.87,
+      "reasoning": "The velocity/collectors/complexity.ts file implements detailed complexity calculations with both cyclomatic and cognitive complexity algorithms. It includes pattern matching for decision points and nesting analysis. This is clearly intentional for comprehensive code quality measurement.",
+      "evidence": [
+        {
+          "filePath": "packages/velocity/src/collectors/complexity.ts",
+          "lineRange": [
+            200,
+            250
+          ],
+          "snippet": "function computeCyclomaticComplexity(source: string): number {\n  const cleaned = stripCommentsAndStrings(source);\n  let complexity = 1; // Base complexity\n  complexity += countDecisionPoints(cleaned);\n  return complexity;\n}",
+          "explanation": "Sophisticated complexity calculation with decision point analysis"
+        },
+        {
+          "filePath": "packages/velocity/src/collectors/complexity.ts",
+          "lineRange": [
+            300,
+            350
+          ],
+          "snippet": "export function calculateComplexityDeltas(\n  diffs: FileDiff[],\n  originalSources: Map<string, string>,\n  modifiedSources: Map<string, string>\n): ComplexityDelta[] {",
+          "explanation": "Complexity change tracking for refactoring detection"
+        }
+      ],
+      "constraints": [
+        "Complexity calculations must be consistent and reproducible",
+        "Both cyclomatic and cognitive complexity must be calculated",
+        "Complexity changes must be tracked for refactoring analysis",
+        "Pattern matching must handle multiple programming languages"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:49:44.447Z",
+      "tags": [
+        "complexity-analysis",
+        "code-quality",
+        "metrics",
+        "refactoring"
+      ]
+    },
+    {
+      "id": "ixVuoVQZwe94i_m9sxyJC",
+      "title": "Job Queue Architecture with BullMQ and Redis",
+      "description": "Asynchronous processing is handled through a job queue system using BullMQ and Redis. Different job types (analysis, review, velocity, summary, sync) are processed by dedicated workers with progress tracking and error handling.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "The server/jobs/ directory contains multiple job files with consistent patterns. The queue.ts file shows deliberate job queue setup with BullMQ, Redis connection management, and typed job data interfaces. Each job type has its own worker registration and processing logic.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/jobs/queue.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import { Queue, Worker } from 'bullmq';\nimport Redis from 'ioredis';\nexport const QUEUE_NAMES = {\n  ANALYSIS: 'analysis',\n  REVIEW: 'review',\n  VELOCITY: 'velocity',\n  SUMMARY: 'summary',\n  SYNC: 'sync',\n} as const;",
+          "explanation": "Centralized queue management with typed queue names and Redis integration"
+        },
+        {
+          "filePath": "packages/server/src/jobs/analyze.job.ts",
+          "lineRange": [
+            20,
+            40
+          ],
+          "snippet": "async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId: string; decisionsCount: number }> {\n  const { repoId, orgId } = job.data;\n  await job.updateProgress(5);",
+          "explanation": "Structured job processing with progress tracking and typed job data"
+        }
+      ],
+      "constraints": [
+        "All long-running operations must be processed through the job queue",
+        "Job workers must implement progress tracking and error handling",
+        "Redis must be available for job queue functionality",
+        "Job data must be serializable and follow defined interfaces"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "job-queue",
+        "bullmq",
+        "redis",
+        "async-processing"
+      ]
+    },
+    {
+      "id": "GhzhfLDfPZ2qW8Y_dUKbW",
+      "title": "Multi-Format Context File Generation System",
+      "description": "The system generates AI context files in multiple formats (.cursorrules, CLAUDE.md, .github/copilot-instructions.md, etc.) from architectural decisions. Each format has specialized generators optimized for different AI coding assistants.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.94,
+      "reasoning": "The context-sync package has dedicated generators for each format with format-specific optimizations. The generators show deep understanding of each AI assistant's context requirements. The sync engine orchestrates multiple format generation with LLM-powered compression.",
+      "evidence": [
+        {
+          "filePath": "packages/context-sync/src/generators/cursorrules.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "/**\n * Generator for .cursorrules files.\n * Produces structured text optimized for Cursor AI's context understanding.\n * The .cursorrules format uses plain text with clear section headers.\n */",
+          "explanation": "Dedicated generator for Cursor AI with format-specific documentation"
+        },
+        {
+          "filePath": "packages/context-sync/src/generators/claude-md.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "/**\n * Generator for CLAUDE.md files.\n * Produces markdown optimized for Claude Code's project context understanding.\n * CLAUDE.md is read automatically by Claude Code when working in a repository.\n */",
+          "explanation": "Specialized generator for Claude Code with automatic file detection"
+        }
+      ],
+      "constraints": [
+        "Each AI assistant format must have a dedicated generator",
+        "Generated files must follow the specific conventions of each AI assistant",
+        "Context files must be regenerated when architectural decisions change",
+        "Token limits must be respected for each AI assistant's context window"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "context-generation",
+        "ai-assistants",
+        "multi-format",
+        "code-generation"
+      ]
+    },
+    {
+      "id": "1bde3C0kFqULdLECJgiWf",
+      "title": "Database-First Architecture with Drizzle ORM and SQLite",
+      "description": "Data persistence uses Drizzle ORM with SQLite as the primary database. The schema is centrally defined with typed queries and migrations. Local development uses file-based SQLite while production can use other SQL databases.",
+      "category": "data",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The core/db/ directory shows deliberate database architecture with Drizzle ORM setup, centralized schema definitions, and seed data. The schema.ts file defines comprehensive database structure. Multiple files import and use the database client consistently.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/db/index.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "import { drizzle } from 'drizzle-orm/better-sqlite3';\nimport Database from 'better-sqlite3';\nexport type DbClient = ReturnType<typeof drizzle>;\nexport function createSqliteClient(dbPath?: string): DbClient {",
+          "explanation": "Centralized database client creation with Drizzle ORM and SQLite"
+        },
+        {
+          "filePath": "packages/core/src/db/schema.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';\nexport const organizations = sqliteTable('organizations', {\n  id: text('id').primaryKey(),\n  name: text('name').notNull(),",
+          "explanation": "Comprehensive schema definition with typed tables and relationships"
+        }
+      ],
+      "constraints": [
+        "All database access must go through the Drizzle ORM client",
+        "Schema changes must be made through the centralized schema definition",
+        "Database queries must use the typed query builder",
+        "Local development must work with SQLite file databases"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "drizzle-orm",
+        "sqlite",
+        "database-first",
+        "typed-queries"
+      ]
+    },
+    {
+      "id": "_NqnKN9Y9i9cw1LHFraQF",
+      "title": "Hono-Based HTTP Server with Typed Middleware Chain",
+      "description": "The server uses Hono framework for HTTP handling with a typed middleware chain including authentication, organization context, rate limiting, and RBAC. Routes are modularly organized with consistent patterns.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.87,
+      "reasoning": "The server/src/index.ts shows deliberate Hono setup with middleware chain. Multiple route files follow consistent patterns. The hono-env.d.ts file provides TypeScript context variables. Middleware files show sophisticated request processing pipeline.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/index.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "import { Hono } from 'hono';\nimport { cors } from 'hono/cors';\nimport { logger } from 'hono/logger';\nconst app = new Hono();\napp.use('*', cors());\napp.use('*', logger());",
+          "explanation": "Hono framework setup with global middleware configuration"
+        },
+        {
+          "filePath": "packages/server/src/hono-env.d.ts",
+          "lineRange": [
+            1,
+            17
+          ],
+          "snippet": "declare module 'hono' {\n  interface ContextVariableMap {\n    user?: AuthUser;\n    org?: OrgContext;\n  }\n}",
+          "explanation": "TypeScript context variable definitions for middleware data"
+        }
+      ],
+      "constraints": [
+        "All HTTP routes must be defined through Hono router",
+        "Middleware must set typed context variables",
+        "Route handlers must use consistent error response patterns",
+        "CORS and logging middleware must be applied globally"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "hono",
+        "http-server",
+        "middleware-chain",
+        "typed-context"
+      ]
+    },
+    {
+      "id": "sqZdH-uG9t-EcYT7_1B_e",
+      "title": "Next.js App Router with Server-Side Rendering",
+      "description": "The dashboard uses Next.js 13+ App Router architecture with file-based routing, server components, and client components. Layout components provide consistent structure across routes.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.93,
+      "reasoning": "The dashboard/src/app/ directory structure follows Next.js App Router conventions exactly. Route groups like (app) and (auth) show intentional organization. Layout files provide nested layouts. The use of 'use client' directives shows deliberate client/server component separation.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/src/app/layout.tsx",
+          "lineRange": [
+            1,
+            47
+          ],
+          "snippet": "import type { Metadata } from 'next';\nexport const metadata: Metadata = {\n  title: {\n    default: 'ArchGuard - Architectural Governance Platform',\n    template: '%s | ArchGuard',\n  },",
+          "explanation": "Root layout with metadata configuration following Next.js patterns"
+        },
+        {
+          "filePath": "packages/dashboard/src/app/(app)/layout.tsx",
+          "lineRange": [
+            1,
+            17
+          ],
+          "snippet": "'use client';\nimport { Sidebar } from '@/components/layout/sidebar';\nimport { Header } from '@/components/layout/header';",
+          "explanation": "Nested layout for authenticated app routes with client-side components"
+        }
+      ],
+      "constraints": [
+        "Routes must follow Next.js App Router file conventions",
+        "Client components must be explicitly marked with 'use client'",
+        "Layouts must be used for consistent UI structure",
+        "Route groups must be used to organize related routes"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "nextjs",
+        "app-router",
+        "ssr",
+        "file-based-routing"
+      ]
+    },
+    {
+      "id": "tSeDPv-NQZvY715-nt2cN",
+      "title": "Comprehensive Integration Layer for External Services",
+      "description": "The integrations package provides unified interfaces for GitHub, Bitbucket, and Slack with webhook handling, PR bots, and notification systems. Each service has dedicated API clients and event handlers.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "The integrations package has well-structured subdirectories for each service with consistent patterns. Each service has API clients, webhook handlers, and specialized functionality. The index.ts exports show comprehensive integration capabilities.",
+      "evidence": [
+        {
+          "filePath": "packages/integrations/src/index.ts",
+          "lineRange": [
+            1,
+            50
+          ],
+          "snippet": "export {\n  createGitHubApp,\n  type GitHubAppConfig,\n  type GitHubAppHandlers,\n} from './github/app.js';\nexport {\n  createBitbucketWebhookHandler,\n  verifyWebhookSignature,\n} from './bitbucket/webhook.js';",
+          "explanation": "Comprehensive exports for GitHub, Bitbucket, and Slack integrations"
+        },
+        {
+          "filePath": "packages/integrations/src/github/pr-bot.ts",
+          "lineRange": [
+            1,
+            30
+          ],
+          "snippet": "export async function handlePREvent(\n  context: PREventContext,\n  options: PRBotOptions\n): Promise<PRBotResult> {\n  const { octokit, repo, pullRequest, config } = context;",
+          "explanation": "Structured PR bot implementation with typed context and options"
+        }
+      ],
+      "constraints": [
+        "Each external service must have a dedicated API client",
+        "Webhook signatures must be verified for security",
+        "Integration responses must follow service-specific formats",
+        "Error handling must be consistent across all integrations"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:39.402Z",
+      "tags": [
+        "integrations",
+        "github",
+        "bitbucket",
+        "slack",
+        "webhooks"
+      ]
+    },
+    {
+      "id": "4JYPoty-Y2jNNNyKXc5AT",
+      "title": "Monorepo Architecture with Package-Based Modularity",
+      "description": "The codebase is organized as a monorepo with 10 distinct packages (analyzer, cli, context-sync, core, dashboard, integrations, mcp-server, reviewer, server, velocity, work-summary), each with clear responsibilities and boundaries.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.95,
+      "reasoning": "The directory structure shows a clear packages/ folder with 10 distinct packages. Each package has its own src/ directory and package.json (implied). The dependency analysis shows module-level flows between packages. This is a deliberate architectural choice for code organization and reusability.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/index.ts",
+          "lineRange": [
+            1,
+            106
+          ],
+          "snippet": "exports loadConfig, createSqliteClient, createLlmClient, createGitClient, etc.",
+          "explanation": "Core package exports foundational utilities used across other packages"
+        },
+        {
+          "filePath": "packages/cli/src/index.ts",
+          "lineRange": [
+            1,
+            98
+          ],
+          "snippet": "import { registerInitCommand } from './commands/init.js'; import { registerAnalyzeCommand } from './commands/analyze.js';",
+          "explanation": "CLI package imports from other packages showing inter-package dependencies"
+        }
+      ],
+      "constraints": [
+        "Each package must maintain clear boundaries and responsibilities",
+        "Cross-package dependencies should flow in one direction (no circular dependencies)",
+        "Shared functionality must be placed in the core package",
+        "Each package should be independently testable and deployable"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "monorepo",
+        "modular-architecture",
+        "package-organization"
+      ]
+    },
+    {
+      "id": "56qpQsDyAshbTRQgel8eG",
+      "title": "Next.js App Router with File-Based Routing",
+      "description": "The dashboard uses Next.js 13+ App Router with file-based routing, organizing pages in (app) and (auth) route groups with nested layouts.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.92,
+      "reasoning": "The directory structure shows app/(app)/ and app/(auth)/ folders with page.tsx files, which is the Next.js App Router convention. The presence of layout.tsx files in both groups confirms this pattern. This is an intentional choice to leverage Next.js routing capabilities.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/src/app/(app)/decisions/page.tsx",
+          "lineRange": [
+            1,
+            160
+          ],
+          "snippet": "'use client'; export default function DecisionsPage()",
+          "explanation": "Client component following App Router conventions"
+        },
+        {
+          "filePath": "packages/dashboard/src/app/(app)/layout.tsx",
+          "lineRange": [
+            1,
+            17
+          ],
+          "snippet": "import @/components/layout/sidebar, @/components/layout/header",
+          "explanation": "Layout component for the authenticated app section"
+        }
+      ],
+      "constraints": [
+        "All pages must follow Next.js App Router file naming conventions",
+        "Route groups must be used to separate authenticated and unauthenticated areas",
+        "Client components must be explicitly marked with 'use client'",
+        "Layouts must be used for shared UI across route groups"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "nextjs",
+        "app-router",
+        "file-based-routing",
+        "react"
+      ]
+    },
+    {
+      "id": "yjYTm9WSvsQAx9Fsu5QdZ",
+      "title": "Layered Architecture with Dependency Injection (Hono + Drizzle)",
+      "description": "The server package implements a layered architecture with routes, middleware, jobs, and auth layers. Uses Hono framework with Drizzle ORM and dependency injection patterns.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "The server package structure shows clear separation: routes/, middleware/, jobs/, auth/ folders. The hono-env.d.ts file defines context variables for DI. Multiple route files import middleware and auth modules, showing layered dependencies.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/hono-env.d.ts",
+          "lineRange": [
+            1,
+            17
+          ],
+          "snippet": "interface ContextVariableMap { user?: AuthUser; orgContext?: OrgContext; }",
+          "explanation": "Hono context variables for dependency injection"
+        },
+        {
+          "filePath": "packages/server/src/index.ts",
+          "lineRange": [
+            1,
+            230
+          ],
+          "snippet": "import middleware/auth.js, middleware/org-context.js, routes/decisions.js",
+          "explanation": "Main server file showing layered imports and middleware composition"
+        }
+      ],
+      "constraints": [
+        "Routes must not directly access database - must go through appropriate services",
+        "All routes must use authentication middleware for protected endpoints",
+        "Middleware must be composable and order-dependent",
+        "Context variables must be properly typed in hono-env.d.ts"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "layered-architecture",
+        "hono",
+        "drizzle-orm",
+        "dependency-injection"
+      ]
+    },
+    {
+      "id": "vvzMrFZKjImwsbNS63Kix",
+      "title": "Command Pattern for CLI Operations",
+      "description": "The CLI package implements the Command pattern with separate command modules (analyze, decisions, sync, etc.) registered with a main commander program.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.9,
+      "reasoning": "The CLI index.ts shows explicit registration of command modules using commander.js. Each command is in its own file with a register function. This is a deliberate pattern for extensible CLI design.",
+      "evidence": [
+        {
+          "filePath": "packages/cli/src/index.ts",
+          "lineRange": [
+            50,
+            70
+          ],
+          "snippet": "registerInitCommand(program); registerAnalyzeCommand(program); registerDecisionsCommand(program);",
+          "explanation": "Explicit registration of command modules following Command pattern"
+        },
+        {
+          "filePath": "packages/cli/src/commands/analyze.ts",
+          "lineRange": [
+            1,
+            398
+          ],
+          "snippet": "export function registerAnalyzeCommand(program: Command)",
+          "explanation": "Command module following consistent registration pattern"
+        }
+      ],
+      "constraints": [
+        "All CLI commands must be registered in the main index.ts file",
+        "Each command must export a register function that takes a Commander program",
+        "Commands should handle their own error cases and user feedback",
+        "Global options and error handling must be consistent across commands"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "command-pattern",
+        "cli",
+        "commander",
+        "modular-commands"
+      ]
+    },
+    {
+      "id": "Tz4Cw5nQeg6T1CZpUcJjx",
+      "title": "Hook-Based State Management in React Dashboard",
+      "description": "The dashboard uses custom React hooks (use-decisions, use-reviews, use-velocity, use-sse) for state management and API integration, following the hooks pattern for data fetching and caching.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.87,
+      "reasoning": "Multiple custom hooks are defined in hooks/ directory, each handling specific domain data. Components import and use these hooks consistently. This is an intentional pattern for separating data logic from UI components.",
+      "evidence": [
+        {
+          "filePath": "packages/dashboard/src/app/(app)/decisions/page.tsx",
+          "lineRange": [
+            10,
+            15
+          ],
+          "snippet": "import { useDecisions, type DecisionCategory, type DecisionStatus } from '@/hooks/use-decisions';",
+          "explanation": "Component using custom hook for decisions data management"
+        },
+        {
+          "filePath": "packages/dashboard/src/hooks/use-decisions.ts",
+          "lineRange": [
+            1,
+            122
+          ],
+          "snippet": "export function useDecisions(filters?: DecisionFilters) { const [decisions, setDecisions] = useState<Decision[]>([]);",
+          "explanation": "Custom hook implementing data fetching and state management pattern"
+        }
+      ],
+      "constraints": [
+        "All API interactions must go through custom hooks, not directly in components",
+        "Hooks must handle loading, error, and success states consistently",
+        "Data fetching hooks should support filtering and pagination where appropriate",
+        "State updates must be immutable and follow React best practices"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "react-hooks",
+        "state-management",
+        "data-fetching",
+        "separation-of-concerns"
+      ]
+    },
+    {
+      "id": "SB7qRHURmuDSBltzhIad1",
+      "title": "Plugin Architecture for Code Analysis",
+      "description": "The analyzer package implements a plugin-like architecture with separate modules for different analysis types (decision-extractor, layer-detector, pattern-detector, drift-detector) that can be composed together.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.85,
+      "reasoning": "The analyzer package has distinct modules for different analysis types, each with clear interfaces. The main index.ts exports functions from all modules, allowing composition. This enables extensible analysis capabilities.",
+      "evidence": [
+        {
+          "filePath": "packages/analyzer/src/index.ts",
+          "lineRange": [
+            1,
+            295
+          ],
+          "snippet": "export { extractDecisions } from './decision-extractor.js'; export { detectLayerViolations } from './layer-detector.js';",
+          "explanation": "Main analyzer module exports functions from specialized analysis modules"
+        },
+        {
+          "filePath": "packages/analyzer/src/layer-detector.ts",
+          "lineRange": [
+            1,
+            151
+          ],
+          "snippet": "export function detectLayerViolations(graph: DependencyGraph, files: ParsedFile[], layers: LayerDefinition[])",
+          "explanation": "Specialized analyzer module with clear interface and single responsibility"
+        }
+      ],
+      "constraints": [
+        "Each analysis module must have a clear, well-defined interface",
+        "Analysis modules should be composable and not tightly coupled",
+        "New analysis types can be added without modifying existing modules",
+        "All analyzers must work with the common ParsedFile and DependencyGraph types"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "plugin-architecture",
+        "modular-analysis",
+        "composition",
+        "extensibility"
+      ]
+    },
+    {
+      "id": "g1lm-b030mhQOJXCslLWj",
+      "title": "Event-Driven Architecture with Job Queues",
+      "description": "The server implements event-driven processing using BullMQ job queues for async operations (analysis, review, velocity, summary, sync jobs) with Redis backing.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.89,
+      "reasoning": "The jobs/ directory contains multiple job processors, and queue.ts shows BullMQ setup with Redis. Routes enqueue jobs rather than processing synchronously. This is a deliberate choice for scalable async processing.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/jobs/queue.ts",
+          "lineRange": [
+            1,
+            276
+          ],
+          "snippet": "import { Queue, Worker } from 'bullmq'; export function enqueueAnalysis(data: AnalysisJobData)",
+          "explanation": "Job queue infrastructure using BullMQ for async processing"
+        },
+        {
+          "filePath": "packages/server/src/routes/analysis.ts",
+          "lineRange": [
+            1,
+            158
+          ],
+          "snippet": "import { enqueueAnalysis } from '../jobs/queue.js';",
+          "explanation": "Routes enqueue jobs instead of processing synchronously"
+        }
+      ],
+      "constraints": [
+        "Long-running operations must be processed asynchronously via job queues",
+        "Jobs must be idempotent and handle failures gracefully",
+        "Job data must be serializable for Redis storage",
+        "Workers must be registered and properly handle job lifecycle"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "event-driven",
+        "job-queues",
+        "bullmq",
+        "async-processing",
+        "redis"
+      ]
+    },
+    {
+      "id": "CLQhcRtEst5-QWJ6Ta2px",
+      "title": "Multi-Provider Integration Strategy",
+      "description": "The integrations package supports multiple external services (GitHub, Bitbucket, Slack) with consistent client interfaces and webhook handling patterns.",
+      "category": "structural",
+      "status": "detected",
+      "confidence": 0.86,
+      "reasoning": "The integrations package has separate folders for each provider (github/, bitbucket/, slack/) with similar file structures (api.ts, webhook.ts, etc.). Each implements consistent interfaces for similar operations.",
+      "evidence": [
+        {
+          "filePath": "packages/integrations/src/github/api.ts",
+          "lineRange": [
+            1,
+            357
+          ],
+          "snippet": "export interface GitHubClientOptions, export function createGitHubClient",
+          "explanation": "GitHub integration with consistent client interface pattern"
+        },
+        {
+          "filePath": "packages/integrations/src/bitbucket/api.ts",
+          "lineRange": [
+            1,
+            443
+          ],
+          "snippet": "export interface BitbucketClientOptions, export function createBitbucketClient",
+          "explanation": "Bitbucket integration following same interface pattern as GitHub"
+        }
+      ],
+      "constraints": [
+        "Each provider must implement consistent client interface patterns",
+        "Webhook handling must follow similar patterns across providers",
+        "Provider-specific features should be abstracted behind common interfaces",
+        "Error handling and authentication must be consistent across providers"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "multi-provider",
+        "integration-strategy",
+        "consistent-interfaces",
+        "abstraction"
+      ]
+    },
+    {
+      "id": "njAXaePaUzDwD9v-B5542",
+      "title": "Template-Based Code Generation",
+      "description": "The context-sync package uses Handlebars templates with custom helpers to generate different output formats (Cursor rules, Claude markdown, etc.) from architectural decisions.",
+      "category": "behavioral",
+      "status": "detected",
+      "confidence": 0.84,
+      "reasoning": "The context-sync package has generators/ folder with different output formats, and templates.ts shows Handlebars template compilation with custom helpers. This is a deliberate pattern for flexible code generation.",
+      "evidence": [
+        {
+          "filePath": "packages/context-sync/src/templates.ts",
+          "lineRange": [
+            1,
+            237
+          ],
+          "snippet": "import handlebars from 'handlebars'; export function registerHelpers(); export function compileTemplate()",
+          "explanation": "Template system using Handlebars with custom helpers for code generation"
+        },
+        {
+          "filePath": "packages/context-sync/src/generators/cursorrules.ts",
+          "lineRange": [
+            1,
+            185
+          ],
+          "snippet": "export function generateCursorRules(decisions: ArchDecision[])",
+          "explanation": "Generator using template system to produce Cursor-specific output format"
+        }
+      ],
+      "constraints": [
+        "All generators must use the common template system and helpers",
+        "Templates must be maintainable and support user customization sections",
+        "Generated output must be valid for the target tool/format",
+        "Template data must be properly escaped to prevent injection issues"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "template-based",
+        "code-generation",
+        "handlebars",
+        "multi-format"
+      ]
+    },
+    {
+      "id": "_l9zEX9pdi2HhdqWcyPJ7",
+      "title": "Anthropic Claude Integration for LLM Operations",
+      "description": "The core package standardizes on Anthropic's Claude API for all LLM operations with cost tracking, caching, and structured output validation using Zod schemas.",
+      "category": "api",
+      "status": "detected",
+      "confidence": 0.91,
+      "reasoning": "The core/llm.ts file shows extensive Anthropic SDK integration with cost tracking, caching, and Zod validation. Multiple packages import LLM functions from core, showing this is the standardized approach.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/llm.ts",
+          "lineRange": [
+            1,
+            598
+          ],
+          "snippet": "import { Anthropic } from '@anthropic-ai/sdk'; export function createLlmClient(); export function analyzeWithLlmValidated()",
+          "explanation": "Centralized LLM client using Anthropic SDK with cost tracking and validation"
+        },
+        {
+          "filePath": "packages/analyzer/src/decision-extractor.ts",
+          "lineRange": [
+            1,
+            733
+          ],
+          "snippet": "import { analyzeWithLlmValidated } from '@archguard/core';",
+          "explanation": "Analyzer package using centralized LLM functions from core"
+        }
+      ],
+      "constraints": [
+        "All LLM operations must go through the centralized core/llm.ts functions",
+        "LLM responses must be validated using Zod schemas",
+        "Cost tracking must be enabled for all LLM calls",
+        "API keys must be properly managed and not hardcoded"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "anthropic",
+        "claude",
+        "llm-integration",
+        "cost-tracking",
+        "validation"
+      ]
+    },
+    {
+      "id": "-Jj_zWOaRq6hG0b9iGkHv",
+      "title": "SQLite with Drizzle ORM for Data Persistence",
+      "description": "The system uses SQLite as the primary database with Drizzle ORM for type-safe database operations, with schema definitions centralized in core/db/schema.ts.",
+      "category": "data",
+      "status": "detected",
+      "confidence": 0.88,
+      "reasoning": "The core/db/ directory shows SQLite client creation and schema definitions using Drizzle. Multiple server routes import from core/db showing this is the standard data access pattern.",
+      "evidence": [
+        {
+          "filePath": "packages/core/src/db/index.ts",
+          "lineRange": [
+            1,
+            257
+          ],
+          "snippet": "import { drizzle } from 'drizzle-orm/better-sqlite3'; export function createSqliteClient()",
+          "explanation": "Database client setup using SQLite with Drizzle ORM"
+        },
+        {
+          "filePath": "packages/core/src/db/schema.ts",
+          "lineRange": [
+            1,
+            236
+          ],
+          "snippet": "export const organizations, users, decisions, evidence",
+          "explanation": "Centralized schema definitions for all database tables"
+        }
+      ],
+      "constraints": [
+        "All database operations must use Drizzle ORM, not raw SQL",
+        "Schema changes must be made in the centralized schema.ts file",
+        "Database migrations must be handled through Drizzle migration system",
+        "Type safety must be maintained through Drizzle's TypeScript integration"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "sqlite",
+        "drizzle-orm",
+        "type-safe",
+        "centralized-schema"
+      ]
+    },
+    {
+      "id": "vvJsUUdy3fbhMS677y08x",
+      "title": "Role-Based Access Control (RBAC) System",
+      "description": "The server implements a comprehensive RBAC system with roles, permissions, and middleware for authorization across all protected endpoints.",
+      "category": "security",
+      "status": "detected",
+      "confidence": 0.87,
+      "reasoning": "The auth/ directory shows dedicated RBAC implementation with roles.ts, rbac.ts, and middleware. Routes import and use RBAC middleware consistently. This is a deliberate security architecture choice.",
+      "evidence": [
+        {
+          "filePath": "packages/server/src/auth/rbac.ts",
+          "lineRange": [
+            1,
+            106
+          ],
+          "snippet": "export function requirePermission(permission: Permission); export function requireRole(role: Role)",
+          "explanation": "RBAC middleware functions for permission and role checking"
+        },
+        {
+          "filePath": "packages/server/src/auth/roles.ts",
+          "lineRange": [
+            1,
+            55
+          ],
+          "snippet": "export const PERMISSIONS, ROLE_HIERARCHY, ROLE_DESCRIPTIONS",
+          "explanation": "Centralized role and permission definitions"
+        }
+      ],
+      "constraints": [
+        "All protected endpoints must use appropriate RBAC middleware",
+        "Roles and permissions must be defined in the centralized roles.ts file",
+        "Permission checks must be granular and follow principle of least privilege",
+        "Role hierarchy must be respected in all authorization decisions"
+      ],
+      "relatedDecisions": [],
+      "detectedAt": "2026-02-20T09:48:35.653Z",
+      "tags": [
+        "rbac",
+        "authorization",
+        "security",
+        "middleware",
+        "permissions"
+      ]
+    }
+  ],
+  "createdAt": "2026-02-20T09:49:44.573Z",
+  "ttlHours": 24,
+  "totalFiles": 179
+}
