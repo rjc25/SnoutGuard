@@ -41,12 +41,14 @@ export function registerAnalyzeCommand(program: Command): void {
     .option('--json', 'Output results as JSON')
     .option('--output <file>', 'Write report to a file')
     .option('--verbose', 'Show detailed logs: files sent to LLM, token counts, response times')
+    .option('--force', 'Bypass cache and run full analysis')
     .action(
       async (options: {
         path: string;
         json?: boolean;
         output?: string;
         verbose?: boolean;
+        force?: boolean;
       }) => {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
@@ -97,6 +99,7 @@ export function registerAnalyzeCommand(program: Command): void {
         try {
           const result = await runAnalysis(projectDir, config, {
             repoId,
+            force: options.force,
             onProgress: (event) => {
               spinner.text = `[${event.step}/${event.totalSteps}] ${event.phase}${event.detail ? chalk.gray(` — ${event.detail}`) : ''}`;
             },

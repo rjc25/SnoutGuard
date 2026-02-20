@@ -20,6 +20,15 @@ export { analyzeTrends, type TrendSummary, type TrendDataPoint } from './trend-a
 export { detectLayerViolations } from './layer-detector.js';
 export { generateMarkdownReport } from './reporters/markdown.js';
 export { generateJsonReport, type JsonReport } from './reporters/json.js';
+export {
+  loadCache,
+  saveCache,
+  clearCache,
+  hashFiles,
+  identifyChangedFiles,
+  mergeDecisions,
+  type AnalysisCache
+} from './cache.js';
 
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ArchDecision, ArchGuardConfig, ArchSnapshot, LayerViolation } from '@archguard/core';
@@ -42,6 +51,13 @@ import { generateMarkdownReport } from './reporters/markdown.js';
 import { generateJsonReport, type JsonReport } from './reporters/json.js';
 import type { DependencyGraph } from './dependency-mapper.js';
 import type { ScanResult } from './scanner.js';
+import {
+  loadCache,
+  saveCache,
+  hashFiles,
+  identifyChangedFiles,
+  mergeDecisions
+} from './cache.js';
 
 /** Full analysis result */
 export interface AnalysisResult {
@@ -82,9 +98,10 @@ export async function runAnalysis(
     repoId: string;
     previousSnapshot?: ArchSnapshot;
     onProgress?: AnalysisProgressCallback;
+    force?: boolean;
   }
 ): Promise<AnalysisResult> {
-  const { repoId, previousSnapshot, onProgress } = options;
+  const { repoId, previousSnapshot, onProgress, force = false } = options;
   const log = getLogger();
   const totalSteps = 6;
 
@@ -108,6 +125,47 @@ export async function runAnalysis(
     languages: Object.keys(scanResult.languageBreakdown),
   });
 
+  // Hash all files for cache comparison
+  const { filesHash, fileHashes } = hashFiles(scanResult.files);
+
+  // Check cache (unless --force is specified)
+  let cachedDecisions: ArchDecision[] = [];
+  let changedFiles: string[] = [];
+  let useCache = false;
+
+  if (!force) {
+    const cache = loadCache(projectDir, config.llm.cacheTtlHours);
+
+    if (cache && cache.filesHash === filesHash) {
+      // Cache hit: no files changed at all
+      log.info('cache', 'Cache hit — no files changed, using cached decisions');
+      progress(3, 'Using cached decisions', 'No files changed');
+
+      // Skip LLM analysis, use cached decisions directly
+      cachedDecisions = cache.decisions;
+      useCache = true;
+    } else if (cache) {
+      // Partial cache: some files changed, do incremental analysis
+      const changes = identifyChangedFiles(fileHashes, cache.fileHashes);
+      changedFiles = [...changes.added, ...changes.modified];
+
+      log.info('cache', `Incremental analysis: ${changedFiles.length} files changed, ${changes.deleted.length} deleted, ${changes.unchanged.length} unchanged`);
+
+      if (changedFiles.length === 0 && changes.deleted.length > 0) {
+        // Only deletions — merge and skip LLM
+        cachedDecisions = mergeDecisions(cache.decisions, [], [], changes.deleted);
+        useCache = true;
+        progress(3, 'Using cached decisions', 'Only file deletions detected');
+      } else {
+        // Filter scan result to only changed files for LLM analysis
+        cachedDecisions = cache.decisions;
+        log.info('cache', `Will analyze ${changedFiles.length} changed files and merge with ${cache.decisions.length} cached decisions`);
+      }
+    }
+  } else {
+    log.info('cache', 'Cache disabled via --force flag');
+  }
+
   // Step 2: Build dependency graph (with tsconfig resolution)
   progress(2, 'Building dependency graph', `${scanResult.totalFiles} files`);
   const dependencyGraph = buildDependencyGraph(scanResult.files, repoId, projectDir);
@@ -118,22 +176,60 @@ export async function runAnalysis(
   });
 
   // Step 3: Extract architectural decisions using LLM
-  progress(3, 'Extracting architectural decisions', `Sending ${scanResult.totalFiles} files to LLM`);
-  log.llmRequest({
-    operation: 'analyze',
-    model: config.llm.models.analyze,
-    inputTokens: 0, // will be logged at the llm layer
-    filesIncluded: scanResult.totalFiles,
-    filesList: scanResult.files.slice(0, 50).map((f) => f.filePath),
-  });
-  const decisions = await extractDecisions(
-    client,
-    config,
-    scanResult.files,
-    scanResult.directoryTree,
-    dependencyGraph
-  );
-  log.info('analysis', `Extracted ${decisions.length} architectural decisions`);
+  let decisions: ArchDecision[];
+
+  if (useCache) {
+    // Use cached decisions directly
+    decisions = cachedDecisions;
+  } else if (changedFiles.length > 0 && cachedDecisions.length > 0) {
+    // Incremental analysis: only analyze changed files
+    const changedFileSet = new Set(changedFiles);
+    const filesToAnalyze = scanResult.files.filter((f) => changedFileSet.has(f.filePath));
+
+    progress(3, 'Incremental analysis', `Analyzing ${filesToAnalyze.length} changed files`);
+    log.llmRequest({
+      operation: 'analyze',
+      model: config.llm.models.analyze,
+      inputTokens: 0,
+      filesIncluded: filesToAnalyze.length,
+      filesList: filesToAnalyze.slice(0, 50).map((f) => f.filePath),
+    });
+
+    const newDecisions = await extractDecisions(
+      client,
+      config,
+      filesToAnalyze,
+      scanResult.directoryTree,
+      dependencyGraph
+    );
+
+    // Identify deleted files
+    const deletedFiles = Object.keys(cachedDecisions[0]?.evidence?.[0] ? {} : {})
+      .filter((f) => !fileHashes[f]);
+
+    // Merge with cached decisions
+    decisions = mergeDecisions(cachedDecisions, newDecisions, changedFiles, deletedFiles);
+    log.info('analysis', `Incremental analysis complete: ${newDecisions.length} new decisions merged with ${cachedDecisions.length} cached`);
+  } else {
+    // Full analysis: analyze all files
+    progress(3, 'Extracting architectural decisions', `Sending ${scanResult.totalFiles} files to LLM`);
+    log.llmRequest({
+      operation: 'analyze',
+      model: config.llm.models.analyze,
+      inputTokens: 0,
+      filesIncluded: scanResult.totalFiles,
+      filesList: scanResult.files.slice(0, 50).map((f) => f.filePath),
+    });
+
+    decisions = await extractDecisions(
+      client,
+      config,
+      scanResult.files,
+      scanResult.directoryTree,
+      dependencyGraph
+    );
+    log.info('analysis', `Extracted ${decisions.length} architectural decisions`);
+  }
 
   // Step 4: Detect layer violations
   progress(4, 'Detecting layer violations');
@@ -174,6 +270,11 @@ export async function runAnalysis(
     apiCalls: getCallHistory().filter((c) => !c.cacheHit).length,
     cacheHits: getCallHistory().filter((c) => c.cacheHit).length,
   });
+
+  // Save results to cache (unless we used cache without changes)
+  if (!useCache || changedFiles.length > 0) {
+    saveCache(projectDir, filesHash, fileHashes, decisions, config.llm.cacheTtlHours);
+  }
 
   return {
     scanResult,
