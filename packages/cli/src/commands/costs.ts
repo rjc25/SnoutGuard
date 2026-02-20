@@ -65,9 +65,7 @@ export function registerCostsCommand(program: Command): void {
         // Typical summary: ~10k input, ~1k output
         const summaryCost = (10_000 / 1_000_000) * summaryPricing.input + (1_000 / 1_000_000) * summaryPricing.output;
         // Typical sync: ~30k input (all decisions), ~8k output (compressed context)
-        const syncCost = config.sync.useLlm
-          ? (30_000 / 1_000_000) * syncPricing.input + (8_000 / 1_000_000) * syncPricing.output
-          : 0;
+        const syncCost = (30_000 / 1_000_000) * syncPricing.input + (8_000 / 1_000_000) * syncPricing.output;
 
         console.log(
           `    ${chalk.cyan('analyze'.padEnd(10))} ~$${analyzeCost.toFixed(4)} per run ` +
@@ -81,17 +79,10 @@ export function registerCostsCommand(program: Command): void {
           `    ${chalk.cyan('summary'.padEnd(10))} ~$${summaryCost.toFixed(4)} per run ` +
           chalk.gray('(~10k input + ~1k output tokens)')
         );
-        if (config.sync.useLlm) {
-          console.log(
-            `    ${chalk.cyan('sync'.padEnd(10))} ~$${syncCost.toFixed(4)} per run ` +
-            chalk.gray(`(~30k input + ~8k output, ${syncModel})`)
-          );
-        } else {
-          console.log(
-            `    ${chalk.cyan('sync'.padEnd(10))} ${chalk.green('$0.00')} ` +
-            chalk.gray('(template-only, no LLM)')
-          );
-        }
+        console.log(
+          `    ${chalk.cyan('sync'.padEnd(10))} ~$${syncCost.toFixed(4)} per run ` +
+          chalk.gray(`(~30k input + ~8k output, ${syncModel})`)
+        );
 
         // Monthly estimate
         const monthlyEstimate =

@@ -143,7 +143,6 @@ Controls AI agent context file generation.
 | `auto_commit` | boolean | `false` | Auto-commit generated context files |
 | `auto_pr` | boolean | `false` | Auto-create PRs for context file changes |
 | `max_context_tokens` | number | `8192` | Token budget for generated context files (min 512, max 32768) |
-| `use_llm` | boolean | `true` | Use Opus to intelligently compress decisions. `false` = template-only (free) |
 
 ```yaml
 sync:
@@ -158,10 +157,9 @@ sync:
   auto_commit: false
   auto_pr: false
   max_context_tokens: 8192
-  use_llm: true
 ```
 
-> **Why `use_llm: true` is the default:** The context file is loaded into every agent session. A ~$0.30 Opus call that produces a 60-70% smaller file saves far more in cumulative token costs across hundreds of agent interactions. Use `use_llm: false` for free, deterministic template-based output.
+> **Why sync uses Opus:** The context file is loaded into every agent session. A ~$0.30 Opus call that produces a 60-70% smaller file saves far more in cumulative token costs across hundreds of agent interactions.
 
 ## mcp
 
@@ -424,7 +422,6 @@ sync:
   auto_commit: false
   auto_pr: false
   max_context_tokens: 8192
-  use_llm: true
 
 mcp:
   transport: stdio

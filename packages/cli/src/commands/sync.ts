@@ -1,7 +1,7 @@
 /**
  * `archguard sync` command.
  * Generates context files for AI coding assistants by synchronizing
- * architectural decisions into tool-specific formats.
+ * architectural decisions into tool-specific formats via LLM compression.
  */
 
 import { Command } from 'commander';
@@ -39,15 +39,13 @@ export function registerSyncCommand(program: Command): void {
     )
     .option('--path <dir>', 'Project directory', '.')
     .option('--output <dir>', 'Output directory for generated files')
-    .option('--dry-run', 'Show what would be generated without writing files')
-    .option('--no-llm', 'Use template-based generation instead of LLM')
+    .option('--dry-run', 'Preview what would be generated without writing files or calling the LLM')
     .action(
       async (options: {
         format: string;
         path: string;
         output?: string;
         dryRun?: boolean;
-        llm?: boolean;
       }) => {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
@@ -72,14 +70,8 @@ export function registerSyncCommand(program: Command): void {
           formats = [requested];
         }
 
-        // Handle --no-llm flag
-        if (options.llm === false) {
-          config.sync.useLlm = false;
-        }
-
-        const mode = config.sync.useLlm ? 'LLM-powered' : 'template';
         console.log(
-          chalk.bold(`\n  Syncing context files (${mode}): ${chalk.cyan(formats.join(', '))}\n`)
+          chalk.bold(`\n  Syncing context files: ${chalk.cyan(formats.join(', '))}\n`)
         );
 
         const spinner = ora('Loading architectural decisions...').start();
@@ -113,48 +105,46 @@ export function registerSyncCommand(program: Command): void {
             return;
           }
 
-          // Create a SyncEngine with the determined formats
-          const { SyncEngine } = await import('@archguard/context-sync');
-
-          // Override config formats to only generate the requested ones
-          const syncConfig = {
-            ...config,
-            sync: {
-              ...config.sync,
-              formats,
-            },
-          };
-
-          const engine = new SyncEngine({
-            config: syncConfig,
-            decisions,
-            repoId: 'local',
-            projectRoot: projectDir,
-          });
-
           if (options.dryRun) {
-            // Preview what would be generated
+            // Preview without LLM calls or file writes
+            const { SyncEngine } = await import('@archguard/context-sync');
+            const syncConfig = { ...config, sync: { ...config.sync, formats } };
+            const engine = new SyncEngine({
+              config: syncConfig,
+              decisions,
+              repoId: 'local',
+              projectRoot: projectDir,
+            });
+            const outputPaths = engine.getOutputPaths();
+
             for (const format of formats) {
-              spinner.text = `Previewing ${format} context file...`;
-              try {
-                const content = engine.renderFormat(format);
-                const outputPaths = engine.getOutputPaths();
-                console.log(chalk.gray(`\n  [dry-run] Would write: ${outputPaths[format]}`));
-                console.log(chalk.gray(`  Content length: ${content.length} chars\n`));
-              } catch (formatError: unknown) {
-                const msg =
-                  formatError instanceof Error
-                    ? formatError.message
-                    : String(formatError);
-                spinner.text = `Skipping ${format}: ${msg}`;
-              }
+              const target = outputPaths[format] ?? `<unknown path for ${format}>`;
+              console.log(chalk.gray(`\n  [dry-run] Would write: ${target}`));
+              console.log(chalk.gray(`  Decisions: ${decisions.length}`));
+              console.log(chalk.gray(`  Model: ${getModelForOperation(config, 'sync')}`));
+              console.log(chalk.gray(`  Max context tokens: ${config.sync.maxContextTokens}\n`));
             }
-            spinner.succeed('Dry run complete');
+            spinner.succeed('Dry run complete (no LLM calls made)');
           } else {
-            // Run the sync
-            spinner.text = config.sync.useLlm
-              ? `Generating context files with ${getModelForOperation(config, 'sync')}...`
-              : 'Generating context files...';
+            // Create a SyncEngine with the determined formats
+            const { SyncEngine } = await import('@archguard/context-sync');
+
+            const syncConfig = {
+              ...config,
+              sync: {
+                ...config.sync,
+                formats,
+              },
+            };
+
+            const engine = new SyncEngine({
+              config: syncConfig,
+              decisions,
+              repoId: 'local',
+              projectRoot: projectDir,
+            });
+
+            spinner.text = `Generating context files with ${getModelForOperation(config, 'sync')}...`;
             const syncResult = await engine.sync();
 
             for (const err of syncResult.errors) {

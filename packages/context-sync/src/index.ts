@@ -1,24 +1,13 @@
 /**
  * @archguard/context-sync - Generate AI agent context files from architectural decisions.
  *
- * This package generates context files for various AI coding assistants:
- * - Cursor (.cursorrules)
- * - Claude Code (CLAUDE.md)
- * - GitHub Copilot (.github/copilot-instructions.md)
- * - Agents (agents.md)
- * - Windsurf (.windsurfrules)
- * - Kiro (.kiro/steering.md)
- * - Custom (user-defined Handlebars templates)
+ * All standard formats (CLAUDE.md, .cursorrules, copilot-instructions.md, etc.) are
+ * generated via LLM-powered intelligent compression. Only the 'custom' format uses
+ * Handlebars templates for user-defined output.
  */
 
-// ─── Generators ───────────────────────────────────────────────────
+// ─── Custom Template Generator ────────────────────────────────────
 
-export { generateCursorRules } from './generators/cursorrules.js';
-export { generateClaudeMd } from './generators/claude-md.js';
-export { generateAgentsMd } from './generators/agents-md.js';
-export { generateCopilotInstructions } from './generators/copilot.js';
-export { generateWindsurfRules } from './generators/windsurf.js';
-export { generateKiroSteering } from './generators/kiro.js';
 export { generateCustom, DEFAULT_CUSTOM_TEMPLATE } from './generators/custom.js';
 export type { CustomTemplateOptions } from './generators/custom.js';
 
@@ -31,18 +20,18 @@ export { generateWithLlm } from './llm-sync.js';
 export { SyncEngine } from './sync-engine.js';
 export type { SyncEngineOptions, SyncResult } from './sync-engine.js';
 
-// ─── Template Utilities ───────────────────────────────────────────
+// ─── Utilities ────────────────────────────────────────────────────
 
 export {
-  registerHelpers,
+  activeDecisions,
+  sortByConfidence,
+  extractUserSections,
+  insertUserSections,
   groupByCategory,
   groupByStatus,
   getAllTags,
   getAllConstraints,
-  activeDecisions,
-  sortByConfidence,
+  registerHelpers,
   compileTemplate,
-  extractUserSections,
-  insertUserSections,
   generationHeader,
 } from './templates.js';

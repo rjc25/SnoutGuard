@@ -300,7 +300,6 @@ sync:
   preserve_user_sections: true
   auto_commit: false
   max_context_tokens: 8192   # Token budget for generated context files (LLM is told this limit)
-  use_llm: true              # Use Opus to intelligently compress decisions (false = template-only)
 
 # MCP server
 mcp:

@@ -1,36 +1,25 @@
 # ArchGuard
 
-**Open-source architectural guardrails and engineering intelligence for AI-powered development teams.**
+**Architectural guardrails for AI coding agents.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/archguard/archguard/actions/workflows/ci.yml/badge.svg)](https://github.com/archguard/archguard/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@archguard/cli)](https://www.npmjs.com/package/@archguard/cli)
 
 ---
 
-ArchGuard analyzes your codebase to automatically extract architectural decisions, syncs them to AI agent context files (CLAUDE.md, .cursorrules, copilot-instructions.md, and more), provides an MCP server for real-time architectural guidance, runs architectural code reviews on PRs, tracks team velocity weighted by code complexity, and generates developer work summaries.
+Your AI agents write code that works but violates your architecture. They introduce layer violations, ignore established patterns, and create inconsistencies across the codebase — because they can't see your architectural decisions.
+
+ArchGuard fixes this. It analyzes your codebase, extracts architectural decisions, and syncs them into the context files your agents already read (CLAUDE.md, .cursorrules, copilot-instructions.md). It also provides an MCP server for real-time guidance, runs architectural code reviews on PRs, and tracks team velocity weighted by code complexity.
 
 ## Prerequisites
 
 **An Anthropic API key is required.** ArchGuard uses Claude as its core analysis engine — the LLM is the product, not an optional enhancement.
 
 ```bash
-# Set your API key
 export ANTHROPIC_API_KEY=sk-ant-...
-
-# Get an API key at: https://console.anthropic.com/settings/keys
+# Get one at: https://console.anthropic.com/settings/keys
 ```
 
-## Why ArchGuard?
-
-AI coding agents are powerful but architecturally unaware. They generate code that works but often violates your team's established patterns, introduces layer violations, or creates inconsistencies. Meanwhile, engineering managers lack visibility into what AI-assisted development is actually producing.
-
-ArchGuard solves both problems:
-
-- **Architecture Agent** keeps AI coding assistants aligned with your team's architectural decisions
-- **Management Agent** provides complexity-weighted velocity tracking and AI-generated work summaries
-
-## Quick Start (CLI)
+## Quick Start
 
 ```bash
 # Clone and build from source
@@ -39,55 +28,22 @@ cd ArchGuard
 pnpm install
 pnpm build
 
-# Link the CLI globally (puts 'archguard' in PATH via node's bin)
+# Link the CLI globally
 npm link packages/cli
 
-# Set your Anthropic API key
-export ANTHROPIC_API_KEY=sk-ant-...
-
-# Then in any project:
+# In any project:
 cd ~/your-project
-archguard init
-
-# Analyze your codebase (uses Claude Opus)
-archguard analyze
-
-# Generate AI agent context files (uses Opus to intelligently compress)
-archguard sync
-
-# Start the MCP server for real-time guidance
-archguard serve
-
-# Review changes against architectural decisions (uses Claude Sonnet)
-archguard review --diff main
-
-# Check model assignments and estimated costs
-archguard costs
-```
-
-## Quick Start (Server Mode)
-
-```bash
-# Clone and run with Docker
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your ANTHROPIC_API_KEY (required)
-
-# Start all services
-docker-compose up -d
-
-# Dashboard available at http://localhost:3001
-# API server at http://localhost:3000
+archguard init                    # Generate .archguard.yml
+archguard analyze                 # Extract decisions (Opus, ~$10-16)
+archguard sync                    # Generate CLAUDE.md + .cursorrules
+archguard serve                   # Start MCP server
+archguard review --diff main      # Review changes (Sonnet)
+archguard costs                   # Check model costs
 ```
 
 ## Setup via AI Coding Agent
 
-### One-Shot Install & Analyze
-
-Copy and paste this into [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenClaw](https://github.com/openclaw/openclaw), or any AI coding agent. It will install ArchGuard, analyze your codebase, and configure the MCP server:
+Copy and paste this into [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenClaw](https://github.com/openclaw/openclaw), or any AI coding agent:
 
 ```
 Install ArchGuard (https://github.com/rjc25/ArchGuard) and analyze my codebase.
@@ -119,11 +75,11 @@ MCP SERVER:
   (validate code), get_dependency_graph (query module coupling)
 ```
 
-### What Happens After Setup
+## How It Works
 
-**The key insight: CLAUDE.md is the floor, not the ceiling.**
+**CLAUDE.md is the floor, not the ceiling.**
 
-Running `archguard analyze` + `archguard sync` generates a CLAUDE.md that gets committed to your repo. That single file gives your entire team architectural awareness with zero per-person setup:
+`archguard analyze` + `archguard sync` generates a CLAUDE.md that gets committed to your repo. That single file gives your entire team architectural awareness with zero per-person setup:
 
 | | CLAUDE.md (everyone) | MCP Server (power users) |
 |---|---|---|
@@ -133,19 +89,11 @@ Running `archguard analyze` + `archguard sync` generates a CLAUDE.md that gets c
 | **What it provides** | All decisions, constraints, and workflow rules as static context | Real-time, task-specific guidance — describe what you're doing, get only the relevant constraints |
 | **Cost** | Free (file already generated) | ~$0.01 per query (Sonnet) |
 
-**For your team:** Commit CLAUDE.md (and `.cursorrules`, `copilot-instructions.md`, etc.) to the repo. Everyone gets architectural alignment automatically — no MCP setup required.
-
-**For power users:** Set up the MCP server (Claude Code, Cursor, OpenClaw — see [MCP Server Setup](#mcp-server-setup) below) for interactive, targeted guidance. `get_architectural_guidance` is the killer tool — it takes a plain-English task description and returns only the decisions that matter for that task.
-
 The generated context files include a **Workflow** section that tells agents to:
 
 1. **Before writing code** — call `get_architectural_guidance` (if MCP is configured), or review the relevant constraints in the context file
 2. **After changes** — run `archguard review --diff <branch>` to catch violations before committing
 3. **After significant refactors** — re-run `archguard analyze` then `archguard sync` to keep context files fresh
-
-**For sub-agents (OpenClaw):** Add the MCP tools to `tools.subagents.tools.alsoAllow` so sub-agents get native access to `archguard_get_architectural_guidance` — they query constraints themselves instead of relying on pasted context.
-
-**For CI:** Add `archguard review --diff origin/main --ci` to your pipeline for automated PR review.
 
 ## Features
 
@@ -162,18 +110,17 @@ The generated context files include a **Workflow** section that tells agents to:
 - Reports LLM cost per run with detailed per-call breakdown
 
 **Context File Sync** (`archguard sync`)
-- Auto-generates context files from your architectural decisions:
+- LLM-powered compression of architectural decisions into AI agent context files:
   - `CLAUDE.md` for Claude Code
   - `.cursorrules` for Cursor
   - `.github/copilot-instructions.md` for GitHub Copilot
   - `agents.md` for Agents.md format
   - `.windsurfrules` for Windsurf
   - `.kiro/steering.md` for AWS Kiro
-  - Custom Handlebars templates
+  - Custom Handlebars templates for any other format
+- Opus intelligently prioritizes and compresses decisions to fit a configurable token budget (default 8192 tokens), typically 60-70% smaller than raw output
 - Watch mode auto-syncs on file changes
-- Preserves user-added sections
-- **LLM-powered compression** — Opus intelligently prioritizes and compresses decisions to fit a configurable token budget (default 8192 tokens), typically 60-70% smaller than raw templates
-- Template-only fallback with `--no-llm` flag
+- Preserves user-added sections between marker comments
 
 **MCP Server** (`archguard serve`)
 - Exposes architectural decisions via Model Context Protocol
@@ -229,7 +176,6 @@ The generated context files include a **Workflow** section that tells agents to:
 - Interactive dependency graph with coupling metrics
 - Layer violation explorer
 - Team management with RBAC
-- Settings for integrations and custom rules
 
 ## Model Configuration
 
@@ -250,11 +196,11 @@ llm:
   provider: anthropic
   api_key_env: ANTHROPIC_API_KEY
   models:
-    analyze: claude-opus-4-6        # For deep codebase analysis
-    sync: claude-opus-4-6           # For context file generation
-    review: claude-sonnet-4-6       # For PR review
-    mcp: claude-sonnet-4-6          # For MCP server queries
-    summary: claude-sonnet-4-6      # For work summaries
+    analyze: claude-opus-4-6
+    sync: claude-opus-4-6
+    review: claude-sonnet-4-6
+    mcp: claude-sonnet-4-6
+    summary: claude-sonnet-4-6
   max_cost_per_run: 10.00           # Safety limit in USD (0 = unlimited)
 ```
 
@@ -269,13 +215,13 @@ llm:
 | Work summary (Sonnet) | $0.02 - $0.05 | Daily/weekly |
 | MCP query (Sonnet) | $0.005 - $0.02 | Per query |
 
-> **Why sync uses Opus:** The context file is loaded into every agent session. A $0.30 Opus call that produces a 67% smaller file saves far more in cumulative token costs across hundreds of agent interactions. Use `--no-llm` for free template-based output.
+> **Why sync uses Opus:** The context file is loaded into every agent session. A $0.30 Opus call that produces a 67% smaller file saves far more in cumulative token costs across hundreds of agent interactions.
 
 Run `archguard costs` for detailed estimates based on your configuration.
 
 ## MCP Server Setup
 
-> **You don't need the MCP server for basic architectural awareness** — CLAUDE.md handles that for everyone on the team. The MCP server is for power users who want real-time, interactive guidance while coding: describe a task, get targeted constraints back, check compliance on the fly.
+> CLAUDE.md handles basic architectural awareness for everyone on the team. The MCP server is for power users who want real-time, interactive guidance while coding.
 
 ### Claude Code
 
@@ -292,7 +238,7 @@ Add to your project's `.claude/settings.json`:
 }
 ```
 
-For the API key, create a gitignored `.claude/settings.local.json` that overrides the env var with your actual key — don't commit secrets to a shared repo.
+For the API key, create a gitignored `.claude/settings.local.json` — don't commit secrets.
 
 ### Cursor
 
@@ -311,106 +257,9 @@ Add to `.cursor/mcp.json`:
 
 ### OpenClaw
 
-OpenClaw's MCP client plugin wires ArchGuard tools directly into the agent's tool palette — no shell commands needed. The agent gets native `archguard_get_architectural_guidance`, `archguard_check_architectural_compliance`, etc. as first-class tools alongside `web_search`, `exec`, and everything else.
-
-**1. Create the plugin directory:**
-
-```bash
-mkdir -p ~/.openclaw/extensions/mcp-client
-```
-
-**2. Create the plugin manifest** (`~/.openclaw/extensions/mcp-client/openclaw.plugin.json`):
-
-```json
-{
-  "id": "mcp-client",
-  "name": "MCP Client",
-  "description": "Connect to MCP servers and expose their tools as native agent tools",
-  "version": "0.1.0",
-  "configSchema": {
-    "type": "object",
-    "properties": {
-      "servers": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "object",
-          "properties": {
-            "command": { "type": "string" },
-            "args": { "type": "array", "items": { "type": "string" } },
-            "env": { "type": "object", "additionalProperties": { "type": "string" } },
-            "cwd": { "type": "string" },
-            "toolPrefix": { "type": "string" },
-            "enabled": { "type": "boolean", "default": true },
-            "timeoutMs": { "type": "number", "default": 30000 }
-          },
-          "required": ["command"]
-        }
-      }
-    }
-  }
-}
-```
-
-**3. Create the plugin** (`~/.openclaw/extensions/mcp-client/index.ts`) — see the [full source](docs/guides/openclaw-integration.md#mcp-client-plugin-source) or copy from the OpenClaw integration guide.
-
-**4. Configure in OpenClaw** (`~/.openclaw/openclaw.json` via `config.patch` or manual edit):
-
-```json
-{
-  "plugins": {
-    "entries": {
-      "mcp-client": {
-        "enabled": true,
-        "config": {
-          "servers": {
-            "archguard": {
-              "command": "archguard",
-              "args": ["serve", "--transport", "stdio", "--path", "/path/to/your/project"],
-              "env": { "ANTHROPIC_API_KEY": "sk-ant-..." },
-              "toolPrefix": "archguard_",
-              "timeoutMs": 60000
-            }
-          }
-        }
-      }
-    }
-  },
-  "tools": {
-    "alsoAllow": [
-      "archguard_get_architectural_decisions",
-      "archguard_check_architectural_compliance",
-      "archguard_get_architectural_guidance",
-      "archguard_get_dependency_graph"
-    ],
-    "subagents": {
-      "tools": {
-        "alsoAllow": [
-          "archguard_get_architectural_decisions",
-          "archguard_check_architectural_compliance",
-          "archguard_get_architectural_guidance",
-          "archguard_get_dependency_graph"
-        ]
-      }
-    }
-  }
-}
-```
-
-The `tools.subagents.tools.alsoAllow` key gives sub-agents (spawned via `sessions_spawn`) the same MCP tools. This means sub-agents can call `archguard_get_architectural_guidance` themselves before writing code — no need to paste CLAUDE.md into task prompts.
-
-**5. Restart OpenClaw.** The ArchGuard tools appear in both the main agent's and sub-agents' tool palettes with `[MCP: archguard]` descriptions.
-
-### Windsurf / Other MCP Clients
-
-Use the same stdio command pattern:
-
-```bash
-archguard serve --transport stdio
-```
+OpenClaw's MCP client plugin wires ArchGuard tools directly into the agent's tool palette — no shell commands needed. See the [OpenClaw integration guide](docs/guides/openclaw-integration.md) for full setup.
 
 ### Available MCP Tools
-
-Once the MCP server is running, your AI agent gets access to these tools:
 
 | Tool | What It Does | When to Use |
 |------|-------------|-------------|
@@ -421,166 +270,9 @@ Once the MCP server is running, your AI agent gets access to these tools:
 
 **`get_architectural_guidance` is the most valuable tool.** It takes a plain-English task description and returns all relevant architectural decisions, constraints, and code examples — so the agent writes architecturally compliant code from the start, instead of fixing violations after the fact.
 
-### CLI Usage (without MCP)
-
-You can also query the MCP server from the command line via JSON-RPC over stdio:
-
-```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"cli","version":"1.0"}}}
-{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_architectural_guidance","arguments":{"task":"add a new webhook handler"}}}' \
-  | archguard serve --transport stdio 2>/dev/null | tail -1 | python3 -m json.tool
-```
-
 ## Configuration
 
 ArchGuard is configured via `.archguard.yml` in your project root. Run `archguard init` to generate one with defaults.
-
-The config file uses `snake_case` keys (e.g. `max_file_size_kb`), which are automatically converted to camelCase internally.
-
-```yaml
-version: 1
-
-analysis:
-  include:
-    - "**"
-  exclude:
-    - "**/node_modules/**"
-    - "**/dist/**"
-    - "**/build/**"
-    - "**/out/**"
-    - "**/.next/**"
-    - "**/vendor/**"
-    - "**/target/**"
-    - "**/__pycache__/**"
-    - "**/.venv/**"
-    - "**/venv/**"
-    - "**/*.min.js"
-    - "**/*.bundle.js"
-    - "**/generated/**"
-    - "**/coverage/**"
-  languages:
-    - typescript
-    - javascript
-    - python
-    - go
-    - rust
-    - java
-  max_file_size_kb: 2048
-  analysis_period_months: 6
-
-llm:
-  provider: anthropic
-  api_key_env: ANTHROPIC_API_KEY
-  models:
-    analyze: claude-opus-4-6
-    sync: claude-opus-4-6
-    review: claude-sonnet-4-6
-    mcp: claude-sonnet-4-6
-    summary: claude-sonnet-4-6
-  max_tokens_per_analysis: 32768
-  cache_ttl_hours: 720
-  max_retries: 3
-  retry_base_delay_ms: 1000
-  request_timeout_ms: 120000
-  max_cost_per_run: 10.00
-
-sync:
-  formats:
-    - cursorrules
-    - claude
-  output_dir: "."
-  preserve_user_sections: true
-  auto_commit: false
-  auto_pr: false
-  max_context_tokens: 8192   # Token budget for generated context files
-  use_llm: true              # Use Opus to compress decisions (false = template-only)
-
-mcp:
-  transport: stdio
-
-review:
-  severity_threshold: warning
-  max_violations: 50
-  auto_fix_suggestions: true
-  auto_review_prs: true
-
-# Layer hierarchy for dependency enforcement
-# Dependencies flow: presentation -> application -> domain <- infrastructure
-layers:
-  - name: presentation
-    patterns:
-      - "**/presentation/**"
-      - "**/ui/**"
-      - "**/pages/**"
-      - "**/components/**"
-      - "**/views/**"
-    allowed_dependencies:
-      - application
-      - domain
-  - name: application
-    patterns:
-      - "**/application/**"
-      - "**/services/**"
-      - "**/use-cases/**"
-      - "**/usecases/**"
-    allowed_dependencies:
-      - domain
-  - name: domain
-    patterns:
-      - "**/domain/**"
-      - "**/entities/**"
-      - "**/models/**"
-    allowed_dependencies: []
-  - name: infrastructure
-    patterns:
-      - "**/infrastructure/**"
-      - "**/repositories/**"
-      - "**/adapters/**"
-      - "**/db/**"
-    allowed_dependencies:
-      - domain
-      - application
-
-velocity:
-  enabled: true
-  calculation_schedule: "0 0 * * *"
-  complexity_weight: 0.4
-  arch_impact_weight: 0.3
-  review_weight: 0.15
-  refactoring_weight: 0.15
-  stale_pr_days: 3
-  long_branch_days: 7
-
-summaries:
-  enabled: true
-  sprint_length_days: 14
-  schedules:
-    - type: standup
-      cron: "0 10 * * *"
-    - type: one_on_one
-      cron: "0 9 * * 1"
-      slack_channel: "#1-1-summaries"
-
-slack:
-  bot_token_env: SLACK_BOT_TOKEN
-  signing_secret_env: SLACK_SIGNING_SECRET
-  notifications:
-    violations:
-      channel: "#arch-violations"
-      severity_threshold: warning
-    drift:
-      channel: "#arch-drift"
-      score_threshold: 0.3
-    blockers:
-      channel: "#dev-blockers"
-
-rules:
-  - name: "No direct DB access outside repositories"
-    pattern: "import.*from.*prisma"
-    allowed_in:
-      - "src/infrastructure/repositories/**"
-    severity: error
-```
 
 See the full [Configuration Reference](docs/configuration.md) for all options.
 
@@ -591,99 +283,59 @@ See the full [Configuration Reference](docs/configuration.md) for all options.
 ```yaml
 - name: Architectural Review
   run: |
-    npm install -g @archguard/cli
+    git clone https://github.com/rjc25/ArchGuard /tmp/archguard
+    cd /tmp/archguard && pnpm install && pnpm build && npm link packages/cli
+    cd $GITHUB_WORKSPACE
     archguard review --diff origin/main --ci --format github
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
 
-## Self-Hosted Deployment
-
-### Docker Compose
+## Server Mode
 
 ```bash
-# Production deployment
-cp .env.example .env
-# Edit .env with production values (ANTHROPIC_API_KEY required)
-docker-compose -f docker-compose.prod.yml up -d
-```
+git clone https://github.com/rjc25/ArchGuard
+cd ArchGuard
+cp .env.example .env  # Set ANTHROPIC_API_KEY
+docker-compose up -d
 
-### Kubernetes (Helm)
-
-```bash
-# Add required secrets
-kubectl create secret generic archguard-secrets \
-  --from-literal=anthropic-api-key=sk-ant-... \
-  --from-literal=session-secret=... \
-  --from-literal=database-url=... \
-  --from-literal=redis-url=...
-
-# Install the chart
-helm install archguard ./deploy/helm/archguard \
-  --set ingress.hosts[0].host=archguard.yourcompany.com
+# Dashboard: http://localhost:3001
+# API: http://localhost:3000
 ```
 
 ## Architecture
 
-ArchGuard is a TypeScript monorepo built with:
-
-- **Runtime:** Node.js 20+
-- **Monorepo:** Turborepo + pnpm workspaces
-- **CLI:** Commander.js
-- **MCP Server:** @modelcontextprotocol/sdk
-- **LLM:** Anthropic SDK (Claude Opus for analysis, Sonnet for everything else)
-- **Validation:** Zod schemas on all LLM responses
-- **Database:** PostgreSQL (server) / SQLite (local CLI)
-- **ORM:** Drizzle
-- **API Server:** Hono
-- **Dashboard:** Next.js 14 + Tailwind + Recharts
-- **Queue:** BullMQ + Redis
-- **Git:** simple-git + Octokit
-- **Slack:** @slack/bolt
-
-### Package Structure
+TypeScript monorepo built with Turborepo + pnpm workspaces:
 
 ```
 packages/
   core/           # Shared types, DB, LLM client, git helpers, cost tracking
   analyzer/       # Codebase analysis engine (decisions, dependencies, layers, drift)
-  context-sync/   # AI agent context file generators (LLM-powered compression)
+  context-sync/   # AI agent context file generation (LLM-powered compression)
   mcp-server/     # MCP server for real-time guidance
   reviewer/       # Architectural code review
   velocity/       # Team velocity tracking
   work-summary/   # Work summary generation
   integrations/   # GitHub, Bitbucket, Slack
   server/         # Hono API server
-  dashboard/      # Next.js web dashboard
-  cli/            # CLI entry point
+  dashboard/      # Next.js 14 + Tailwind + Recharts web dashboard
+  cli/            # CLI entry point (Commander.js)
 ```
 
-## Auth & RBAC
-
-ArchGuard supports multiple authentication methods:
-
-- **Email/Password** - Default for all tiers
-- **OAuth** - GitHub and Google
-- **SAML 2.0** - Enterprise tier (Okta, Azure AD, OneLogin)
-- **API Keys** - For CI/CD and CLI authentication
-
-Roles: **Owner** > **Admin** > **Member** > **Viewer**
+Key dependencies: Anthropic SDK, @modelcontextprotocol/sdk, Drizzle (PostgreSQL/SQLite), Zod, simple-git, BullMQ + Redis, @slack/bolt.
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
 ```bash
-# Development setup
 git clone https://github.com/rjc25/ArchGuard
 cd ArchGuard
 pnpm install
 pnpm build
 pnpm test
-
-# Link CLI for local development
 npm link packages/cli
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 

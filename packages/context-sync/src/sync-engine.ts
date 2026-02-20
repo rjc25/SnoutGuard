@@ -3,6 +3,8 @@
  *
  * Responsibilities:
  * - Generates all configured format files (cursorrules, claude, copilot, etc.)
+ * - Uses LLM-powered intelligent compression for all standard formats
+ * - Falls back to Handlebars templates only for the 'custom' format
  * - Preserves user sections between archguard comment markers
  * - Supports watch mode with chokidar (debounced at 5 seconds)
  * - Returns SyncRecord[] for each sync operation
@@ -21,12 +23,6 @@ import type {
 } from '@archguard/core';
 import { generateId, now } from '@archguard/core';
 
-import { generateCursorRules } from './generators/cursorrules.js';
-import { generateClaudeMd } from './generators/claude-md.js';
-import { generateAgentsMd } from './generators/agents-md.js';
-import { generateCopilotInstructions } from './generators/copilot.js';
-import { generateWindsurfRules } from './generators/windsurf.js';
-import { generateKiroSteering } from './generators/kiro.js';
 import { generateCustom, type CustomTemplateOptions } from './generators/custom.js';
 import { generateWithLlm } from './llm-sync.js';
 import { extractUserSections, insertUserSections } from './templates.js';
@@ -135,12 +131,13 @@ export class SyncEngine {
 
   /**
    * Generate a single format file.
+   * Uses LLM for all standard formats; Handlebars templates only for 'custom'.
    */
   private async generateFormat(format: SyncFormat, outputDir: string): Promise<SyncRecord> {
-    // Generate content — use LLM if configured, otherwise template
-    const content = this.config.sync.useLlm && format !== 'custom'
-      ? await this.renderFormatLlm(format)
-      : this.renderFormat(format);
+    // Generate content
+    const content = format === 'custom'
+      ? this.renderCustomFormat()
+      : await generateWithLlm(this.decisions, this.config, format);
 
     // Determine output path
     const outputPath = getOutputPath(format, outputDir);
@@ -180,43 +177,16 @@ export class SyncEngine {
   }
 
   /**
-   * Render a format using LLM-powered intelligent compression.
-   * Sends all decisions to the sync model (Opus by default) which
-   * prioritizes, compresses, and organizes them within the token budget.
+   * Render the 'custom' format using Handlebars templates.
    */
-  async renderFormatLlm(format: SyncFormat): Promise<string> {
-    return generateWithLlm(this.decisions, this.config, format);
-  }
-
-  /**
-   * Render a format to a string without writing to disk.
-   * Uses template-based generation (no LLM). Useful for previewing output.
-   */
-  renderFormat(format: SyncFormat): string {
-    switch (format) {
-      case 'cursorrules':
-        return generateCursorRules(this.decisions, this.config);
-      case 'claude':
-        return generateClaudeMd(this.decisions, this.config);
-      case 'copilot':
-        return generateCopilotInstructions(this.decisions, this.config);
-      case 'agents':
-        return generateAgentsMd(this.decisions, this.config);
-      case 'windsurf':
-        return generateWindsurfRules(this.decisions, this.config);
-      case 'kiro':
-        return generateKiroSteering(this.decisions, this.config);
-      case 'custom':
-        if (!this.customTemplate) {
-          throw new Error(
-            'Custom format requires a customTemplate option. ' +
-              'Provide a CustomTemplateOptions object with at least a template string.'
-          );
-        }
-        return generateCustom(this.decisions, this.config, this.customTemplate);
-      default:
-        throw new Error(`Unknown sync format: ${format}`);
+  private renderCustomFormat(): string {
+    if (!this.customTemplate) {
+      throw new Error(
+        'Custom format requires a customTemplate option. ' +
+          'Provide a CustomTemplateOptions object with at least a template string.'
+      );
     }
+    return generateCustom(this.decisions, this.config, this.customTemplate);
   }
 
   /**
