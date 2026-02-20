@@ -242,11 +242,16 @@ export function registerAnalyzeCommand(program: Command): void {
               }).run();
             }
 
-            // Clear previous decisions and insert fresh ones
+            // Clear previous decisions and evidence, then insert fresh ones
             db.delete(schema.decisions).run();
+            db.delete(schema.evidence).run();
+            
             for (const decision of result.decisions) {
+              const decisionId = decision.id ?? generateId();
+              
+              // Insert the decision
               db.insert(schema.decisions).values({
-                id: decision.id ?? generateId(),
+                id: decisionId,
                 repoId: localRepoId,
                 title: decision.title,
                 description: decision.description,
@@ -259,8 +264,25 @@ export function registerAnalyzeCommand(program: Command): void {
                 detectedAt: now,
                 updatedAt: now,
               }).run();
+              
+              // Insert evidence for this decision
+              if (decision.evidence && decision.evidence.length > 0) {
+                for (const ev of decision.evidence) {
+                  db.insert(schema.evidence).values({
+                    id: generateId(),
+                    decisionId,
+                    filePath: ev.filePath,
+                    lineStart: ev.lineRange[0],
+                    lineEnd: ev.lineRange[1],
+                    snippet: ev.snippet,
+                    explanation: ev.explanation,
+                  }).run();
+                }
+              }
             }
-            logger.info('analysis', `Persisted ${result.decisions.length} decisions to local database`);
+            
+            const totalEvidence = result.decisions.reduce((sum, d) => sum + (d.evidence?.length ?? 0), 0);
+            logger.info('analysis', `Persisted ${result.decisions.length} decisions and ${totalEvidence} evidence items to local database`);
           } catch (dbError: unknown) {
             const dbMsg = dbError instanceof Error ? dbError.message : String(dbError);
             logger.warn('analysis', `Could not persist decisions to database: ${dbMsg}`);
