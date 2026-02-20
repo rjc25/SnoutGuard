@@ -164,7 +164,7 @@ function registerTools(
     },
     async (input: CheckPatternInput) => {
       try {
-        const result = await executeCheckPattern(db, input, config.rules);
+        const result = await executeCheckPattern(db, input, config);
         return {
           content: [
             {

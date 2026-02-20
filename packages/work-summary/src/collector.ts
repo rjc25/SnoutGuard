@@ -114,7 +114,7 @@ export async function collectData(options: CollectorOptions): Promise<CollectedD
   // Gather per-developer stats
   const devStatsArray = await getDevStats(git, periodStart, periodEnd);
   const gitStats = devStatsArray.find(
-    (s) => s.author.toLowerCase() === developer.toLowerCase()
+    (s: { author: string; email: string }) => s.author.toLowerCase() === developer.toLowerCase()
       || s.email.toLowerCase() === developer.toLowerCase()
   ) ?? null;
 
@@ -193,7 +193,7 @@ async function collectCommits(
       author: developer,
     });
 
-    return log.all.map((entry) => ({
+    return log.all.map((entry: { hash: string; message: string; date: string }) => ({
       sha: entry.hash,
       message: entry.message,
       date: entry.date,

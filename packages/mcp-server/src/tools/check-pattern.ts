@@ -1,9 +1,10 @@
 /**
  * MCP Tool: check_architectural_compliance
- * Checks code against architectural decisions and constraints.
- * Returns compliance result with any violations found.
+ * Checks code against architectural decisions and constraints using LLM-powered
+ * semantic analysis via Claude Sonnet for fast, accurate compliance checking.
  */
 
+import { z } from 'zod';
 import type {
   ArchCategory,
   ArchDecision,
@@ -13,8 +14,15 @@ import type {
   Evidence,
   Violation,
   ViolationSeverity,
+  ArchGuardConfig,
 } from '@archguard/core';
-import { generateId, schema, parseJsonSafe } from '@archguard/core';
+import {
+  generateId,
+  schema,
+  parseJsonSafe,
+  createLlmClient,
+  analyzeWithLlmValidated,
+} from '@archguard/core';
 
 /** Input schema for check_architectural_compliance tool */
 export interface CheckPatternInput {
@@ -44,19 +52,71 @@ export const checkPatternInputSchema = {
   required: ['code', 'filePath'] as const,
 };
 
+// ─── LLM Response Schema ───────────────────────────────────────────
+
+const llmViolationSchema = z.object({
+  constraintViolated: z.string(),
+  decisionTitle: z.string(),
+  severity: z.enum(['error', 'warning', 'info']),
+  explanation: z.string(),
+  lineStart: z.number().optional(),
+  lineEnd: z.number().optional(),
+  suggestion: z.string().optional(),
+});
+
+const complianceAnalysisSchema = z.object({
+  compliant: z.boolean(),
+  violations: z.array(llmViolationSchema),
+  reasoning: z.string(),
+});
+
+type ComplianceAnalysis = z.infer<typeof complianceAnalysisSchema>;
+
+// ─── System Prompt ─────────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are an expert software architect analyzing code for compliance with architectural decisions and constraints.
+
+Your job is to semantically analyze whether the provided code violates any of the architectural constraints from the project's documented decisions.
+
+<important_rules>
+1. Use semantic understanding — don't just pattern match. Understand what the code DOES, not just what it contains.
+2. Only flag real violations. If the code complies with the intent of the constraint (even if it looks suspicious), it's compliant.
+3. Explain your reasoning clearly — WHY is this a violation or WHY is it compliant?
+4. Consider the file path and intent when determining relevance.
+5. Be specific about which constraint was violated and from which decision.
+</important_rules>
+
+You must respond with ONLY valid JSON matching this schema:
+
+{
+  "compliant": true/false,
+  "violations": [
+    {
+      "constraintViolated": "The exact constraint text that was violated",
+      "decisionTitle": "Title of the decision this constraint came from",
+      "severity": "error|warning|info",
+      "explanation": "Clear explanation of WHY this code violates the constraint",
+      "lineStart": 1,
+      "lineEnd": 10,
+      "suggestion": "How to fix this violation"
+    }
+  ],
+  "reasoning": "Your step-by-step thinking about whether the code complies with the constraints"
+}
+
+If the code is compliant with all constraints, return compliant: true and an empty violations array.`;
+
 /**
  * Execute the check_architectural_compliance tool.
- * Loads all decisions and custom rules from the database,
- * then checks the provided code against constraints.
+ * Loads all decisions from the database, then uses Claude Sonnet to
+ * semantically check the code against constraints.
  */
 export async function executeCheckPattern(
   db: DbClient,
   input: CheckPatternInput,
-  customRules: CustomRule[]
+  config: ArchGuardConfig
 ): Promise<ComplianceResult> {
   const { code, filePath, intent } = input;
-  const violations: Violation[] = [];
-  const suggestions: string[] = [];
 
   // Load all decisions from the database
   const allDecisions = await db.select().from(schema.decisions);
@@ -91,278 +151,132 @@ export async function executeCheckPattern(
     confirmedBy: row.confirmedBy ?? undefined,
   }));
 
-  // Check against decision constraints
-  for (const decision of decisions) {
-    if (decision.status === 'deprecated') continue;
-
-    for (const constraint of decision.constraints) {
-      const violation = checkConstraint(code, filePath, constraint, decision);
-      if (violation) {
-        violations.push(violation);
-      }
-    }
-  }
-
-  // Check against custom rules from config
-  for (const rule of customRules) {
-    const violation = checkCustomRule(code, filePath, rule);
-    if (violation) {
-      violations.push(violation);
-    }
-  }
-
-  // Generate suggestions based on the code and relevant decisions
+  // Filter to relevant decisions
   const relevantDecisions = findRelevantDecisions(decisions, filePath, code, intent);
-  for (const decision of relevantDecisions) {
-    if (decision.constraints.length > 0) {
+
+  // If no relevant decisions, return compliant with suggestions
+  if (relevantDecisions.length === 0) {
+    const suggestions: string[] = [];
+    if (intent) {
       suggestions.push(
-        `[${decision.title}] Ensure compliance with: ${decision.constraints.join('; ')}`
+        'No specific architectural decisions found for this area. Consider documenting the architectural intent.'
+      );
+    }
+    return {
+      compliant: true,
+      violations: [],
+      suggestions,
+    };
+  }
+
+  // Build the prompt for LLM analysis
+  const userPrompt = buildCompliancePrompt(
+    code,
+    filePath,
+    intent,
+    relevantDecisions
+  );
+
+  // Call Claude Sonnet for semantic analysis (review model = Sonnet, fast/cheap)
+  const client = createLlmClient(config);
+  const analysis = await analyzeWithLlmValidated<ComplianceAnalysis>(
+    client,
+    config,
+    {
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.2, // Lower temperature for more consistent compliance checking
+    },
+    complianceAnalysisSchema,
+    'review' // Use review operation → Sonnet model (fast + cheap for per-query checks)
+  );
+
+  // Convert LLM violations to our Violation format
+  const violations: Violation[] = analysis.violations.map((v) => ({
+    id: generateId(),
+    rule: `${v.decisionTitle}: ${v.constraintViolated}`,
+    severity: v.severity,
+    message: v.explanation,
+    filePath,
+    lineStart: v.lineStart ?? 1,
+    lineEnd: v.lineEnd ?? code.split('\n').length,
+    suggestion: v.suggestion,
+    decisionId: relevantDecisions.find(d => d.title === v.decisionTitle)?.id,
+  }));
+
+  // Generate helpful suggestions
+  const suggestions: string[] = [];
+  for (const decision of relevantDecisions) {
+    if (decision.constraints.length > 0 && !violations.some(v => v.decisionId === decision.id)) {
+      suggestions.push(
+        `[${decision.title}] Following constraints: ${decision.constraints.join('; ')}`
       );
     }
   }
 
-  if (relevantDecisions.length === 0 && intent) {
-    suggestions.push(
-      'No specific architectural decisions found for this area. Consider documenting the architectural intent.'
-    );
-  }
-
   return {
-    compliant: violations.length === 0,
+    compliant: analysis.compliant,
     violations,
     suggestions,
   };
 }
 
-/**
- * Check a single constraint against the provided code.
- * Uses heuristic matching to detect common constraint violations.
- */
-function checkConstraint(
+// ─── Prompt Building ───────────────────────────────────────────────
+
+function buildCompliancePrompt(
   code: string,
   filePath: string,
-  constraint: string,
-  decision: ArchDecision
-): Violation | null {
-  const constraintLower = constraint.toLowerCase();
-  const codeLower = code.toLowerCase();
-  const filePathLower = filePath.toLowerCase();
+  intent: string | undefined,
+  decisions: ArchDecision[]
+): string {
+  const sections: string[] = [];
 
-  // Check "should not directly access data storage" constraint
-  if (
-    constraintLower.includes('should not directly access') &&
-    constraintLower.includes('data')
-  ) {
-    if (
-      filePathLower.includes('controller') &&
-      (codeLower.includes('query(') ||
-        codeLower.includes('.execute(') ||
-        codeLower.includes('db.') ||
-        codeLower.includes('database') ||
-        codeLower.includes('.sql'))
-    ) {
-      return createViolation(
-        filePath,
-        code,
-        constraint,
-        decision,
-        'warning'
-      );
-    }
+  sections.push(`<code_to_check>
+File: ${filePath}
+${intent ? `Intent: ${intent}\n` : ''}
+\`\`\`
+${code}
+\`\`\`
+</code_to_check>`);
+
+  sections.push(`<architectural_decisions>
+The following architectural decisions have been documented for this codebase.
+Check if the code above violates any of their constraints.
+`);
+
+  for (const decision of decisions) {
+    sections.push(`
+<decision>
+  <title>${decision.title}</title>
+  <category>${decision.category}</category>
+  <description>${decision.description}</description>
+  <constraints>
+${decision.constraints.map(c => `    - ${c}`).join('\n')}
+  </constraints>
+  <confidence>${(decision.confidence * 100).toFixed(0)}%</confidence>
+</decision>`);
   }
 
-  // Check "dependencies should point inward" constraint
-  if (constraintLower.includes('dependencies should point inward')) {
-    if (
-      filePathLower.includes('/domain/') &&
-      (codeLower.includes("from '../infrastructure") ||
-        codeLower.includes("from '../adapters") ||
-        codeLower.includes("from '../presentation") ||
-        codeLower.includes("from '../ui"))
-    ) {
-      return createViolation(
-        filePath,
-        code,
-        constraint,
-        decision,
-        'error'
-      );
-    }
-  }
+  sections.push('</architectural_decisions>');
 
-  // Check "domain layer should have no external dependencies" constraint
-  if (
-    constraintLower.includes('domain') &&
-    constraintLower.includes('no external dependencies')
-  ) {
-    if (
-      filePathLower.includes('/domain/') &&
-      hasExternalImports(code)
-    ) {
-      return createViolation(
-        filePath,
-        code,
-        constraint,
-        decision,
-        'warning'
-      );
-    }
-  }
+  sections.push(`<task>
+Analyze the code and determine if it violates any of the constraints listed above.
 
-  // Check "use constructor injection" constraint
-  if (constraintLower.includes('constructor injection')) {
-    if (
-      codeLower.includes('new ') &&
-      !codeLower.includes('constructor') &&
-      (filePathLower.includes('service') || filePathLower.includes('controller'))
-    ) {
-      const newInstances = code.match(/new\s+\w+Service|new\s+\w+Repository|new\s+\w+Controller/gi);
-      if (newInstances && newInstances.length > 0) {
-        return createViolation(
-          filePath,
-          code,
-          constraint,
-          decision,
-          'warning'
-        );
-      }
-    }
-  }
+For each constraint:
+1. Understand what the constraint requires
+2. Semantically analyze the code to see if it violates that requirement
+3. If it violates, explain clearly WHY and HOW to fix it
 
-  // Check "data access should go through repository" constraint
-  if (
-    constraintLower.includes('data access') &&
-    constraintLower.includes('repository')
-  ) {
-    if (
-      !filePathLower.includes('repository') &&
-      !filePathLower.includes('repo') &&
-      (filePathLower.includes('service') || filePathLower.includes('controller')) &&
-      (codeLower.includes('.query(') ||
-        codeLower.includes('.execute(') ||
-        codeLower.includes('select(') ||
-        codeLower.includes('insert(') ||
-        codeLower.includes('update(') ||
-        codeLower.includes('delete('))
-    ) {
-      return createViolation(
-        filePath,
-        code,
-        constraint,
-        decision,
-        'warning'
-      );
-    }
-  }
+Examples of violations to catch:
+- Code using sqlite3 directly when the architecture says "All data must flow through Supabase"
+- Controllers accessing database directly when they should use repositories
+- Domain layer importing infrastructure code when dependencies should point inward
+- Hardcoded secrets when the architecture requires environment variables
 
-  return null;
-}
+Return your analysis as JSON matching the schema in the system prompt.
+</task>`);
 
-/**
- * Check a custom rule from config against the code.
- */
-function checkCustomRule(
-  code: string,
-  filePath: string,
-  rule: CustomRule
-): Violation | null {
-  let patternMatches: boolean;
-  try {
-    const regex = new RegExp(rule.pattern, 'gi');
-    patternMatches = regex.test(code);
-  } catch {
-    // Invalid regex in config
-    return null;
-  }
-
-  if (!patternMatches) return null;
-
-  // Check allowedIn / notAllowedIn
-  if (rule.allowedIn && rule.allowedIn.length > 0) {
-    const isAllowed = rule.allowedIn.some((pattern) => {
-      try {
-        return new RegExp(pattern).test(filePath);
-      } catch {
-        return filePath.includes(pattern);
-      }
-    });
-
-    if (!isAllowed) {
-      return {
-        id: generateId(),
-        rule: rule.name,
-        severity: rule.severity,
-        message: `Pattern "${rule.pattern}" found in ${filePath} but is only allowed in: ${rule.allowedIn.join(', ')}`,
-        filePath,
-        lineStart: 1,
-        lineEnd: code.split('\n').length,
-        suggestion: `Move this code to one of: ${rule.allowedIn.join(', ')}`,
-      };
-    }
-  }
-
-  if (rule.notAllowedIn && rule.notAllowedIn.length > 0) {
-    const isBlocked = rule.notAllowedIn.some((pattern) => {
-      try {
-        return new RegExp(pattern).test(filePath);
-      } catch {
-        return filePath.includes(pattern);
-      }
-    });
-
-    if (isBlocked) {
-      return {
-        id: generateId(),
-        rule: rule.name,
-        severity: rule.severity,
-        message: `Pattern "${rule.pattern}" found in ${filePath} but is not allowed here.`,
-        filePath,
-        lineStart: 1,
-        lineEnd: code.split('\n').length,
-        suggestion: `This pattern is prohibited in files matching: ${rule.notAllowedIn.join(', ')}`,
-      };
-    }
-  }
-
-  return null;
-}
-
-/** Check if code has external (non-relative) imports */
-function hasExternalImports(code: string): boolean {
-  const importRegex = /(?:import|from)\s+['"]([^'"]+)['"]/g;
-  let match: RegExpExecArray | null;
-  while ((match = importRegex.exec(code)) !== null) {
-    const importPath = match[1];
-    if (
-      !importPath.startsWith('.') &&
-      !importPath.startsWith('@/') &&
-      !importPath.startsWith('node:')
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/** Create a violation object */
-function createViolation(
-  filePath: string,
-  code: string,
-  constraint: string,
-  decision: ArchDecision,
-  severity: ViolationSeverity
-): Violation {
-  return {
-    id: generateId(),
-    rule: `${decision.title}: ${constraint}`,
-    severity,
-    message: `Potential violation of constraint: "${constraint}" from decision "${decision.title}"`,
-    filePath,
-    lineStart: 1,
-    lineEnd: code.split('\n').length,
-    suggestion: `Review this code against the architectural decision "${decision.title}". Constraint: ${constraint}`,
-    decisionId: decision.id,
-  };
+  return sections.join('\n\n');
 }
 
 /**
@@ -379,6 +293,9 @@ function findRelevantDecisions(
   const intentLower = intent?.toLowerCase() ?? '';
 
   return decisions.filter((decision) => {
+    // Skip deprecated decisions
+    if (decision.status === 'deprecated') return false;
+
     // Check if any evidence file paths are related
     const evidenceMatch = decision.evidence.some((ev) => {
       const evDir = ev.filePath.split('/').slice(0, -1).join('/').toLowerCase();
