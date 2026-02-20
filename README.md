@@ -121,17 +121,31 @@ MCP SERVER:
 
 ### What Happens After Setup
 
-The generated context files (CLAUDE.md, .cursorrules, etc.) include a **Workflow** section that tells your AI agent to:
+**The key insight: CLAUDE.md is the floor, not the ceiling.**
 
-1. **Before writing code** — call `get_architectural_guidance` with a task description (if MCP is configured), or review relevant constraints in the context file
+Running `archguard analyze` + `archguard sync` generates a CLAUDE.md that gets committed to your repo. That single file gives your entire team architectural awareness with zero per-person setup:
+
+| | CLAUDE.md (everyone) | MCP Server (power users) |
+|---|---|---|
+| **Setup** | One person runs `archguard sync`, commits the file | Each user configures MCP in their editor |
+| **Who gets it** | Every developer who opens the repo | Developers who opt into the MCP server |
+| **How it works** | Claude Code / Cursor reads it automatically on boot | Agent calls tools like `get_architectural_guidance` interactively |
+| **What it provides** | All decisions, constraints, and workflow rules as static context | Real-time, task-specific guidance — describe what you're doing, get only the relevant constraints |
+| **Cost** | Free (file already generated) | ~$0.01 per query (Sonnet) |
+
+**For your team:** Commit CLAUDE.md (and `.cursorrules`, `copilot-instructions.md`, etc.) to the repo. Everyone gets architectural alignment automatically — no MCP setup required.
+
+**For power users:** Set up the MCP server (Claude Code, Cursor, OpenClaw — see [MCP Server Setup](#mcp-server-setup) below) for interactive, targeted guidance. `get_architectural_guidance` is the killer tool — it takes a plain-English task description and returns only the decisions that matter for that task.
+
+The generated context files include a **Workflow** section that tells agents to:
+
+1. **Before writing code** — call `get_architectural_guidance` (if MCP is configured), or review the relevant constraints in the context file
 2. **After changes** — run `archguard review --diff <branch>` to catch violations before committing
-3. **After significant refactors** — run `archguard analyze` then `archguard sync` to keep context files fresh (incremental — only re-analyzes changed files, costs pennies)
+3. **After significant refactors** — re-run `archguard analyze` then `archguard sync` to keep context files fresh
 
-This means the enforcement is **baked into the context file itself** — every agent session that loads CLAUDE.md (or .cursorrules, copilot-instructions.md, etc.) gets the workflow rules automatically. You don't need to remember to tell your agent to check architecture; it's already in its instructions.
+**For sub-agents (OpenClaw):** Add the MCP tools to `tools.subagents.tools.alsoAllow` so sub-agents get native access to `archguard_get_architectural_guidance` — they query constraints themselves instead of relying on pasted context.
 
-**For sub-agents:** If using OpenClaw, add the MCP tools to `tools.subagents.tools.alsoAllow` so sub-agents get native access to `archguard_get_architectural_guidance` — they can query architectural constraints themselves instead of relying on pasted CLAUDE.md content. For other platforms, include the generated CLAUDE.md content in sub-agent task prompts.
-
-**For CI:** Add `archguard review --diff origin/main --ci` to your CI pipeline for automated PR review.
+**For CI:** Add `archguard review --diff origin/main --ci` to your pipeline for automated PR review.
 
 ## Features
 
@@ -261,6 +275,8 @@ Run `archguard costs` for detailed estimates based on your configuration.
 
 ## MCP Server Setup
 
+> **You don't need the MCP server for basic architectural awareness** — CLAUDE.md handles that for everyone on the team. The MCP server is for power users who want real-time, interactive guidance while coding: describe a task, get targeted constraints back, check compliance on the fly.
+
 ### Claude Code
 
 Add to your project's `.claude/settings.json`:
@@ -275,6 +291,8 @@ Add to your project's `.claude/settings.json`:
   }
 }
 ```
+
+For the API key, create a gitignored `.claude/settings.local.json` that overrides the env var with your actual key — don't commit secrets to a shared repo.
 
 ### Cursor
 
