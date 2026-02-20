@@ -56,7 +56,7 @@ export async function scanCodebase(
       cwd: projectDir,
       nodir: true,
       ignore: excludePatterns,
-      dot: false,
+      dot: true,
     });
     allFiles.push(...matches);
   }
