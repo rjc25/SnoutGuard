@@ -16,7 +16,6 @@ import {
   type ArchDecision,
   type ArchGuardConfig,
   type ParsedFile,
-  type DetectedPattern,
 } from '@archguard/core';
 import type Anthropic from '@anthropic-ai/sdk';
 import { formatDirectoryTree, type DirectoryNode } from './scanner.js';
@@ -51,9 +50,28 @@ type DecisionResponse = z.infer<typeof decisionsResponseSchema>;
 
 // ─── Constants ─────────────────────────────────────────────────────
 
-const MAX_SAMPLE_SIZE = 12_000;
-const MAX_SAMPLES_PER_REQUEST = 15;
 const MAX_PROMPT_TOKENS = 150_000;
+// Reserve tokens for system prompt, few-shot, tree, dep summary, task instructions
+const PROMPT_OVERHEAD_TOKENS = 8_000;
+// Token budget available for file content in the prompt
+const FILE_CONTENT_BUDGET_TOKENS = MAX_PROMPT_TOKENS - PROMPT_OVERHEAD_TOKENS;
+
+/** Content tiers determine how much of a file the LLM sees */
+type ContentTier = 'full' | 'summary';
+
+interface ScoredFile {
+  file: ParsedFile;
+  score: number;
+  tier: ContentTier;
+  /** Estimated tokens this file will consume in the prompt */
+  tokenCost: number;
+  /** Why this file scored high — useful for debugging */
+  scoreBreakdown: Record<string, number>;
+  /** Estimated tokens for full file content */
+  contentTokens: number;
+  /** Estimated tokens for summary-only representation */
+  summaryTokens: number;
+}
 
 // ─── System Prompt ─────────────────────────────────────────────────
 
@@ -153,8 +171,17 @@ Decorators found: @Controller, @Injectable, @InjectRepository
 
 /**
  * Extract architectural decisions using LLM analysis.
- * Sends representative code samples, dependency graph, and directory structure
- * to Claude for deep pattern identification with chain-of-thought reasoning.
+ *
+ * Strategy:
+ * 1. Score all files and determine which ones deserve full content
+ * 2. If everything fits in one call — do one call
+ * 3. If not — split high-value files into batches, each getting a full
+ *    LLM call with the shared context (tree, dep graph) plus its batch
+ *    of full-content files + summaries of everything else
+ * 4. Merge and deduplicate across all calls
+ *
+ * This ensures every architecturally significant file gets its full
+ * content seen by Opus, even if that requires multiple calls.
  */
 export async function extractDecisions(
   client: Anthropic,
@@ -163,93 +190,119 @@ export async function extractDecisions(
   directoryTree: DirectoryNode,
   dependencyGraph?: DependencyGraph
 ): Promise<ArchDecision[]> {
-  // For large codebases, analyze in batches
-  const inputSize = estimateInputSize(files, directoryTree, dependencyGraph);
+  // Score all files upfront so we can plan the call strategy
+  const allScored = files.map((f) => {
+    const { score, breakdown } = calculateSignificance(f, dependencyGraph);
+    const content = readFileContent(f.filePath);
+    const cTokens = content ? estimateTokens(content) : 0;
+    const sTokens = estimateFileSummaryTokens(f);
+    return {
+      file: f,
+      score,
+      tier: 'summary' as ContentTier,
+      tokenCost: sTokens,
+      scoreBreakdown: breakdown,
+      contentTokens: cTokens,
+      summaryTokens: sTokens,
+    };
+  });
+  allScored.sort((a, b) => b.score - a.score);
 
-  if (inputSize > MAX_PROMPT_TOKENS) {
-    return extractDecisionsMultiPass(client, config, files, directoryTree, dependencyGraph);
+  // Separate files that deserve full content (score >= 4) from summary-only
+  const fullCandidates = allScored.filter((s) => s.score >= 4 && s.contentTokens > 0);
+  const summaryOnly = allScored.filter((s) => s.score < 4 || s.contentTokens === 0);
+
+  // Calculate shared overhead: tree, dep summary, file paths, system prompt, etc.
+  const treeStr = formatDirectoryTree(directoryTree);
+  const depSummary = dependencyGraph ? buildDependencyContext(dependencyGraph) : '';
+  const allPaths = files.map((f) => f.filePath).join('\n');
+  const sharedOverhead =
+    PROMPT_OVERHEAD_TOKENS +
+    estimateTokens(treeStr) +
+    estimateTokens(depSummary) +
+    estimateTokens(allPaths) +
+    summaryOnly.reduce((sum, s) => sum + s.summaryTokens, 0);
+
+  // How many tokens are available per call for full-content files?
+  const budgetPerCall = FILE_CONTENT_BUDGET_TOKENS - sharedOverhead;
+
+  // Greedily pack full-content files into batches
+  const batches: ScoredFile[][] = [];
+  let currentBatch: ScoredFile[] = [];
+  let currentBatchTokens = 0;
+
+  for (const entry of fullCandidates) {
+    const cost = entry.contentTokens + entry.summaryTokens;
+    if (currentBatchTokens + cost > budgetPerCall && currentBatch.length > 0) {
+      // Current batch is full — start a new one
+      batches.push(currentBatch);
+      currentBatch = [];
+      currentBatchTokens = 0;
+    }
+    entry.tier = 'full';
+    entry.tokenCost = cost;
+    currentBatch.push(entry);
+    currentBatchTokens += cost;
+  }
+  if (currentBatch.length > 0) {
+    batches.push(currentBatch);
   }
 
-  return extractDecisionsSinglePass(client, config, files, directoryTree, dependencyGraph);
-}
+  // If no full-content files, still do at least one call with summaries
+  if (batches.length === 0) {
+    batches.push([]);
+  }
 
-/**
- * Single-pass extraction for codebases that fit within context.
- */
-async function extractDecisionsSinglePass(
-  client: Anthropic,
-  config: ArchGuardConfig,
-  files: ParsedFile[],
-  directoryTree: DirectoryNode,
-  dependencyGraph?: DependencyGraph
-): Promise<ArchDecision[]> {
-  const userPrompt = buildAnalysisPrompt(files, directoryTree, dependencyGraph);
-
-  const response = await analyzeWithLlmValidated<DecisionResponse>(
-    client,
-    config,
-    { systemPrompt: SYSTEM_PROMPT, userPrompt },
-    decisionsResponseSchema,
-    'analyze'
-  );
-
-  return response.decisions.map(toArchDecision);
-}
-
-/**
- * Multi-pass extraction for large codebases.
- * Splits files into groups by architectural area and analyzes each separately,
- * then merges and deduplicates results.
- */
-async function extractDecisionsMultiPass(
-  client: Anthropic,
-  config: ArchGuardConfig,
-  files: ParsedFile[],
-  directoryTree: DirectoryNode,
-  dependencyGraph?: DependencyGraph
-): Promise<ArchDecision[]> {
-  const groups = groupFilesByArea(files);
+  // Execute LLM calls — one per batch
   const allDecisions: ArchDecision[] = [];
 
-  for (const [area, areaFiles] of Object.entries(groups)) {
-    const prompt = buildAnalysisPrompt(areaFiles, directoryTree, dependencyGraph, area);
-    const inputTokens = estimateTokens(SYSTEM_PROMPT + prompt);
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    const batchLabel = batches.length > 1 ? `batch ${i + 1}/${batches.length}` : undefined;
 
-    // Skip if even a single area is too large — sample it
-    if (inputTokens > MAX_PROMPT_TOKENS) {
-      const sampled = selectRepresentativeSamples(areaFiles, MAX_SAMPLES_PER_REQUEST);
-      const sampledPrompt = buildAnalysisPrompt(sampled, directoryTree, dependencyGraph, area);
+    // Build the file selection for this call: batch's full-content files + all summaries
+    const callFiles: ScoredFile[] = [
+      ...batch,
+      ...summaryOnly.map((s) => ({ ...s, tier: 'summary' as ContentTier })),
+      // Also include full candidates NOT in this batch as summaries
+      ...fullCandidates
+        .filter((s) => !batch.includes(s))
+        .map((s) => ({ ...s, tier: 'summary' as ContentTier, tokenCost: s.summaryTokens })),
+    ];
 
-      const response = await analyzeWithLlmValidated<DecisionResponse>(
-        client,
-        config,
-        { systemPrompt: SYSTEM_PROMPT, userPrompt: sampledPrompt },
-        decisionsResponseSchema,
-        'analyze'
-      );
-      allDecisions.push(...response.decisions.map(toArchDecision));
-    } else {
-      const response = await analyzeWithLlmValidated<DecisionResponse>(
-        client,
-        config,
-        { systemPrompt: SYSTEM_PROMPT, userPrompt: prompt },
-        decisionsResponseSchema,
-        'analyze'
-      );
-      allDecisions.push(...response.decisions.map(toArchDecision));
-    }
+    const userPrompt = buildAnalysisPromptFromScored(
+      callFiles,
+      files,
+      directoryTree,
+      dependencyGraph,
+      batchLabel
+    );
+
+    const response = await analyzeWithLlmValidated<DecisionResponse>(
+      client,
+      config,
+      { systemPrompt: SYSTEM_PROMPT, userPrompt },
+      decisionsResponseSchema,
+      'analyze'
+    );
+    allDecisions.push(...response.decisions.map(toArchDecision));
   }
 
-  return deduplicateDecisions(allDecisions);
+  return batches.length > 1 ? deduplicateDecisions(allDecisions) : allDecisions;
 }
 
 // ─── Prompt Building ───────────────────────────────────────────────
 
-function buildAnalysisPrompt(
-  files: ParsedFile[],
+/**
+ * Build the analysis prompt from pre-scored files.
+ * This is the core prompt builder used by the main extraction flow.
+ */
+function buildAnalysisPromptFromScored(
+  scoredFiles: ScoredFile[],
+  allFiles: ParsedFile[],
   directoryTree: DirectoryNode,
   dependencyGraph?: DependencyGraph,
-  areaFocus?: string
+  batchLabel?: string
 ): string {
   const sections: string[] = [];
 
@@ -257,26 +310,31 @@ function buildAnalysisPrompt(
   sections.push(FEW_SHOT_EXAMPLE);
 
   // Project overview
-  const languages = [...new Set(files.map((f) => f.language))];
-  const totalLines = files.reduce((sum, f) => sum + f.lineCount, 0);
+  const languages = [...new Set(allFiles.map((f) => f.language))];
+  const totalLines = allFiles.reduce((sum, f) => sum + f.lineCount, 0);
   sections.push(`<project_overview>
 Languages: ${languages.join(', ')}
-Total files: ${files.length}
+Total files: ${allFiles.length}
 Total lines: ${totalLines}
-${areaFocus ? `Analysis focus area: ${areaFocus}` : 'Full codebase analysis'}
+${batchLabel ? `Analysis pass: ${batchLabel} (results will be merged across passes)` : 'Full codebase analysis'}
 </project_overview>`);
 
   // Directory structure
   const treeStr = formatDirectoryTree(directoryTree);
+  const treeTokens = estimateTokens(treeStr);
+  const maxTreeTokens = 10_000;
   sections.push(`<directory_structure>
-${truncate(treeStr, 4000)}
+${treeTokens > maxTreeTokens ? truncate(treeStr, maxTreeTokens * 4) : treeStr}
 </directory_structure>`);
 
-  // File AST summaries
-  const samples = selectRepresentativeSamples(files, MAX_SAMPLES_PER_REQUEST);
-  const fileSummaries = samples.map((f) => {
+  // Build file sections with tiered content
+  const fullContentFiles: string[] = [];
+  const summaryFiles: string[] = [];
+
+  for (const entry of scoredFiles) {
+    const f = entry.file;
     const parts = [
-      `<file path="${f.filePath}" language="${f.language}" lines="${f.lineCount}">`,
+      `<file path="${f.filePath}" language="${f.language}" lines="${f.lineCount}" tier="${entry.tier}" significance="${entry.score}">`,
     ];
     if (f.imports.length > 0) parts.push(`  <imports>${f.imports.join(', ')}</imports>`);
     if (f.exports.length > 0) parts.push(`  <exports>${f.exports.join(', ')}</exports>`);
@@ -285,18 +343,29 @@ ${truncate(treeStr, 4000)}
     if (f.functions.length > 0) parts.push(`  <functions>${f.functions.join(', ')}</functions>`);
     if (f.decorators.length > 0) parts.push(`  <decorators>${f.decorators.join(', ')}</decorators>`);
 
-    // Include file content for architecturally significant files
-    const content = readFileContent(f.filePath);
-    if (content && calculateSignificance(f) > 6) {
-      parts.push(`  <content>${truncate(content, MAX_SAMPLE_SIZE / MAX_SAMPLES_PER_REQUEST)}</content>`);
+    if (entry.tier === 'full') {
+      const content = readFileContent(f.filePath);
+      if (content) {
+        parts.push(`  <content>\n${content}\n  </content>`);
+      }
     }
 
     parts.push('</file>');
-    return parts.join('\n');
-  });
+    const fileXml = parts.join('\n');
 
-  sections.push(`<code_analysis>
-${fileSummaries.join('\n\n')}
+    if (entry.tier === 'full') {
+      fullContentFiles.push(fileXml);
+    } else {
+      summaryFiles.push(fileXml);
+    }
+  }
+
+  // Present full-content files first (most important for LLM reasoning)
+  const allFileSections = [...fullContentFiles, ...summaryFiles];
+  const fullCount = fullContentFiles.length;
+  const summaryCount = summaryFiles.length;
+  sections.push(`<code_analysis files_with_full_content="${fullCount}" files_with_summary="${summaryCount}" total_project_files="${allFiles.length}">
+${allFileSections.join('\n\n')}
 </code_analysis>`);
 
   // Dependency graph summary
@@ -308,9 +377,9 @@ ${depSummary}
   }
 
   // All file paths for context
-  const allPaths = files.map((f) => f.filePath).join('\n');
+  const allPaths = allFiles.map((f) => f.filePath).join('\n');
   sections.push(`<all_file_paths>
-${truncate(allPaths, 3000)}
+${allPaths}
 </all_file_paths>`);
 
   sections.push(`<task>
@@ -319,6 +388,8 @@ Analyze this codebase and identify ALL architectural decisions. For each decisio
 2. Determine if it's intentional (deliberate choice) or accidental (emerged without planning)
 3. Assign calibrated confidence based on evidence strength
 4. List specific constraints this decision imposes
+
+You have full source code for ${fullCount} architecturally significant files and structural summaries for ${summaryCount} more. Use the full source code to identify concrete patterns, and the summaries + dependency graph + directory structure to identify broader architectural decisions across the codebase.
 
 Return your analysis as JSON matching the schema in the system prompt.
 </task>`);
@@ -378,67 +449,173 @@ function buildDependencyContext(graph: DependencyGraph): string {
   return parts.join('\n');
 }
 
-// ─── File Selection ────────────────────────────────────────────────
+// ─── File Scoring ───────────────────────────────────────────────────
 
-function selectRepresentativeSamples(files: ParsedFile[], max: number): ParsedFile[] {
-  const scored = files.map((f) => ({ file: f, score: calculateSignificance(f) }));
-  scored.sort((a, b) => b.score - a.score);
+/**
+ * Calculate architectural significance of a file using both static
+ * heuristics and dependency graph topology.
+ *
+ * Returns a score object with breakdown for debuggability.
+ */
+function calculateSignificance(
+  file: ParsedFile,
+  graph?: DependencyGraph
+): { score: number; breakdown: Record<string, number> } {
+  const b: Record<string, number> = {};
 
-  // Ensure diversity: pick from different directories
-  const selected: ParsedFile[] = [];
-  const dirCounts = new Map<string, number>();
+  // ── 1. Graph-derived signals (strongest indicators) ────────────
 
-  for (const { file } of scored) {
-    if (selected.length >= max) break;
-    const dir = file.filePath.split('/').slice(0, -1).join('/');
-    const count = dirCounts.get(dir) ?? 0;
+  if (graph) {
+    const node = graph.nodes.get(file.filePath);
+    if (node) {
+      const fanIn = node.importedBy.length;
+      const fanOut = node.imports.length;
 
-    // Allow up to 3 from same directory
-    if (count < 3) {
-      selected.push(file);
-      dirCounts.set(dir, count + 1);
+      // Hub detection: files imported by many others are architectural anchors
+      // Scale: 1pt per importer, capped at 15. A file imported by 10+ modules
+      // is almost certainly architecturally significant.
+      b.fanIn = Math.min(fanIn, 15);
+
+      // Connector detection: files that import many others are integration points
+      b.fanOut = Math.min(Math.floor(fanOut / 2), 6);
+
+      // Cross-boundary imports: if this file is imported from multiple
+      // top-level directories, it's a shared boundary/contract
+      const importerAreas = new Set(
+        node.importedBy.map((p: string) => p.split('/')[0])
+      );
+      if (importerAreas.size >= 3) b.crossBoundary = 8;
+      else if (importerAreas.size === 2) b.crossBoundary = 4;
+
+      // Circular dependency membership: files in cycles are architecturally
+      // interesting (either intentional patterns or problems to surface)
+      const inCycle = graph.circularDeps.some((c) =>
+        c.files.includes(file.filePath)
+      );
+      if (inCycle) b.circularDep = 5;
+
+      // High instability with high fan-in = fragile hub (important to see)
+      const metrics = graph.couplingMetrics.get(file.filePath);
+      if (metrics) {
+        if (metrics.instability > 0.7 && fanIn >= 3) b.fragileHub = 4;
+        // Low distance from main sequence = well-designed module
+        if (metrics.distanceFromMainSequence < 0.2 && fanIn >= 2) b.wellDesigned = 2;
+      }
     }
   }
 
-  return selected;
-}
+  // ── 2. Structural role detection ───────────────────────────────
 
-function calculateSignificance(file: ParsedFile): number {
-  let score = 0;
+  const lowerPath = file.filePath.toLowerCase();
+  const fileName = lowerPath.split('/').pop() ?? '';
 
-  // Config files
-  if (/config|\.config\.|tsconfig/.test(file.filePath)) score += 5;
-
-  // Entry points
-  if (/index\.(ts|js)|main\.(ts|js)|app\.(ts|js)$/.test(file.filePath)) score += 3;
-
-  // Decorators indicate framework patterns
-  score += file.decorators.length * 2;
-
-  // Exports indicate public API surface
-  score += Math.min(file.exports.length, 5);
-
-  // Imports indicate connectivity
-  score += Math.min(file.imports.length / 3, 3);
-
-  // Interfaces/abstract classes indicate design contracts
-  score += (file.interfaces?.length ?? 0) * 2;
-  score += (file.abstractClasses?.length ?? 0) * 3;
-
-  // Architecturally significant naming
-  const significantNames = [
-    'controller', 'service', 'middleware', 'router', 'repository',
-    'module', 'provider', 'factory', 'handler', 'gateway', 'guard',
-    'interceptor', 'adapter', 'port', 'usecase',
-  ];
-  if (significantNames.some((n) =>
-    file.filePath.toLowerCase().includes(n) ||
-    file.classes.some((c) => c.toLowerCase().includes(n))
-  )) {
-    score += 4;
+  // Config/setup files define architectural constraints
+  if (/(?:^|\/)(?:tsconfig|jest\.config|vite\.config|webpack\.config|\.eslintrc|rollup\.config|next\.config|nuxt\.config|tailwind\.config|docker-compose|\.env\.example|babel\.config|vitest\.config)/.test(lowerPath) ||
+      /\.config\.(ts|js|mjs|cjs)$/.test(fileName)) {
+    b.config = 6;
   }
 
-  return score;
+  // Entry points / bootstrap files wire the application together
+  if (/(?:^|\/)(?:main|app|server|index)\.(ts|js|tsx|jsx|py|go|rs|java)$/.test(fileName)) {
+    b.entryPoint = 4;
+  }
+
+  // Schema/migration files define data architecture
+  if (/(?:schema|migration|seed|model|entity|prisma\.schema)/.test(lowerPath)) {
+    b.dataLayer = 4;
+  }
+
+  // Infrastructure files
+  if (/(?:dockerfile|docker-compose|terraform|\.github\/|\.circleci|jenkinsfile|k8s|helm)/i.test(lowerPath)) {
+    b.infrastructure = 3;
+  }
+
+  // ── 3. Code structure signals ──────────────────────────────────
+
+  // Decorators indicate framework patterns (NestJS, Angular, Spring, etc.)
+  if (file.decorators.length > 0) {
+    b.decorators = Math.min(file.decorators.length * 2, 8);
+  }
+
+  // Interfaces and abstract classes define contracts
+  const interfaceCount = file.interfaces?.length ?? 0;
+  const abstractCount = file.abstractClasses?.length ?? 0;
+  if (interfaceCount > 0 || abstractCount > 0) {
+    b.contracts = Math.min(interfaceCount * 2 + abstractCount * 3, 10);
+  }
+
+  // Public API surface
+  if (file.exports.length > 0) {
+    b.exports = Math.min(file.exports.length, 6);
+  }
+
+  // ── 4. Architectural naming patterns ───────────────────────────
+
+  // Check file path AND class/function names for role indicators
+  const allNames = [
+    lowerPath,
+    ...file.classes.map((c: string) => c.toLowerCase()),
+    ...file.functions.map((fn: string) => fn.toLowerCase()),
+  ].join(' ');
+
+  const namingPatterns: Array<{ names: string[]; points: number }> = [
+    // Backend architectural roles
+    { names: ['controller', 'router', 'endpoint', 'route', 'resolver'], points: 5 },
+    { names: ['service', 'usecase', 'use-case', 'interactor', 'command-handler'], points: 5 },
+    { names: ['repository', 'dao', 'data-source', 'datasource'], points: 5 },
+    { names: ['middleware', 'interceptor', 'guard', 'pipe', 'filter'], points: 4 },
+    { names: ['gateway', 'adapter', 'port', 'client', 'connector'], points: 4 },
+    { names: ['factory', 'builder', 'provider', 'registry', 'container'], points: 4 },
+    { names: ['module', 'plugin', 'extension'], points: 3 },
+    // Frontend architectural roles
+    { names: ['component', 'page', 'view', 'screen', 'layout'], points: 3 },
+    { names: ['hook', 'composable', 'use-'], points: 3 },
+    { names: ['store', 'reducer', 'slice', 'atom', 'signal', 'state'], points: 4 },
+    { names: ['context', 'provider'], points: 3 },
+    // Event/messaging patterns
+    { names: ['event', 'listener', 'subscriber', 'handler', 'saga', 'effect'], points: 3 },
+    { names: ['queue', 'worker', 'job', 'consumer', 'producer'], points: 3 },
+    // Auth/security
+    { names: ['auth', 'permission', 'policy', 'rbac', 'acl'], points: 4 },
+  ];
+
+  let namingScore = 0;
+  for (const { names, points } of namingPatterns) {
+    if (names.some((n) => allNames.includes(n))) {
+      namingScore = Math.max(namingScore, points);
+    }
+  }
+  if (namingScore > 0) b.naming = namingScore;
+
+  // ── 5. Barrel file detection (lower value — re-exports, not logic) ─
+
+  const isBarrel = fileName.startsWith('index.') &&
+    file.exports.length > 3 &&
+    file.functions.length === 0 &&
+    file.classes.length === 0;
+  if (isBarrel) {
+    // Barrel files are useful for understanding module boundaries but
+    // contain no logic. Cap their score — they shouldn't displace real files.
+    b.barrel = -5;
+  }
+
+  const score = Object.values(b).reduce((sum, v) => sum + v, 0);
+  return { score, breakdown: b };
+}
+
+function estimateFileSummaryTokens(file: ParsedFile): number {
+  // Estimate tokens for the XML metadata (path, language, imports, exports, etc.)
+  const parts = [
+    file.filePath,
+    file.language,
+    file.imports.join(', '),
+    file.exports.join(', '),
+    file.classes.join(', '),
+    (file.interfaces ?? []).join(', '),
+    file.functions.join(', '),
+    file.decorators.join(', '),
+  ];
+  return estimateTokens(parts.join(' ')) + 20; // +20 for XML tags
 }
 
 function readFileContent(filePath: string): string | null {
@@ -448,20 +625,6 @@ function readFileContent(filePath: string): string | null {
   } catch {
     return null;
   }
-}
-
-// ─── File Grouping ─────────────────────────────────────────────────
-
-function groupFilesByArea(files: ParsedFile[]): Record<string, ParsedFile[]> {
-  const groups: Record<string, ParsedFile[]> = {};
-
-  for (const file of files) {
-    const topDir = file.filePath.split('/')[0] || 'root';
-    if (!groups[topDir]) groups[topDir] = [];
-    groups[topDir].push(file);
-  }
-
-  return groups;
 }
 
 // ─── Result Transformation ─────────────────────────────────────────
@@ -475,7 +638,7 @@ function toArchDecision(d: DecisionResponse['decisions'][number]): ArchDecision 
     status: 'detected',
     confidence: d.confidence,
     reasoning: d.reasoning,
-    evidence: d.evidence.map((e) => ({
+    evidence: d.evidence.map((e: { filePath: string; lineRange: [number, number]; snippet: string; explanation: string }) => ({
       filePath: e.filePath,
       lineRange: e.lineRange,
       snippet: e.snippet,
@@ -502,26 +665,3 @@ function deduplicateDecisions(decisions: ArchDecision[]): ArchDecision[] {
   return [...seen.values()];
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────
-
-function estimateInputSize(
-  files: ParsedFile[],
-  tree: DirectoryNode,
-  graph?: DependencyGraph
-): number {
-  let estimate = estimateTokens(SYSTEM_PROMPT);
-  estimate += estimateTokens(FEW_SHOT_EXAMPLE);
-  estimate += estimateTokens(formatDirectoryTree(tree));
-
-  for (const f of files.slice(0, MAX_SAMPLES_PER_REQUEST)) {
-    estimate += estimateTokens(
-      f.filePath + f.imports.join('') + f.exports.join('') + f.classes.join('') + f.functions.join('')
-    );
-  }
-
-  if (graph) {
-    estimate += graph.totalModules * 20;
-  }
-
-  return estimate;
-}
