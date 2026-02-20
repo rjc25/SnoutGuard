@@ -1,164 +1,161 @@
 # Architecture
 
-This is **ArchGuard** — an AI-powered architectural governance platform organized as a monorepo. It analyzes codebases, extracts architectural decisions, detects drift, reviews PRs, tracks developer velocity, and generates AI context files for coding assistants.
+This is ArchGuard — an LLM-powered architectural analysis platform. It extracts architectural decisions from codebases, reviews PRs for violations, tracks developer velocity, generates work summaries, and syncs context files to AI coding assistants.
 
-## Monorepo Package Structure
+## Monorepo Structure
 
-Packages under `packages/` with `@archguard/*` namespace:
+11 packages under `packages/`, each a bounded domain with `src/` directory and `index.ts` barrel export:
 
-| Package | Responsibility |
-|---------|---------------|
-| **core** | Shared types, LLM client, Git utilities, DB schema, Zod schemas |
-| **analyzer** | LLM-powered decision extraction, drift detection, layer/pattern detection |
-| **reviewer** | AI-powered code review |
-| **velocity** | Developer velocity tracking, complexity analysis |
-| **work-summary** | Work summary generation |
-| **integrations** | GitHub, Bitbucket, Slack APIs, webhooks, PR bots |
-| **context-sync** | Multi-format AI context file generation (Cursor, Claude, Copilot, etc.) |
-| **mcp-server** | Model Context Protocol server for AI assistant integration |
-| **server** | Hono HTTP server, API routes, middleware, job queues |
-| **dashboard** | Next.js App Router frontend |
-| **cli** | Commander-based CLI |
+- **core** — shared types, config, DB, LLM client, git, auth, logging (depends on NO other @archguard packages)
+- **analyzer** — codebase scanning, decision extraction, dependency analysis, drift detection
+- **reviewer** — dual-pass code review (deterministic rules + LLM), multi-format output
+- **velocity** — developer metrics, composite scoring, blocker detection
+- **work-summary** — LLM-powered summary generation with templates
+- **context-sync** — AI context file generation (7+ formats)
+- **integrations** — GitHub, Bitbucket, Slack clients and webhooks
+- **mcp-server** — Model Context Protocol server for AI agents
+- **server** — Hono HTTP API with BullMQ job processing
+- **dashboard** — Next.js App Router web UI
+- **cli** — Commander.js CLI
 
-### Dependency Rules
+**Rules:**
+- You MUST use `@archguard/*` scoped imports for cross-package dependencies, never relative paths
+- You MUST define all shared domain types in `packages/core/src/types.ts` — never redefine them elsewhere
+- You MUST export public API through each package's `index.ts` barrel file
+- Core MUST NOT depend on any other @archguard package
+- New domain capabilities should be new packages, not bolted onto existing ones
 
-- **Core MUST remain dependency-free** of all other packages.
-- Dependencies MUST flow inward toward core — never circular between packages.
-- Cross-package imports MUST use the `@archguard/*` namespace.
-- You MUST place shared utilities in the `core` package.
-- Each package MUST maintain its own build and test configuration.
-- New functionality MUST be placed in the appropriate package based on domain.
+## LLM Layer (Anthropic Claude Only)
 
-## Database — Drizzle ORM + SQLite
+All LLM operations go through `packages/core/src/llm.ts`. Different Claude models per operation type (Opus for analysis, Sonnet for review/MCP/summary). Features: exponential backoff retry, cost tracking, in-memory caching with TTL, Zod validation, context window overflow prevention.
 
-- All schemas are defined centrally in `core/db/schema.ts` using Drizzle's schema builder.
-- You MUST use Drizzle ORM's typed query builder for all database operations. Never use raw SQL except for genuinely complex operations.
-- Schema changes MUST go through Drizzle migrations.
-- All business data MUST be scoped by `organizationId` for multi-tenant isolation.
-- New tables MUST include organization scoping where appropriate.
-- Foreign key relationships MUST be properly defined.
+**Rules:**
+- You MUST route all LLM calls through `analyzeWithLlm` or `analyzeWithLlmValidated` — no direct SDK usage
+- You MUST add new operations to the `LlmOperation` type and model mapping
+- You MUST validate structured LLM responses with Zod schemas via `analyzeWithLlmValidated`
+- You MUST track cost for every call — the run cost accumulator is mandatory
+- You MUST respect `maxCostPerRun` limits to prevent surprise bills
+- You MUST use XML-tagged prompt sections (`<role>`, `<task>`, `<output_format>`, etc.) following Anthropic best practices
+- You MUST include few-shot examples for complex extraction tasks
+- JSON extraction handles markdown fences, truncated responses (via `repairTruncatedJson`), and auto-retry with refined prompts on validation failure (up to 2 retries)
 
-## LLM Integration — Anthropic Claude
+**Error hierarchy:** `LlmError` → `LlmAuthError`, `LlmRateLimitError`, `LlmValidationError` (carries rawResponse + zodErrors), `LlmCostLimitError`. Always throw specific subclasses, never generic Error.
 
-- All LLM operations MUST go through the centralized `core/llm.ts` module.
-- You MUST implement cost tracking for every LLM call.
-- LLM responses MUST be validated against Zod schemas before processing.
-- API keys MUST be managed through configuration — never hardcoded.
-- Different models should be selected based on operation requirements.
+## Database (SQLite + Drizzle ORM)
 
-## Validation — Zod Throughout
+SQLite via better-sqlite3 with Drizzle ORM. Schema in `packages/core/src/db/schema.ts` (16 tables). WAL mode enabled.
 
-- All external inputs MUST be validated with Zod schemas.
-- All LLM responses MUST be validated before processing.
-- Configuration files MUST have corresponding Zod schemas.
-- API request bodies MUST be validated with Zod.
+**Rules:**
+- You MUST use Drizzle ORM query builders — no raw SQL in application code (except schema init)
+- You MUST import Drizzle operators (`eq`, `and`, `desc`, etc.) from `@archguard/core`, not `drizzle-orm` directly
+- JSON/array fields are stored as text — serialize with `JSON.stringify`, parse with `JSON.parse`
+- Schema changes require updating both Drizzle schema definitions and CREATE TABLE statements
+- Repository deletion MUST cascade in order: evidence → decisions, drift_events → snapshots, dependencies, reviews, sync_history → repository
 
-## Server — Hono Framework
+## Server (Hono + BullMQ)
 
-- All HTTP handlers MUST use Hono's `Context` and `Next` types.
-- Middleware MUST follow Hono's `async (c, next) =>` pattern.
-- Middleware pipeline order: CORS → logging → authentication → organization context → rate limiting → RBAC.
-- Routes MUST NOT directly access the database — go through service/repository layers.
-- Context variables MUST be properly typed in `hono-env.d.ts`.
-- All protected endpoints MUST use `requirePermission` middleware.
+HTTP framework: Hono. Middleware chain order: CORS → logger → auth → org-context → rate-limit → routes.
 
-## Security — RBAC + Multi-Tenancy
+**Rules:**
+- All route modules MUST export a factory function (`createXxxRouter(db: DbClient)`) returning a Hono router
+- Route handlers receive Hono `Context` objects, not Express req/res
+- Long-running operations MUST be processed via BullMQ queues, never inline in HTTP handlers
+- Each job type MUST have a typed data interface
+- Redis is required for server mode (`REDIS_URL` env var)
+- Workers can be disabled via `ENABLE_WORKERS=false`
+- Job processors MUST use dynamic `import()` for heavy packages to avoid circular dependencies
+- Webhook and health routes MUST be mounted before the auth middleware chain
+- Public routes (webhooks) verify signatures cryptographically (HMAC-SHA256, constant-time comparison)
+- Graceful shutdown: close queues/workers first, then HTTP server, force exit after 10s
 
-- Four-tier role hierarchy: **viewer < member < admin < owner** (higher inherits lower).
-- All API endpoints MUST use RBAC middleware for authorization.
-- Permission checks MUST happen after authentication.
-- Users can ONLY access data within their organization.
-- Database queries MUST include organization filtering.
-- Owner-specific resources MUST check ownership in addition to role.
-- New permissions MUST be added to the `PERMISSIONS` constant and role mappings.
+### RBAC & Multi-Tenancy
 
-## Job Queue — BullMQ + Redis
+4-tier roles: owner > admin > member > viewer. Permissions follow `resource:action` pattern defined in `core/auth.ts`.
 
-- All long-running operations MUST be processed through BullMQ job queues.
-- Job types: analysis, review, velocity, summary, sync.
-- Job data MUST be serializable and follow defined TypeScript interfaces.
-- Workers MUST implement progress tracking, error handling, and retry logic.
-- Jobs MUST be idempotent.
-- Redis connection MUST be shared and properly managed across all queues.
-- Workers MUST be registered during server startup.
+- You MUST protect every API route with `requirePermission()` or `requireRole()` middleware
+- You MUST scope all database queries by `orgId` from authenticated session — never from user input
+- Auth bypass: `ARCHGUARD_DISABLE_AUTH` env var for local/CLI mode
+- New permissions MUST be added to `ROLE_PERMISSIONS` in `core/auth.ts`
+- SAML SSO config is per-organization; SAML routes must remain public (before auth middleware)
 
-## Real-Time — Server-Sent Events (SSE)
+### Rate Limiting
 
-- All real-time dashboard updates MUST use SSE (not WebSockets).
-- SSE connections MUST be authenticated with valid tokens.
-- Events MUST be filtered by organization membership.
-- Client reconnection MUST use exponential backoff.
-- Connection cleanup MUST be handled to prevent memory leaks.
-- Event payloads MUST be JSON serializable.
+Three tiers: `standardLimit` (100/min), `strictLimit` (20/min), `analysisLimit` (5/min). In-memory sliding window. Rate limit headers on every response.
 
-## Dashboard — Next.js App Router
+### REST API Conventions
 
-- You MUST follow Next.js App Router file-based routing conventions.
-- Interactive components MUST use the `'use client'` directive.
-- Route groups: `(app)` for authenticated, `(auth)` for unauthenticated areas.
-- Layouts MUST be used for shared UI across route groups.
-- All API interactions MUST go through custom hooks (`use-decisions`, `use-reviews`, `use-velocity`, `use-sse`), never direct API calls in components.
-- Hooks MUST provide consistent loading, error, and success state interfaces.
-- All styling MUST use Tailwind CSS classes — no custom CSS files.
-- Use the `cn()` utility for conditional class composition.
-- Brand colors and custom animations are defined in `tailwind.config.ts`.
+- List endpoints: `limit`/`offset` pagination (defaults: 20/0), return `{ data, total }`
+- Create: return 201. Async operations: return 202
+- Errors: `{ error: string }` format. 404 for missing resources
+- SSE for real-time updates (not WebSockets). Events scoped to org. Heartbeat every 30s. New event types added to `SSEEventType` union
 
-## Integrations — GitHub, Bitbucket, Slack
+## Dashboard (Next.js App Router)
 
-- Each provider MUST implement consistent interfaces for common operations.
-- Webhook endpoints MUST validate signatures for security.
-- Webhook processing MUST be asynchronous (enqueue to job queue) to avoid timeouts.
-- Integration clients MUST handle API rate limits.
-- PR bots MUST support both inline comments and check runs.
-- Error handling and authentication MUST be consistent across providers.
+Route groups: `(auth)/` for login/signup/SSO, `(app)/` for authenticated pages with sidebar+header layout.
 
-## Context Sync — Multi-Format AI Context Generation
+**Rules:**
+- Authenticated pages MUST be under `(app)/` route group
+- Auth pages MUST be under `(auth)/` route group
+- All pages use `'use client'` directive
+- All API calls MUST go through centralized `lib/api.ts` (`apiFetch`, `apiGet`, `apiPost`, etc.) — auth tokens auto-injected from localStorage
+- Data fetching MUST use custom hooks (`hooks/use-*.ts`) returning `{ data, loading, error, refetch? }` — no React Query/SWR
+- Components organized by domain (`decisions/`, `reviews/`, `velocity/`, etc.), not by type
+- Charts use Recharts with `ResponsiveContainer`. All charts handle empty states
+- Styling: Tailwind CSS with `brand-*` color tokens. Use `cn()` (clsx + tailwind-merge) for conditional classes. Use custom classes: `card`, `btn-primary`, `btn-secondary`, `btn-ghost`, `input-field`
 
-- Supported formats: Cursor rules, CLAUDE.md, GitHub Copilot instructions, Windsurf rules, Kiro steering.
-- Each AI tool format MUST have a dedicated generator.
-- All generators MUST use the shared Handlebars template system and helpers.
-- User-written content sections MUST be preserved between regenerations.
-- LLM compression MUST respect token limits for each format.
-- File watching MUST be debounced to avoid excessive regeneration.
-- Helper functions MUST handle null/undefined values gracefully.
+## Analyzer
 
-## MCP Server — Model Context Protocol
+- **Dual-pass review:** deterministic rule engine first, then LLM analysis. Rule-based violations take precedence on overlap
+- **Tiered file content:** files scoring ≥4 get full source sent to LLM; others get structural summaries only
+- **Incremental analysis:** SHA-256 file hashing, cache at `.archguard/cache.json` with configurable TTL. `--force` bypasses cache
+- **Dependency metrics:** Robert C. Martin's Ca, Ce, instability (I=Ce/(Ca+Ce)), abstractness (A), distance from main sequence (D=|A+I-1|)
+- **Drift detection:** snapshot comparison producing composite 0-100 drift score. First analysis = baseline (score 0). Confidence drops >15% flagged
+- **Multi-language regex parsing:** TS, JS, Python, Go, Rust, Java. New language requires cases in ALL extraction functions
+- **Import resolution order:** language-specific → relative → tsconfig paths → pnpm workspace → fallback. Try extensions: .ts, .tsx, .js, .jsx, .py, .go, /index variants
+- **Pattern detection:** 9 heuristic detectors run pre-LLM. Confidence <0.3 filtered out
 
-- MUST support multiple transports: stdio, SSE, streamable-http.
-- All transports MUST expose the same tools and resources.
-- Transport selection MUST be configurable via environment variables.
-- All MCP tools MUST have JSON schema definitions and Zod input validation.
-- Tool responses MUST follow MCP protocol standards.
-- Each transport MUST handle its own connection lifecycle.
+## Context Sync
 
-## Analyzer — Architectural Analysis
+7 formats: `.cursorrules`, `CLAUDE.md`, `agents.md`, `.github/copilot-instructions.md`, `.windsurfrules`, `.kiro/steering.md`, custom Handlebars templates.
 
-- Modular plugin-like architecture: decision-extractor, layer-detector, pattern-detector, drift-detector.
-- Analysis modules MUST be composable and not tightly coupled.
-- All analyzers MUST work with common `ParsedFile` and `DependencyGraph` types.
-- Dependency analysis MUST support TypeScript path aliases and monorepo packages.
-- Coupling metrics MUST follow Robert C. Martin's formal definitions (afferent/efferent coupling, instability, abstractness, distance from main sequence).
-- Drift detection MUST compare multiple architectural dimensions with severity scoring.
-- Snapshots MUST be stored for historical comparison.
+- Each format has its own generator in `generators/`
+- All generators accept `(decisions: ArchDecision[], config: ArchGuardConfig)` → `string`
+- Generated files include `<!-- archguard:user-start/end -->` markers — user content between markers MUST be preserved on regeneration
+- LLM-powered sync optional via `config.sync.useLlm`
+- Watch mode debounces at 5 seconds
 
-## Velocity — Developer Metrics
+## CLI (Commander.js)
 
-- Velocity scoring combines git metrics, complexity analysis, PR metrics, and architectural impact.
-- Both cyclomatic and cognitive complexity MUST be calculated.
-- Scoring algorithms MUST be configurable through weights.
-- Complexity changes MUST be tracked for refactoring analysis.
+- Each command in own file under `commands/`, exporting `registerXxxCommand(program)`
+- Use `chalk` for colors, `ora` for spinners
+- Load config via `loadConfig()` from `@archguard/core`
+- Validate API key upfront with `requireApiKey()` where LLM needed
+- Custom inline `.env` loader (no dotenv dependency) — existing env vars not overridden
 
-## CLI — Commander Pattern
+## MCP Server
 
-- All CLI commands MUST be registered in the main `index.ts`.
-- Each command MUST export a register function that takes a Commander program.
-- Commands MUST handle their own error cases and user feedback.
+Exposes tools (`get_architectural_decisions`, `check_architectural_compliance`, `get_architectural_guidance`, `get_dependencies`) and resources (`archguard://decisions`, `archguard://patterns`, `archguard://dependencies/{module}`).
 
-## Git Operations
+- Tools MUST have Zod input schemas and return `{ content: [{ type: 'text', text }] }`
+- Resources use `archguard://` URI scheme
+- Supports stdio (default), SSE, and streamable HTTP transports
 
-- All Git operations MUST go through `core/git.ts` utilities (uses `simple-git` library).
-- Git clients MUST be properly initialized with repository paths.
-- Operations MUST be async and handle large repositories gracefully.
+## Configuration
+
+`.archguard.yml` at project root, parsed with js-yaml, validated with Zod. Covers: languages, layers, rules, sync formats, LLM settings, velocity weights, summary schedules. Use `loadConfig()` / `getDefaultConfig()` / `writeDefaultConfig()`.
+
+## Key Patterns
+
+- **Factory functions over classes:** `createGitHubClient()`, `createSlackApp()`, `createLlmClient()`, etc. Classes only for errors, Logger, SyncEngine, SummaryScheduler
+- **Provider interface pattern:** external data sources have interface + `createNoopXxx()` null implementation with `isAvailable()` method
+- **Integrations structure:** each platform (GitHub, Bitbucket) has `api.ts`, `pr-bot.ts`, webhook handler. Reviewer has matching formatters
+- **Logging:** `initLogger()` at startup, `getLogger()` returns safe no-op proxy if uninitialized. Logs to `.archguard/logs/`. LLM calls use specialized `llmRequest`/`llmResponse`/`llmError` methods
+- **Work summaries:** 4 types (standup, sprint-review, one-on-one, progress-report). Templates build `{systemPrompt, userPrompt}` from collected data. `editedContent` stored separately from AI-generated content — never overwrite originals
+- **Velocity:** weighted composite (complexity 0.4, arch impact 0.3, review 0.15, refactoring 0.15). Weights auto-normalize to 1.0. Scores 0-100. Blocker detection from stalled PRs, long branches, review bottlenecks
+
+## Dual-Mode Operation
+
+Local CLI (no auth, SQLite, no Redis) and cloud server (full auth, BullMQ, multi-tenant). Routes handle missing `orgId` gracefully. Session store is in-memory (needs Redis for production).
 
 <!-- archguard:user-start -->
 <!-- archguard:user-end -->
