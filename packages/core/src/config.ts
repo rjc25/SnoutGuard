@@ -45,10 +45,20 @@ const configSchema = z.object({
       exclude: z
         .array(z.string())
         .default([
-          '**/*.test.*',
-          '**/*.spec.*',
           '**/node_modules/**',
           '**/dist/**',
+          '**/build/**',
+          '**/out/**',
+          '**/.next/**',
+          '**/vendor/**',
+          '**/target/**',
+          '**/__pycache__/**',
+          '**/.venv/**',
+          '**/venv/**',
+          '**/*.min.js',
+          '**/*.bundle.js',
+          '**/generated/**',
+          '**/coverage/**',
         ]),
       languages: z
         .array(
@@ -61,8 +71,15 @@ const configSchema = z.object({
             'java',
           ])
         )
-        .default(['typescript']),
-      maxFileSizeKb: z.number().default(500),
+        .default([
+          'typescript',
+          'javascript',
+          'python',
+          'go',
+          'rust',
+          'java',
+        ]),
+      maxFileSizeKb: z.number().default(2048),
       analysisPeriodMonths: z.number().default(6),
     })
     .default({}),
@@ -217,17 +234,34 @@ export function writeDefaultConfig(projectDir: string): string {
   const defaultYaml = `version: 1
 
 # Analysis settings
+# By default scans all common project structures and all supported languages.
+# Test files ARE included so testing architecture decisions can be detected.
 analysis:
   include:
     - "**"
   exclude:
-    - "**/*.test.*"
-    - "**/*.spec.*"
     - "**/node_modules/**"
     - "**/dist/**"
+    - "**/build/**"
+    - "**/out/**"
+    - "**/.next/**"
+    - "**/vendor/**"
+    - "**/target/**"
+    - "**/__pycache__/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/*.min.js"
+    - "**/*.bundle.js"
+    - "**/generated/**"
+    - "**/coverage/**"
   languages:
     - typescript
-  max_file_size_kb: 500
+    - javascript
+    - python
+    - go
+    - rust
+    - java
+  max_file_size_kb: 2048
   analysis_period_months: 6
 
 # LLM settings — an Anthropic API key is required
