@@ -284,6 +284,85 @@ Add to `.cursor/mcp.json`:
 }
 ```
 
+### OpenClaw
+
+OpenClaw's MCP client plugin wires ArchGuard tools directly into the agent's tool palette — no shell commands needed. The agent gets native `archguard_get_architectural_guidance`, `archguard_check_architectural_compliance`, etc. as first-class tools alongside `web_search`, `exec`, and everything else.
+
+**1. Create the plugin directory:**
+
+```bash
+mkdir -p ~/.openclaw/extensions/mcp-client
+```
+
+**2. Create the plugin manifest** (`~/.openclaw/extensions/mcp-client/openclaw.plugin.json`):
+
+```json
+{
+  "id": "mcp-client",
+  "name": "MCP Client",
+  "description": "Connect to MCP servers and expose their tools as native agent tools",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "servers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "command": { "type": "string" },
+            "args": { "type": "array", "items": { "type": "string" } },
+            "env": { "type": "object", "additionalProperties": { "type": "string" } },
+            "cwd": { "type": "string" },
+            "toolPrefix": { "type": "string" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeoutMs": { "type": "number", "default": 30000 }
+          },
+          "required": ["command"]
+        }
+      }
+    }
+  }
+}
+```
+
+**3. Create the plugin** (`~/.openclaw/extensions/mcp-client/index.ts`) — see the [full source](docs/guides/openclaw-integration.md#mcp-client-plugin-source) or copy from the OpenClaw integration guide.
+
+**4. Configure in OpenClaw** (`~/.openclaw/openclaw.json` via `config.patch` or manual edit):
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "mcp-client": {
+        "enabled": true,
+        "config": {
+          "servers": {
+            "archguard": {
+              "command": "archguard",
+              "args": ["serve", "--transport", "stdio", "--path", "/path/to/your/project"],
+              "env": { "ANTHROPIC_API_KEY": "sk-ant-..." },
+              "toolPrefix": "archguard_",
+              "timeoutMs": 60000
+            }
+          }
+        }
+      }
+    }
+  },
+  "tools": {
+    "alsoAllow": [
+      "archguard_get_architectural_decisions",
+      "archguard_check_architectural_compliance",
+      "archguard_get_architectural_guidance",
+      "archguard_get_dependency_graph"
+    ]
+  }
+}
+```
+
+**5. Restart OpenClaw.** The 4 ArchGuard tools appear in the agent's tool palette with `[MCP: archguard]` descriptions, just like built-in tools.
+
 ### Windsurf / Other MCP Clients
 
 Use the same stdio command pattern:

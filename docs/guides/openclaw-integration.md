@@ -61,9 +61,69 @@ That sub-agent gets your `CLAUDE.md` in its context. It knows:
 
 Without ArchGuard, that sub-agent would make reasonable but uninformed decisions. With it, the sub-agent follows your architecture from the first line of code.
 
+### Native MCP Tools (Recommended)
+
+The most powerful integration is wiring ArchGuard's MCP server directly into OpenClaw's tool system. This gives your agent native `archguard_get_architectural_guidance` alongside `web_search`, `exec`, and every other built-in tool — no shell commands, no wrapper scripts.
+
+**How it works:** An MCP client plugin spawns the ArchGuard MCP server as a child process over stdio, discovers its tools via JSON-RPC, and registers each one as a native OpenClaw agent tool. The agent calls them like any other tool and gets structured results back.
+
+**Step 1: Install the MCP client plugin**
+
+Create `~/.openclaw/extensions/mcp-client/` with the plugin manifest and implementation. See the [MCP Client Plugin Source](#mcp-client-plugin-source) at the bottom of this guide for the full code.
+
+**Step 2: Configure in OpenClaw config**
+
+Apply via `gateway config.patch` or edit `~/.openclaw/openclaw.json` directly:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "mcp-client": {
+        "enabled": true,
+        "config": {
+          "servers": {
+            "archguard": {
+              "command": "archguard",
+              "args": ["serve", "--transport", "stdio", "--path", "/path/to/your/project"],
+              "env": { "ANTHROPIC_API_KEY": "sk-ant-..." },
+              "toolPrefix": "archguard_",
+              "timeoutMs": 60000
+            }
+          }
+        }
+      }
+    }
+  },
+  "tools": {
+    "alsoAllow": [
+      "archguard_get_architectural_decisions",
+      "archguard_check_architectural_compliance",
+      "archguard_get_architectural_guidance",
+      "archguard_get_dependency_graph"
+    ]
+  }
+}
+```
+
+**Step 3: Restart OpenClaw**
+
+After restart, you'll see `[MCP: archguard]` tools in the agent's tool palette. The agent can now call them directly:
+
+| Native Tool | What It Does |
+|------------|-------------|
+| `archguard_get_architectural_guidance` | Describe a task → get all relevant decisions and constraints |
+| `archguard_get_architectural_decisions` | Search decisions by keyword, category, or file path |
+| `archguard_check_architectural_compliance` | Validate a code snippet against architectural constraints |
+| `archguard_get_dependency_graph` | Query the dependency graph for coupling metrics |
+
+`archguard_get_architectural_guidance` is the killer feature — it takes a plain-English task description and returns only the decisions relevant to that task. The agent calls it before writing code, naturally, because it's right there in the tool palette.
+
+**Multiple projects:** You can configure multiple servers in the plugin config, each pointing to a different project path. Use different `toolPrefix` values to namespace them (e.g. `"frontend_"`, `"backend_"`).
+
 ### Pre-Flight and Post-Flight Checks
 
-For critical work, the MCP server provides real-time guidance:
+For agents without native MCP integration, the CLI provides the same capabilities:
 
 **Before coding:**
 ```bash
@@ -79,8 +139,6 @@ The MCP server exposes four tools:
 | `get_architectural_decisions` | Search decisions by keyword, category, or file path |
 | `check_architectural_compliance` | Validate a code snippet against architectural constraints |
 | `get_dependency_graph` | Query the dependency graph for coupling metrics |
-
-`get_architectural_guidance` is the most valuable — it takes a plain-English task description and returns only the decisions relevant to the task at hand.
 
 **After coding:**
 ```bash
@@ -204,8 +262,231 @@ Paste this into your OpenClaw session to get started:
 Install ArchGuard from source (https://github.com/rjc25/ArchGuard). Clone the repo,
 install dependencies with pnpm, build all packages, and link the CLI globally. Then in
 my current project: run "archguard init", "archguard analyze", and "archguard sync" to
-generate CLAUDE.md. Configure "archguard serve" as an MCP server in .claude/settings.json.
-Show me the decisions found and the generated context file.
+generate CLAUDE.md.
+
+Then wire up native MCP tools:
+1. Create the MCP client plugin at ~/.openclaw/extensions/mcp-client/ (manifest + index.ts
+   from the ArchGuard OpenClaw integration guide)
+2. Apply a gateway config.patch to enable the mcp-client plugin with an archguard server
+   entry (command: "archguard", args: ["serve", "--transport", "stdio", "--path", "<project>"],
+   toolPrefix: "archguard_", timeoutMs: 60000) and add the 4 archguard_ tools to
+   tools.alsoAllow
+3. Restart the gateway
+
+Show me the decisions found, the generated CLAUDE.md, and confirm the MCP tools are live.
 ```
 
 Your agents will thank you. Your architecture will survive them.
+
+---
+
+## MCP Client Plugin Source
+
+The OpenClaw MCP client plugin is a generic bridge between any MCP server and OpenClaw's native tool system. It's not ArchGuard-specific — you can use it with any MCP server.
+
+### Plugin Manifest
+
+Save as `~/.openclaw/extensions/mcp-client/openclaw.plugin.json`:
+
+```json
+{
+  "id": "mcp-client",
+  "name": "MCP Client",
+  "description": "Connect to MCP servers and expose their tools as native agent tools",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "servers": {
+        "type": "object",
+        "description": "MCP server definitions keyed by server name",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "command": { "type": "string", "description": "Command to spawn the MCP server" },
+            "args": { "type": "array", "items": { "type": "string" } },
+            "env": { "type": "object", "additionalProperties": { "type": "string" } },
+            "cwd": { "type": "string" },
+            "toolPrefix": { "type": "string", "description": "Prefix for tool names (e.g. 'archguard_')" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeoutMs": { "type": "number", "default": 30000 }
+          },
+          "required": ["command"]
+        }
+      }
+    }
+  }
+}
+```
+
+### Plugin Implementation
+
+Save as `~/.openclaw/extensions/mcp-client/index.ts`:
+
+```typescript
+import { spawn, type ChildProcess } from "node:child_process";
+
+interface McpServerConfig {
+  command: string;
+  args?: string[];
+  env?: Record<string, string>;
+  cwd?: string;
+  toolPrefix?: string;
+  enabled?: boolean;
+  timeoutMs?: number;
+}
+
+interface McpToolDef {
+  name: string;
+  description?: string;
+  inputSchema?: Record<string, unknown>;
+}
+
+class McpConnection {
+  private process: ChildProcess | null = null;
+  private messageId = 0;
+  private pendingRequests = new Map<number, {
+    resolve: (v: unknown) => void;
+    reject: (e: Error) => void;
+    timer: ReturnType<typeof setTimeout>;
+  }>();
+  private buffer = "";
+  private connected = false;
+  private logger: { info: (...a: unknown[]) => void; error: (...a: unknown[]) => void };
+
+  constructor(private name: string, private config: McpServerConfig, logger?: any) {
+    this.logger = logger ?? { info: console.log, error: console.error };
+  }
+
+  async connect(): Promise<void> {
+    const env = { ...process.env, ...(this.config.env ?? {}) };
+    this.process = spawn(this.config.command, this.config.args ?? [], {
+      stdio: ["pipe", "pipe", "pipe"], cwd: this.config.cwd, env,
+    });
+
+    this.process.on("error", (err) => { this.connected = false; });
+    this.process.on("exit", () => {
+      this.connected = false;
+      for (const [, { reject, timer }] of this.pendingRequests) {
+        clearTimeout(timer); reject(new Error(`MCP server "${this.name}" exited`));
+      }
+      this.pendingRequests.clear();
+    });
+
+    this.process.stderr?.on("data", (d: Buffer) => {
+      const msg = d.toString().trim();
+      if (msg) this.logger.info(`[mcp-client] ${this.name} stderr: ${msg.slice(0, 200)}`);
+    });
+
+    this.process.stdout!.on("data", (d: Buffer) => {
+      this.buffer += d.toString();
+      const lines = this.buffer.split("\n");
+      this.buffer = lines.pop()!;
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const msg = JSON.parse(line);
+          if (msg.id !== undefined && this.pendingRequests.has(msg.id)) {
+            const { resolve, reject, timer } = this.pendingRequests.get(msg.id)!;
+            clearTimeout(timer); this.pendingRequests.delete(msg.id);
+            msg.error ? reject(new Error(msg.error.message ?? JSON.stringify(msg.error))) : resolve(msg.result);
+          }
+        } catch {}
+      }
+    });
+
+    await this.request("initialize", {
+      protocolVersion: "2024-11-05", capabilities: {},
+      clientInfo: { name: "openclaw-mcp-client", version: "0.1.0" },
+    });
+    this.write({ jsonrpc: "2.0", method: "notifications/initialized", params: {} });
+    this.connected = true;
+  }
+
+  private write(msg: Record<string, unknown>): void {
+    if (!this.process?.stdin?.writable) throw new Error(`MCP server "${this.name}" stdin not writable`);
+    this.process.stdin.write(JSON.stringify(msg) + "\n");
+  }
+
+  request(method: string, params: unknown): Promise<unknown> {
+    const timeout = this.config.timeoutMs ?? 30_000;
+    return new Promise((resolve, reject) => {
+      const id = ++this.messageId;
+      const timer = setTimeout(() => {
+        this.pendingRequests.delete(id);
+        reject(new Error(`MCP request "${method}" timed out after ${timeout}ms`));
+      }, timeout);
+      this.pendingRequests.set(id, { resolve, reject, timer });
+      try { this.write({ jsonrpc: "2.0", id, method, params }); }
+      catch (err) { clearTimeout(timer); this.pendingRequests.delete(id); reject(err); }
+    });
+  }
+
+  async listTools(): Promise<McpToolDef[]> {
+    const result = await this.request("tools/list", {}) as { tools?: McpToolDef[] };
+    return result?.tools ?? [];
+  }
+
+  async callTool(name: string, args: Record<string, unknown>) {
+    return await this.request("tools/call", { name, arguments: args });
+  }
+
+  isConnected() { return this.connected && this.process !== null && !this.process.killed; }
+
+  disconnect() {
+    this.connected = false;
+    for (const [, { reject, timer }] of this.pendingRequests) {
+      clearTimeout(timer); reject(new Error("Disconnecting"));
+    }
+    this.pendingRequests.clear();
+    try { this.process?.kill(); } catch {}
+    this.process = null;
+  }
+}
+
+export default function register(api: any) {
+  const connections = new Map<string, McpConnection>();
+  const pluginConfig = api.config?.plugins?.entries?.["mcp-client"]?.config;
+  const servers = pluginConfig?.servers ?? {};
+  const enabledServers = Object.entries(servers).filter(([, cfg]: any) => cfg.enabled !== false);
+
+  if (enabledServers.length === 0) { api.logger.info("[mcp-client] No MCP servers configured"); return; }
+
+  api.registerService({
+    id: "mcp-client",
+    start: async () => {
+      for (const [name, config] of enabledServers as [string, McpServerConfig][]) {
+        const conn = new McpConnection(name, config, api.logger);
+        try {
+          await conn.connect();
+          connections.set(name, conn);
+          const tools = await conn.listTools();
+          api.logger.info(`[mcp-client] "${name}" exposes ${tools.length} tool(s)`);
+
+          for (const tool of tools) {
+            const toolName = (config.toolPrefix ?? "") + tool.name;
+            const mcpToolName = tool.name;
+            api.registerTool({
+              name: toolName,
+              description: `[MCP: ${name}] ${tool.description ?? tool.name}`,
+              parameters: tool.inputSchema ?? { type: "object", properties: {} },
+              execute: async (_id: string, params: Record<string, unknown>) => {
+                const c = connections.get(name);
+                if (!c?.isConnected()) return { content: [{ type: "text", text: `Error: MCP server "${name}" not connected` }] };
+                try { return await c.callTool(mcpToolName, params); }
+                catch (err: any) { return { content: [{ type: "text", text: `MCP error: ${err.message}` }] }; }
+              },
+            }, { optional: true });
+          }
+        } catch (err: any) {
+          api.logger.error(`[mcp-client] Failed to connect to "${name}": ${err.message}`);
+        }
+      }
+    },
+    stop: () => { for (const [, conn] of connections) conn.disconnect(); connections.clear(); },
+  });
+}
+```
+
+This plugin is generic — it works with any MCP server, not just ArchGuard. Configure multiple servers in the `servers` object to wire up different MCP tools into your agent.
