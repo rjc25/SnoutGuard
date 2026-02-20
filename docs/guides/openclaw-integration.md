@@ -52,12 +52,11 @@ This is where it gets powerful. When you spawn sub-agents for parallel work:
 Spawn a sub-agent to refactor the authentication module.
 ```
 
-That sub-agent gets your `CLAUDE.md` in its context. It knows:
-- Which patterns your codebase follows
-- Which layers can depend on which
-- What technologies are approved and how they're used
-- What constraints are non-negotiable
-- **What workflow to follow** (check guidance before coding, review after)
+With native MCP tools configured (see below), that sub-agent has `archguard_get_architectural_guidance` in its own tool palette. It can query the architectural constraints relevant to its specific task — without you needing to paste CLAUDE.md into every task prompt.
+
+The sub-agent calls `archguard_get_architectural_guidance("refactor the authentication module")` and gets back exactly the decisions that matter: which patterns to follow, which layers to respect, what constraints are non-negotiable. Targeted guidance, not a wall of context.
+
+**Key config:** Add the MCP tools to `tools.subagents.tools.alsoAllow` (not just `tools.alsoAllow`) to give sub-agents access. Without this, only the main agent gets the tools.
 
 Without ArchGuard, that sub-agent would make reasonable but uninformed decisions. With it, the sub-agent follows your architecture from the first line of code.
 
@@ -101,14 +100,26 @@ Apply via `gateway config.patch` or edit `~/.openclaw/openclaw.json` directly:
       "archguard_check_architectural_compliance",
       "archguard_get_architectural_guidance",
       "archguard_get_dependency_graph"
-    ]
+    ],
+    "subagents": {
+      "tools": {
+        "alsoAllow": [
+          "archguard_get_architectural_decisions",
+          "archguard_check_architectural_compliance",
+          "archguard_get_architectural_guidance",
+          "archguard_get_dependency_graph"
+        ]
+      }
+    }
   }
 }
 ```
 
+The `tools.subagents.tools.alsoAllow` key is critical — without it, only the main agent gets the MCP tools. With it, every sub-agent you spawn also gets native access. Sub-agents can call `archguard_get_architectural_guidance` before writing code instead of relying on CLAUDE.md being pasted into their task prompt.
+
 **Step 3: Restart OpenClaw**
 
-After restart, you'll see `[MCP: archguard]` tools in the agent's tool palette. The agent can now call them directly:
+After restart, you'll see `[MCP: archguard]` tools in both the main agent's and sub-agents' tool palettes:
 
 | Native Tool | What It Does |
 |------------|-------------|
@@ -276,9 +287,13 @@ OPENCLAW NATIVE MCP SETUP:
    from the ArchGuard OpenClaw integration guide)
 2. Apply a gateway config.patch to enable the mcp-client plugin with an archguard server
    entry (command: "archguard", args: ["serve", "--transport", "stdio", "--path", "<project>"],
-   toolPrefix: "archguard_", timeoutMs: 60000) and add the 4 archguard_ tools to
-   tools.alsoAllow
+   toolPrefix: "archguard_", timeoutMs: 60000) and add the 4 archguard_ tools to BOTH
+   tools.alsoAllow (main agent) AND tools.subagents.tools.alsoAllow (sub-agents)
 3. Restart the gateway
+
+This gives both the main agent AND any spawned sub-agents native access to the ArchGuard
+tools. Sub-agents can call archguard_get_architectural_guidance themselves before writing
+code — no need to paste CLAUDE.md into task prompts.
 
 Show me the decisions found, the generated CLAUDE.md, and confirm the MCP tools are live.
 ```

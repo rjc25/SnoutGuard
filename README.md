@@ -112,7 +112,8 @@ MCP SERVER:
 - Add ".claude/settings.local.json" to .gitignore (it contains secrets)
 - For Cursor: same config in .cursor/mcp.json
 - For OpenClaw: see the OpenClaw section under MCP Server Setup below for native tool
-  integration via the mcp-client plugin (tools appear directly in the agent's palette)
+  integration via the mcp-client plugin (tools appear directly in the agent's palette,
+  including sub-agents — add tools to both tools.alsoAllow and tools.subagents.tools.alsoAllow)
 - The server exposes 4 tools: get_architectural_guidance (describe a task, get relevant
   constraints), get_architectural_decisions (search by keyword), check_architectural_compliance
   (validate code), get_dependency_graph (query module coupling)
@@ -128,7 +129,9 @@ The generated context files (CLAUDE.md, .cursorrules, etc.) include a **Workflow
 
 This means the enforcement is **baked into the context file itself** — every agent session that loads CLAUDE.md (or .cursorrules, copilot-instructions.md, etc.) gets the workflow rules automatically. You don't need to remember to tell your agent to check architecture; it's already in its instructions.
 
-**For sub-agents and CI:** Include the generated CLAUDE.md content in sub-agent task prompts, and add `archguard review --diff origin/main --ci` to your CI pipeline for automated PR review.
+**For sub-agents:** If using OpenClaw, add the MCP tools to `tools.subagents.tools.alsoAllow` so sub-agents get native access to `archguard_get_architectural_guidance` — they can query architectural constraints themselves instead of relying on pasted CLAUDE.md content. For other platforms, include the generated CLAUDE.md content in sub-agent task prompts.
+
+**For CI:** Add `archguard review --diff origin/main --ci` to your CI pipeline for automated PR review.
 
 ## Features
 
@@ -360,12 +363,24 @@ mkdir -p ~/.openclaw/extensions/mcp-client
       "archguard_check_architectural_compliance",
       "archguard_get_architectural_guidance",
       "archguard_get_dependency_graph"
-    ]
+    ],
+    "subagents": {
+      "tools": {
+        "alsoAllow": [
+          "archguard_get_architectural_decisions",
+          "archguard_check_architectural_compliance",
+          "archguard_get_architectural_guidance",
+          "archguard_get_dependency_graph"
+        ]
+      }
+    }
   }
 }
 ```
 
-**5. Restart OpenClaw.** The 4 ArchGuard tools appear in the agent's tool palette with `[MCP: archguard]` descriptions, just like built-in tools.
+The `tools.subagents.tools.alsoAllow` key gives sub-agents (spawned via `sessions_spawn`) the same MCP tools. This means sub-agents can call `archguard_get_architectural_guidance` themselves before writing code — no need to paste CLAUDE.md into task prompts.
+
+**5. Restart OpenClaw.** The ArchGuard tools appear in both the main agent's and sub-agents' tool palettes with `[MCP: archguard]` descriptions.
 
 ### Windsurf / Other MCP Clients
 
