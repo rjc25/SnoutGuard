@@ -64,7 +64,7 @@ const configSchema = z.object({
   llm: z
     .object({
       provider: z.string().default('anthropic'),
-      model: z.string().default('claude-sonnet-4-20250514'),
+      model: z.string().default('claude-sonnet-4-6'),
       apiKeyEnv: z.string().default('ANTHROPIC_API_KEY'),
       maxTokensPerAnalysis: z.number().default(4096),
       cacheTtlHours: z.number().default(24),
@@ -198,7 +198,7 @@ analysis:
 # LLM settings
 llm:
   provider: anthropic
-  model: claude-sonnet-4-20250514
+  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
   max_tokens_per_analysis: 4096
   cache_ttl_hours: 24
