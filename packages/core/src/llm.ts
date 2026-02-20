@@ -189,7 +189,10 @@ export function requireApiKey(config: ArchGuardConfig): string {
 /** Create an Anthropic client from config. Throws LlmAuthError if no API key. */
 export function createLlmClient(config: ArchGuardConfig): Anthropic {
   const apiKey = requireApiKey(config);
-  return new Anthropic({ apiKey });
+  return new Anthropic({
+    apiKey,
+    timeout: config.llm.requestTimeoutMs,
+  });
 }
 
 /** Get the model to use for a specific operation */
