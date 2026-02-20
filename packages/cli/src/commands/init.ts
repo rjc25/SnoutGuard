@@ -128,9 +128,14 @@ export function registerInitCommand(program: Command): void {
 
       let selectedLanguages = detectedLanguages;
       if (!options.nonInteractive && detectedLanguages.length > 0) {
+        console.log(
+          chalk.gray(
+            `  Press Enter to analyze all detected languages, or type a comma-separated list to override.`
+          )
+        );
         const languageInput = await prompt(
           chalk.cyan(
-            `  Languages to analyze [${detectedLanguages.join(', ')}]: `
+            `  Languages to analyze [${detectedLanguages.join(', ')}] (Enter = all): `
           )
         );
         if (languageInput) {
