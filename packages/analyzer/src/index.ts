@@ -200,7 +200,8 @@ export async function runAnalysis(
       config,
       filesToAnalyze,
       scanResult.directoryTree,
-      dependencyGraph
+      dependencyGraph,
+      projectDir,
     );
 
     // Identify deleted files
@@ -226,7 +227,8 @@ export async function runAnalysis(
       config,
       scanResult.files,
       scanResult.directoryTree,
-      dependencyGraph
+      dependencyGraph,
+      projectDir,
     );
     log.info('analysis', `Extracted ${decisions.length} architectural decisions`);
   }

@@ -13,6 +13,7 @@ import {
   now,
   truncate,
   estimateTokens,
+  getLogger,
   type ArchDecision,
   type ArchGuardConfig,
   type ParsedFile,
@@ -55,6 +56,11 @@ const MAX_PROMPT_TOKENS = 150_000;
 const PROMPT_OVERHEAD_TOKENS = 8_000;
 // Token budget available for file content in the prompt
 const FILE_CONTENT_BUDGET_TOKENS = MAX_PROMPT_TOKENS - PROMPT_OVERHEAD_TOKENS;
+// Maximum tokens of file content per batch — keeps each LLM call fast
+// and enables parallelism across batches
+const MAX_TOKENS_PER_BATCH = 30_000;
+// Maximum parallel LLM calls during analysis
+const MAX_PARALLEL_BATCHES = 3;
 
 /** Content tiers determine how much of a file the LLM sees */
 type ContentTier = 'full' | 'summary';
@@ -188,12 +194,15 @@ export async function extractDecisions(
   config: ArchGuardConfig,
   files: ParsedFile[],
   directoryTree: DirectoryNode,
-  dependencyGraph?: DependencyGraph
+  dependencyGraph?: DependencyGraph,
+  projectRoot?: string,
 ): Promise<ArchDecision[]> {
+  // Resolve file paths against project root for content reading
+  const resolveRoot = projectRoot ?? process.cwd();
   // Score all files upfront so we can plan the call strategy
   const allScored = files.map((f) => {
     const { score, breakdown } = calculateSignificance(f, dependencyGraph);
-    const content = readFileContent(f.filePath);
+    const content = readFileContent(f.filePath, resolveRoot);
     const cTokens = content ? estimateTokens(content) : 0;
     const sTokens = estimateFileSummaryTokens(f);
     return {
@@ -209,8 +218,20 @@ export async function extractDecisions(
   allScored.sort((a, b) => b.score - a.score);
 
   // Separate files that deserve full content (score >= 4) from summary-only
-  const fullCandidates = allScored.filter((s) => s.score >= 4 && s.contentTokens > 0);
-  const summaryOnly = allScored.filter((s) => s.score < 4 || s.contentTokens === 0);
+  // If no files score high enough (weak dependency graph), promote the top 50%
+  // of files with readable content — better to send some full content than none
+  const logger = getLogger();
+  const filesWithContent = allScored.filter((s) => s.contentTokens > 0);
+  logger.debug('analysis', `File content stats: ${filesWithContent.length}/${allScored.length} files have readable content, total content tokens: ${allScored.reduce((s, f) => s + f.contentTokens, 0)}`);
+  let fullCandidates = allScored.filter((s) => s.score >= 4 && s.contentTokens > 0);
+  logger.debug('analysis', `Files scoring >= 4 with content: ${fullCandidates.length}`);
+  if (fullCandidates.length === 0) {
+    const topHalf = Math.max(Math.ceil(filesWithContent.length * 0.5), 1);
+    fullCandidates = filesWithContent.slice(0, topHalf); // already sorted by score desc
+    logger.info('analysis', `Promoted top ${topHalf} files to full-content (no files scored >= 4)`);
+  }
+  const fullSet = new Set(fullCandidates);
+  const summaryOnly = allScored.filter((s) => !fullSet.has(s));
 
   // Calculate shared overhead: tree, dep summary, file paths, system prompt, etc.
   const treeStr = formatDirectoryTree(directoryTree);
@@ -223,8 +244,17 @@ export async function extractDecisions(
     estimateTokens(allPaths) +
     summaryOnly.reduce((sum, s) => sum + s.summaryTokens, 0);
 
-  // How many tokens are available per call for full-content files?
-  const budgetPerCall = FILE_CONTENT_BUDGET_TOKENS - sharedOverhead;
+  // Total budget per batch = MAX_TOKENS_PER_BATCH minus the shared overhead
+  // (summaries, tree, dep graph) that appears in every call.
+  // This ensures each batch's TOTAL prompt stays reasonable, not just
+  // the full-content portion.
+  const totalSummaryTokens = summaryOnly.reduce((sum, s) => sum + s.summaryTokens, 0);
+  const perCallOverhead = sharedOverhead + totalSummaryTokens;
+  const contextBudget = FILE_CONTENT_BUDGET_TOKENS - perCallOverhead;
+  const budgetPerCall = Math.min(
+    contextBudget,
+    Math.max(MAX_TOKENS_PER_BATCH - perCallOverhead, 5_000)
+  );
 
   // Greedily pack full-content files into batches
   const batches: ScoredFile[][] = [];
@@ -248,17 +278,31 @@ export async function extractDecisions(
     batches.push(currentBatch);
   }
 
-  // If no full-content files, still do at least one call with summaries
+  // Summary-only files that didn't qualify for full content should also
+  // be included in at least one batch so the LLM sees them
+  // If no full-content files at all, create a single batch with just summaries
   if (batches.length === 0) {
     batches.push([]);
   }
 
-  // Execute LLM calls — one per batch
-  const allDecisions: ArchDecision[] = [];
+  // Log batch plan
+  const log = getLogger();
+  log.info('analysis', `Batch plan: ${batches.length} batch(es), ${fullCandidates.length} full-content files, ${summaryOnly.length} summary-only files`, {
+    batches: batches.length,
+    budgetPerCall,
+    perCallOverhead,
+    fullContentFiles: fullCandidates.length,
+    summaryFiles: summaryOnly.length,
+    parallelism: MAX_PARALLEL_BATCHES,
+  });
+  for (let b = 0; b < batches.length; b++) {
+    const batchTokens = batches[b].reduce((sum, s) => sum + s.contentTokens, 0);
+    log.info('analysis', `  Batch ${b + 1}: ${batches[b].length} files, ~${batchTokens} content tokens`);
+  }
 
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i];
-    const batchLabel = batches.length > 1 ? `batch ${i + 1}/${batches.length}` : undefined;
+  // Execute LLM calls in parallel (bounded concurrency)
+  const processBatch = async (batch: ScoredFile[], index: number): Promise<ArchDecision[]> => {
+    const batchLabel = batches.length > 1 ? `batch ${index + 1}/${batches.length}` : undefined;
 
     // Build the file selection for this call: batch's full-content files + all summaries
     const callFiles: ScoredFile[] = [
@@ -275,7 +319,8 @@ export async function extractDecisions(
       files,
       directoryTree,
       dependencyGraph,
-      batchLabel
+      batchLabel,
+      resolveRoot,
     );
 
     const response = await analyzeWithLlmValidated<DecisionResponse>(
@@ -285,7 +330,20 @@ export async function extractDecisions(
       decisionsResponseSchema,
       'analyze'
     );
-    allDecisions.push(...response.decisions.map(toArchDecision));
+    return response.decisions.map(toArchDecision);
+  };
+
+  // Run batches with bounded parallelism
+  const allDecisions: ArchDecision[] = [];
+
+  for (let start = 0; start < batches.length; start += MAX_PARALLEL_BATCHES) {
+    const chunk = batches.slice(start, start + MAX_PARALLEL_BATCHES);
+    const results = await Promise.all(
+      chunk.map((batch, i) => processBatch(batch, start + i))
+    );
+    for (const decisions of results) {
+      allDecisions.push(...decisions);
+    }
   }
 
   return batches.length > 1 ? deduplicateDecisions(allDecisions) : allDecisions;
@@ -302,7 +360,8 @@ function buildAnalysisPromptFromScored(
   allFiles: ParsedFile[],
   directoryTree: DirectoryNode,
   dependencyGraph?: DependencyGraph,
-  batchLabel?: string
+  batchLabel?: string,
+  projectRoot?: string,
 ): string {
   const sections: string[] = [];
 
@@ -344,7 +403,7 @@ ${treeTokens > maxTreeTokens ? truncate(treeStr, maxTreeTokens * 4) : treeStr}
     if (f.decorators.length > 0) parts.push(`  <decorators>${f.decorators.join(', ')}</decorators>`);
 
     if (entry.tier === 'full') {
-      const content = readFileContent(f.filePath);
+      const content = readFileContent(f.filePath, projectRoot);
       if (content) {
         parts.push(`  <content>\n${content}\n  </content>`);
       }
@@ -618,10 +677,14 @@ function estimateFileSummaryTokens(file: ParsedFile): number {
   return estimateTokens(parts.join(' ')) + 20; // +20 for XML tags
 }
 
-function readFileContent(filePath: string): string | null {
+function readFileContent(filePath: string, projectRoot?: string): string | null {
   try {
     const fs = require('node:fs');
-    return fs.readFileSync(filePath, 'utf-8');
+    const path = require('node:path');
+    const resolved = projectRoot && !path.isAbsolute(filePath)
+      ? path.resolve(projectRoot, filePath)
+      : filePath;
+    return fs.readFileSync(resolved, 'utf-8');
   } catch {
     return null;
   }
