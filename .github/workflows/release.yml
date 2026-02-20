@@ -15,10 +15,8 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux-x64
-            archive: tar.gz
           - os: windows-latest
             target: win-x64
-            archive: zip
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -34,12 +32,13 @@ jobs:
       - run: pnpm build
       - run: node scripts/bundle-cli.mjs
 
-      # Package the CLI bundle + better-sqlite3 native addon
+      # Package the CLI bundle + better-sqlite3 native addon + Node.js runtime
+      # into a single self-extracting executable via warp-packer
       - name: Create distribution
         shell: bash
         run: |
           VERSION="${GITHUB_REF#refs/tags/v}"
-          DIST_DIR="archguard-${VERSION}-${{ matrix.target }}"
+          DIST_DIR="archguard-dist"
           mkdir -p "$DIST_DIR"
 
           # Copy the bundled CLI
@@ -62,32 +61,58 @@ jobs:
           npm install --omit=dev --ignore-scripts=false
           cd ..
 
-          # Create launcher script
+          # Bundle the Node.js runtime so users don't need it installed
+          NODE_DIR="$DIST_DIR/node"
+          mkdir -p "$NODE_DIR"
           if [[ "${{ matrix.target }}" == "win-x64" ]]; then
+            cp "$(which node).exe" "$NODE_DIR/node.exe" 2>/dev/null || cp "$(which node)" "$NODE_DIR/node.exe"
+            # Launcher script
             cat > "$DIST_DIR/archguard.cmd" << 'BATCH'
           @echo off
-          node "%~dp0archguard.cjs" %*
+          "%~dp0node\node.exe" "%~dp0archguard.cjs" %*
           BATCH
+            EXEC_NAME="archguard.cmd"
           else
+            cp "$(which node)" "$NODE_DIR/node"
+            chmod +x "$NODE_DIR/node"
+            # Launcher script
             cat > "$DIST_DIR/archguard" << 'SH'
           #!/bin/sh
-          exec node "$(dirname "$0")/archguard.cjs" "$@"
+          exec "$(dirname "$0")/node/node" "$(dirname "$0")/archguard.cjs" "$@"
           SH
             chmod +x "$DIST_DIR/archguard"
+            EXEC_NAME="archguard"
           fi
 
-          # Create archive
-          if [[ "${{ matrix.archive }}" == "zip" ]]; then
-            7z a "archguard-${VERSION}-${{ matrix.target }}.zip" "$DIST_DIR"
+      - name: Download warp-packer
+        shell: bash
+        run: |
+          if [[ "${{ matrix.target }}" == "win-x64" ]]; then
+            curl -Lo warp-packer.exe https://github.com/dgiagio/warp/releases/download/v0.3.0/windows-x64.warp-packer.exe
+            PACKER="./warp-packer.exe"
           else
-            tar czf "archguard-${VERSION}-${{ matrix.target }}.tar.gz" "$DIST_DIR"
+            curl -Lo warp-packer https://github.com/dgiagio/warp/releases/download/v0.3.0/linux-x64.warp-packer
+            chmod +x warp-packer
+            PACKER="./warp-packer"
+          fi
+          echo "PACKER=$PACKER" >> "$GITHUB_ENV"
+
+      - name: Create executable
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if [[ "${{ matrix.target }}" == "win-x64" ]]; then
+            $PACKER --arch windows-x64 --input_dir archguard-dist --exec archguard.cmd --output "archguard-${VERSION}-win-x64.exe"
+          else
+            $PACKER --arch linux-x64 --input_dir archguard-dist --exec archguard --output "archguard-${VERSION}-linux-x64"
+            chmod +x "archguard-${VERSION}-linux-x64"
           fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: archguard-${{ matrix.target }}
-          path: archguard-*.${{ matrix.archive }}
+          path: archguard-*-${{ matrix.target }}*
 
   publish-npm:
     runs-on: ubuntu-latest
@@ -141,5 +166,5 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            archguard-*.tar.gz
-            archguard-*.zip
+            archguard-*-linux-x64
+            archguard-*-win-x64.exe
