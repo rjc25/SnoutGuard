@@ -31,7 +31,7 @@ import {
   type LogEntry,
 } from '@archguard/core';
 import { runAnalysis } from '@archguard/analyzer';
-import { createTapirSpinner, TAPIR_ASCII } from '../tapir-spinner.js';
+import { createTapirSpinner, TAPIR_ASCII, randomTapirPhrase } from '../tapir-spinner.js';
 
 export function registerAnalyzeCommand(program: Command): void {
   program
@@ -94,14 +94,14 @@ export function registerAnalyzeCommand(program: Command): void {
         );
         console.log('');
 
-        const spinner = createTapirSpinner({ text: 'Scanning codebase...' }).start();
+        const spinner = createTapirSpinner({ text: `${randomTapirPhrase()}...` }).start();
 
         try {
           const result = await runAnalysis(projectDir, config, {
             repoId,
             force: options.force,
             onProgress: (event) => {
-              spinner.text = `[${event.step}/${event.totalSteps}] ${event.phase}${event.detail ? chalk.gray(` — ${event.detail}`) : ''}`;
+              spinner.text = `[${event.step}/${event.totalSteps}] ${randomTapirPhrase()}${event.detail ? chalk.gray(` — ${event.detail}`) : ''}`;
             },
           });
 
