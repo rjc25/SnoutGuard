@@ -101,7 +101,7 @@ const configSchema = z.object({
       maxRetries: z.number().default(3),
       retryBaseDelayMs: z.number().default(1000),
       requestTimeoutMs: z.number().default(120_000),
-      maxCostPerRun: z.number().default(5.0),
+      maxCostPerRun: z.number().default(10.0),
     })
     .default({}),
   sync: z
@@ -289,7 +289,7 @@ llm:
   max_retries: 3
   retry_base_delay_ms: 1000
   request_timeout_ms: 120000
-  max_cost_per_run: 5.00
+  max_cost_per_run: 10.00
 
 # Context file sync (no LLM needed — pure templating)
 sync:
