@@ -21,29 +21,60 @@ const FORMAT_INSTRUCTIONS: Record<string, string> = {
 Start with "# Architecture" header.
 Claude Code reads this file automatically when working in the repository.
 Use ## sections, bullet lists, and code fences where helpful.
-Write constraints as imperative rules ("You MUST...", "Never...", "Always...").`,
+Write constraints as imperative rules ("You MUST...", "Never...", "Always...").
+
+IMPORTANT: Include a "## Workflow" section at the end of the file with these rules:
+- Before writing code, if \`get_architectural_guidance\` MCP tool is available, call it with a description of the task to get relevant constraints. If MCP is not configured, review the constraints in this file that relate to the files being modified.
+- After making changes, run \`archguard review --diff <branch>\` to check for architectural violations before committing.
+- After significant refactors or new features, run \`archguard analyze\` then \`archguard sync\` to keep this context file current (incremental — only re-analyzes changed files).
+This section ensures agents using this file actually follow the architectural guardrails rather than just reading them.`,
 
   cursorrules: `Output format: Plain text rules (.cursorrules for Cursor).
 Write as a flat list of rules and constraints — no markdown headers.
 Each rule should be a single clear sentence or short paragraph.
-Cursor loads this as system-level context for every interaction.`,
+Cursor loads this as system-level context for every interaction.
+
+Include these workflow rules at the end:
+- Before writing code, call get_architectural_guidance with a task description if the ArchGuard MCP server is configured.
+- After changes, run "archguard review --diff <branch>" to check for violations before committing.
+- After significant changes, run "archguard analyze" then "archguard sync" to refresh this file.`,
 
   copilot: `Output format: Markdown (.github/copilot-instructions.md for GitHub Copilot).
 Start with a brief project overview paragraph.
 Use ## sections for major architectural areas.
-Write constraints as clear directives.`,
+Write constraints as clear directives.
+
+Include a "## Workflow" section at the end with rules for using ArchGuard:
+- Before coding, call get_architectural_guidance if the MCP server is configured.
+- After changes, run "archguard review --diff <branch>" before committing.
+- After significant changes, run "archguard analyze" then "archguard sync" to refresh this file.`,
 
   windsurf: `Output format: Plain text rules (.windsurfrules for Windsurf).
 Similar to .cursorrules — flat list of architectural rules and patterns.
-Keep entries concise and actionable.`,
+Keep entries concise and actionable.
+
+Include workflow rules at the end:
+- Before coding, call get_architectural_guidance if the ArchGuard MCP server is configured.
+- After changes, run "archguard review --diff <branch>" before committing.
+- After significant changes, run "archguard analyze" then "archguard sync" to refresh this file.`,
 
   kiro: `Output format: Markdown (.kiro/steering.md for AWS Kiro).
 Use ## sections for architectural areas.
-Write constraints as steering directives that guide code generation.`,
+Write constraints as steering directives that guide code generation.
+
+Include a "## Workflow" section with rules for using ArchGuard:
+- Before coding, call get_architectural_guidance if the MCP server is configured.
+- After changes, run "archguard review --diff <branch>" before committing.
+- After significant changes, run "archguard analyze" then "archguard sync" to refresh this file.`,
 
   agents: `Output format: Markdown (agents.md for Agents.md format).
 Use ## sections for major decisions.
-Focus on constraints and patterns that autonomous agents need to follow.`,
+Focus on constraints and patterns that autonomous agents need to follow.
+
+Include a "## Workflow" section at the end with rules for using ArchGuard:
+- Before coding, call get_architectural_guidance if the MCP server is configured.
+- After changes, run "archguard review --diff <branch>" before committing.
+- After significant changes, run "archguard analyze" then "archguard sync" to refresh this file.`,
 };
 
 /**

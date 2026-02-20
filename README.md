@@ -83,44 +83,48 @@ docker-compose up -d
 # API server at http://localhost:3000
 ```
 
-## Setup via Claude Code or OpenClaw
+## Setup via AI Coding Agent
 
-### One-Shot Prompt
+### One-Shot Install & Analyze
 
-Copy and paste this into [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenClaw](https://github.com/openclaw/openclaw), or any AI coding agent to install ArchGuard and fully integrate it into your workflow:
+Copy and paste this into [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenClaw](https://github.com/openclaw/openclaw), or any AI coding agent. It will install ArchGuard, analyze your codebase, and configure the MCP server:
 
 ```
-Install and set up ArchGuard (https://github.com/rjc25/ArchGuard) as my architectural guardrails.
+Install ArchGuard (https://github.com/rjc25/ArchGuard) and analyze my codebase.
 
 INSTALL:
-- Clone the repo, install with pnpm, build all packages, link the CLI globally ("archguard" in PATH)
+- Clone the repo, install with pnpm, build all packages, link the CLI globally
 - If ANTHROPIC_API_KEY isn't set, walk me through getting one from console.anthropic.com
 
-ANALYZE MY CODEBASE:
+ANALYZE:
 - Run "archguard init" in my project to generate .archguard.yml
-- Run "archguard analyze" to extract architectural decisions (uses Opus by default ~$10-16, or
-  set analyze model to Sonnet in .archguard.yml for ~$2-3)
-- Run "archguard sync" to generate CLAUDE.md with all decisions compressed for AI context
+- Run "archguard analyze" to extract architectural decisions (Opus ~$10-16, or set
+  analyze model to Sonnet in .archguard.yml for ~$2-3)
+- Run "archguard sync" to generate CLAUDE.md (and other context files) with decisions
+  compressed for AI context
 - Show me the CLAUDE.md and a summary of decisions found
 
-SET UP MCP SERVER:
-- Configure "archguard serve" as an MCP server (stdio transport) in my editor config
-  (Claude Code .claude/settings.json, Cursor .cursor/mcp.json, or Windsurf equivalent)
-- This gives 4 tools: get_architectural_guidance (best — describe a task, get relevant
+MCP SERVER:
+- Configure "archguard serve" as an MCP server (stdio transport) in my editor's MCP config:
+  Claude Code: .claude/settings.json
+  Cursor: .cursor/mcp.json
+  Windsurf: equivalent config
+- The server exposes 4 tools: get_architectural_guidance (describe a task, get relevant
   constraints), get_architectural_decisions (search by keyword), check_architectural_compliance
   (validate code), get_dependency_graph (query module coupling)
-
-INTEGRATE INTO MY WORKFLOW:
-- Before coding: call get_architectural_guidance with a description of the task
-- After coding: run "archguard review --diff <branch>" to catch violations before merging
-- For sub-agents: include CLAUDE.md content in every sub-agent's task prompt so they follow
-  my architecture. Have them call get_architectural_guidance before starting work.
-- After significant changes: re-run "archguard analyze" then "archguard sync" to keep
-  context files fresh (incremental — only re-analyzes changed files, costs pennies)
-
-The goal: every agent that touches my code knows my architectural decisions and gets flagged
-if it violates them. No more architectural drift from autonomous agents.
 ```
+
+### What Happens After Setup
+
+The generated context files (CLAUDE.md, .cursorrules, etc.) include a **Workflow** section that tells your AI agent to:
+
+1. **Before writing code** — call `get_architectural_guidance` with a task description (if MCP is configured), or review relevant constraints in the context file
+2. **After changes** — run `archguard review --diff <branch>` to catch violations before committing
+3. **After significant refactors** — run `archguard analyze` then `archguard sync` to keep context files fresh (incremental — only re-analyzes changed files, costs pennies)
+
+This means the enforcement is **baked into the context file itself** — every agent session that loads CLAUDE.md (or .cursorrules, copilot-instructions.md, etc.) gets the workflow rules automatically. You don't need to remember to tell your agent to check architecture; it's already in its instructions.
+
+**For sub-agents and CI:** Include the generated CLAUDE.md content in sub-agent task prompts, and add `archguard review --diff origin/main --ci` to your CI pipeline for automated PR review.
 
 ## Features
 
