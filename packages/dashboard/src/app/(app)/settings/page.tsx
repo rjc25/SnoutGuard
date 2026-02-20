@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
+  Activity,
+  Brain,
   Building2,
+  Code2,
   CreditCard,
   Key,
   Save,
@@ -24,9 +27,13 @@ interface OrgSettings {
     autoReview: boolean;
     reviewOnPush: boolean;
     reviewOnPr: boolean;
+    llmEnabled: boolean;
+    enabledLanguages: string[];
     driftThreshold: number;
     minConfidence: number;
+    severityThreshold: 'error' | 'warning' | 'info';
   };
+  velocityTrackingEnabled: boolean;
 }
 
 const planDetails: Record<string, { label: string; color: string; features: string[] }> = {
@@ -52,6 +59,20 @@ const planDetails: Record<string, { label: string; color: string; features: stri
     ],
   },
 };
+
+const availableLanguages = [
+  'TypeScript',
+  'JavaScript',
+  'Python',
+  'Go',
+  'Rust',
+  'Java',
+  'C#',
+  'Ruby',
+  'PHP',
+  'Swift',
+  'Kotlin',
+];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<OrgSettings | null>(null);
@@ -118,6 +139,16 @@ export default function SettingsPage() {
   if (!settings) return null;
 
   const plan = planDetails[settings.plan];
+
+  function toggleLanguage(lang: string) {
+    setSettings((prev) => {
+      if (!prev) return prev;
+      const languages = prev.analysis.enabledLanguages.includes(lang)
+        ? prev.analysis.enabledLanguages.filter((l) => l !== lang)
+        : [...prev.analysis.enabledLanguages, lang];
+      return { ...prev, analysis: { ...prev.analysis, enabledLanguages: languages } };
+    });
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -249,6 +280,73 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-4">
+          {/* LLM toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div className="flex items-center gap-3">
+              <Brain className="w-5 h-5 text-purple-500" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">LLM-Powered Analysis</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Use large language models for deeper code understanding and decision inference.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setSettings({
+                  ...settings,
+                  analysis: {
+                    ...settings.analysis,
+                    llmEnabled: !settings.analysis.llmEnabled,
+                  },
+                })
+              }
+              className={cn(
+                'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                settings.analysis.llmEnabled ? 'bg-brand-600' : 'bg-gray-300',
+              )}
+            >
+              <span
+                className={cn(
+                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                  settings.analysis.llmEnabled ? 'translate-x-6' : 'translate-x-1',
+                )}
+              />
+            </button>
+          </div>
+
+          {/* Enabled Languages */}
+          <div className="p-3 rounded-lg bg-gray-50">
+            <div className="flex items-center gap-2 mb-3">
+              <Code2 className="w-4 h-4 text-gray-500" />
+              <p className="text-sm font-medium text-gray-900">Enabled Languages</p>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              Select which programming languages to analyze in your repositories.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {availableLanguages.map((lang) => {
+                const isActive = settings.analysis.enabledLanguages.includes(lang);
+                return (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => toggleLanguage(lang)}
+                    className={cn(
+                      'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'border-brand-600 bg-brand-50 text-brand-700'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300',
+                    )}
+                  >
+                    {lang}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Toggle options */}
           <div className="space-y-3">
             {(
@@ -305,8 +403,37 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          {/* Numeric settings */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          {/* Numeric and select settings */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div>
+              <label
+                htmlFor="severityThreshold"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Severity Threshold
+              </label>
+              <select
+                id="severityThreshold"
+                value={settings.analysis.severityThreshold}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    analysis: {
+                      ...settings.analysis,
+                      severityThreshold: e.target.value as OrgSettings['analysis']['severityThreshold'],
+                    },
+                  })
+                }
+                className="input-field"
+              >
+                <option value="error">Error only</option>
+                <option value="warning">Warning and above</option>
+                <option value="info">All (including info)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Minimum severity level to report.
+              </p>
+            </div>
             <div>
               <label
                 htmlFor="driftThreshold"
@@ -364,6 +491,44 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Velocity settings */}
+      <div className="card-padded">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="w-5 h-5 text-brand-600" />
+          <h2 className="text-sm font-semibold text-gray-900">Velocity Tracking</h2>
+        </div>
+
+        <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Enable Velocity Tracking</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Track team and individual developer velocity metrics, cycle times, and throughput.
+              Data is visible on the Velocity dashboard.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setSettings({
+                ...settings,
+                velocityTrackingEnabled: !settings.velocityTrackingEnabled,
+              })
+            }
+            className={cn(
+              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+              settings.velocityTrackingEnabled ? 'bg-brand-600' : 'bg-gray-300',
+            )}
+          >
+            <span
+              className={cn(
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                settings.velocityTrackingEnabled ? 'translate-x-6' : 'translate-x-1',
+              )}
+            />
+          </button>
         </div>
       </div>
 
