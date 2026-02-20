@@ -3,11 +3,17 @@
  *
  * Runs a full codebase analysis using Claude (Opus by default).
  * Requires an Anthropic API key — the LLM IS the product.
+ *
+ * Features:
+ * - Tapir-themed spinner animation during analysis
+ * - Real-time step progress updates
+ * - --verbose flag for detailed console output
+ * - Automatic debug log file in .archguard/logs/
+ * - Specific failure reasons on error
  */
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import ora from 'ora';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
@@ -15,9 +21,15 @@ import {
   generateId,
   requireApiKey,
   getModelForOperation,
+  initLogger,
+  getLogger,
+  getFailureReason,
   LlmAuthError,
+  LlmValidationError,
+  type LogEntry,
 } from '@archguard/core';
 import { runAnalysis } from '@archguard/analyzer';
+import { createTapirSpinner, TAPIR_ASCII } from '../tapir-spinner.js';
 
 export function registerAnalyzeCommand(program: Command): void {
   program
@@ -26,15 +38,25 @@ export function registerAnalyzeCommand(program: Command): void {
     .option('--path <dir>', 'Project directory to analyze', '.')
     .option('--json', 'Output results as JSON')
     .option('--output <file>', 'Write report to a file')
+    .option('--verbose', 'Show detailed logs: files sent to LLM, token counts, response times')
     .action(
       async (options: {
         path: string;
         json?: boolean;
         output?: string;
+        verbose?: boolean;
       }) => {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
         const repoId = generateId();
+        const verbose = options.verbose ?? false;
+
+        // Initialise logger — always writes to .archguard/logs/
+        const logger = initLogger({
+          projectDir,
+          verbose,
+          onLog: verbose ? verboseConsoleHandler : undefined,
+        });
 
         // Validate API key upfront with clear messaging
         try {
@@ -48,26 +70,37 @@ export function registerAnalyzeCommand(program: Command): void {
         }
 
         const model = getModelForOperation(config, 'analyze');
+
+        // Print header
+        console.log(chalk.magenta(TAPIR_ASCII));
         console.log(
-          chalk.bold(`\n  Analyzing ${chalk.cyan(projectDir)}`)
+          chalk.bold(`  Analyzing ${chalk.cyan(projectDir)}`)
         );
         console.log(
-          chalk.gray(`  Model: ${model}\n`)
+          chalk.gray(`  Model: ${model}`)
         );
 
         if (config.llm.maxCostPerRun > 0) {
           console.log(
-            chalk.gray(`  Cost limit: $${config.llm.maxCostPerRun.toFixed(2)} per run\n`)
+            chalk.gray(`  Cost limit: $${config.llm.maxCostPerRun.toFixed(2)} per run`)
           );
         }
+        console.log(
+          chalk.gray(`  Log file: ${logger.filePath}`)
+        );
+        console.log('');
 
-        const spinner = ora('Scanning codebase...').start();
+        const spinner = createTapirSpinner({ text: 'Scanning codebase...' }).start();
 
         try {
-          spinner.text = 'Scanning files and building dependency graph...';
-          const result = await runAnalysis(projectDir, config, { repoId });
+          const result = await runAnalysis(projectDir, config, {
+            repoId,
+            onProgress: (event) => {
+              spinner.text = `[${event.step}/${event.totalSteps}] ${event.phase}${event.detail ? chalk.gray(` — ${event.detail}`) : ''}`;
+            },
+          });
 
-          spinner.succeed('Analysis complete');
+          spinner.succeed(chalk.green('Analysis complete'));
 
           // Display summary
           console.log('');
@@ -150,6 +183,25 @@ export function registerAnalyzeCommand(program: Command): void {
             `    Cache hits: ${chalk.green(String(result.cost.calls.filter((c) => c.cacheHit).length))}`
           );
 
+          // Per-call breakdown in verbose mode
+          if (verbose && result.cost.calls.length > 0) {
+            console.log(chalk.bold('\n  LLM Call Details:'));
+            for (const call of result.cost.calls) {
+              if (call.cacheHit) {
+                console.log(chalk.gray(`    [cache hit] ${call.operation}`));
+              } else {
+                console.log(
+                  `    ${chalk.cyan(call.operation)} ` +
+                  chalk.gray(`${call.model} `) +
+                  `in:${chalk.yellow(String(call.inputTokens))} ` +
+                  `out:${chalk.yellow(String(call.outputTokens))} ` +
+                  `${chalk.gray(call.latencyMs + 'ms')} ` +
+                  chalk.yellow(`$${call.estimatedCost.toFixed(4)}`)
+                );
+              }
+            }
+          }
+
           // Output handling
           if (options.json) {
             const jsonOutput = JSON.stringify(result.jsonReport, null, 2);
@@ -170,14 +222,52 @@ export function registerAnalyzeCommand(program: Command): void {
             );
           }
 
+          console.log(
+            chalk.gray(`\n  Full log: ${logger.filePath}`)
+          );
           console.log('');
         } catch (error: unknown) {
-          spinner.fail('Analysis failed');
-          const message =
-            error instanceof Error ? error.message : String(error);
-          console.error(chalk.red(`\n  ${message}\n`));
+          spinner.fail(chalk.red('Analysis failed'));
+
+          // Determine specific failure reason
+          const reason = getFailureReason(error);
+          console.error(chalk.red(`\n  Reason: ${reason}`));
+
+          // Show raw LLM response preview on JSON parse failures
+          if (error instanceof LlmValidationError && error.rawResponse) {
+            console.error(chalk.gray(`\n  LLM response preview (first 500 chars):`));
+            console.error(chalk.gray(`  ${error.rawResponse.slice(0, 500)}`));
+          }
+
+          // Show zod errors if schema validation failed
+          if (error instanceof LlmValidationError && error.zodErrors) {
+            console.error(chalk.gray(`\n  Schema validation errors:`));
+            for (const issue of error.zodErrors.issues.slice(0, 5)) {
+              console.error(chalk.gray(`    ${issue.path.join('.')}: ${issue.message}`));
+            }
+          }
+
+          // Always show log file location
+          console.error(
+            chalk.gray(`\n  Debug log: ${logger.filePath}`)
+          );
+          console.error(
+            chalk.gray(`  Re-run with --verbose for detailed console output\n`)
+          );
+
+          // Log the full error to file
+          const fullError = error instanceof Error ? error : new Error(String(error));
+          logger.error('analysis', `Analysis failed: ${reason}`, {
+            errorName: fullError.name,
+            errorMessage: fullError.message,
+            stack: fullError.stack,
+          });
+
+          logger.close();
           process.exit(1);
         }
+
+        logger.close();
       }
     );
 }
@@ -188,4 +278,31 @@ function formatDriftScore(score: number): string {
   if (percent <= 20) return chalk.green(`${percent}%`);
   if (percent <= 50) return chalk.yellow(`${percent}%`);
   return chalk.red(`${percent}%`);
+}
+
+/**
+ * Console handler for --verbose mode.
+ * Formats log entries for real-time console display.
+ */
+function verboseConsoleHandler(entry: LogEntry): void {
+  const levelColors: Record<string, (s: string) => string> = {
+    debug: chalk.gray,
+    info: chalk.blue,
+    warn: chalk.yellow,
+    error: chalk.red,
+  };
+  const colorFn = levelColors[entry.level] ?? chalk.white;
+  const prefix = colorFn(`  [${entry.level.toUpperCase()}]`);
+  const cat = chalk.gray(`[${entry.category}]`);
+
+  let line = `${prefix} ${cat} ${entry.message}`;
+  if (entry.data) {
+    const dataStr = Object.entries(entry.data)
+      .map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`)
+      .join(' ');
+    line += chalk.gray(` ${dataStr}`);
+  }
+
+  // Use stderr so it doesn't interfere with --json stdout output
+  process.stderr.write(line + '\n');
 }

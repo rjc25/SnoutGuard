@@ -32,6 +32,9 @@ importers:
       minimatch:
         specifier: ^10.0.0
         version: 10.2.2
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
       typescript:
         specifier: ^5.7.0
@@ -264,6 +267,9 @@ importers:
       '@archguard/core':
         specifier: workspace:*
         version: link:../core
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
       typescript:
         specifier: ^5.7.0
