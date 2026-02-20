@@ -52,7 +52,7 @@ archguard init
 # Analyze your codebase (uses Claude Opus)
 archguard analyze
 
-# Generate AI agent context files (no LLM needed)
+# Generate AI agent context files (uses Opus to intelligently compress)
 archguard sync
 
 # Start the MCP server for real-time guidance
@@ -158,7 +158,8 @@ if it violates them. No more architectural drift from autonomous agents.
   - Custom Handlebars templates
 - Watch mode auto-syncs on file changes
 - Preserves user-added sections
-- **No LLM needed** — pure templating from analysis results
+- **LLM-powered compression** — Opus intelligently prioritizes and compresses decisions to fit a configurable token budget (default 8192 tokens), typically 60-70% smaller than raw templates
+- Template-only fallback with `--no-llm` flag
 
 **MCP Server** (`archguard serve`)
 - Exposes architectural decisions via Model Context Protocol
@@ -222,7 +223,7 @@ ArchGuard uses **tiered model defaults** optimized for each operation:
 |-----------|--------------|-----------|
 | `archguard analyze` | Claude Opus | Deep analysis, runs infrequently — quality matters most |
 | `archguard review` | Claude Sonnet | Every PR, speed and cost matter |
-| `archguard sync` | No LLM | Pure templating from stored decisions |
+| `archguard sync` | Claude Opus | Intelligent compression of decisions into dense context files |
 | MCP server queries | Claude Sonnet | Fast interactive responses |
 | Work summaries | Claude Sonnet | Summarization task, Sonnet excels |
 
@@ -234,6 +235,7 @@ llm:
   api_key_env: ANTHROPIC_API_KEY
   models:
     analyze: claude-opus-4-6        # For deep codebase analysis
+    sync: claude-opus-4-6           # For context file generation
     review: claude-sonnet-4-6       # For PR review
     mcp: claude-sonnet-4-6          # For MCP server queries
     summary: claude-sonnet-4-6      # For work summaries
@@ -245,9 +247,12 @@ llm:
 | Operation | Typical Cost | Frequency |
 |-----------|-------------|-----------|
 | Full analysis (Opus) | $0.50 - $3.00 | Weekly or on-demand |
+| Context sync (Opus) | $0.10 - $0.50 | After analysis or major refactors |
 | PR review (Sonnet) | $0.01 - $0.10 | Per PR |
 | Work summary (Sonnet) | $0.02 - $0.05 | Daily/weekly |
 | MCP query (Sonnet) | $0.005 - $0.02 | Per query |
+
+> **Why sync uses Opus:** The context file is loaded into every agent session. A $0.30 Opus call that produces a 67% smaller file saves far more in cumulative token costs across hundreds of agent interactions. Use `--no-llm` for free template-based output.
 
 Run `archguard costs` for detailed estimates based on your configuration.
 
@@ -341,6 +346,8 @@ sync:
   preserve_user_sections: true
   auto_commit: false
   auto_pr: false
+  max_context_tokens: 8192   # Token budget for generated context files
+  use_llm: true              # Use Opus to compress decisions (false = template-only)
 
 mcp:
   transport: stdio
@@ -483,7 +490,7 @@ ArchGuard is a TypeScript monorepo built with:
 packages/
   core/           # Shared types, DB, LLM client, git helpers, cost tracking
   analyzer/       # Codebase analysis engine (decisions, dependencies, layers, drift)
-  context-sync/   # AI agent context file generators (no LLM)
+  context-sync/   # AI agent context file generators (LLM-powered compression)
   mcp-server/     # MCP server for real-time guidance
   reviewer/       # Architectural code review
   velocity/       # Team velocity tracking
