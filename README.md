@@ -85,10 +85,52 @@ docker-compose up -d
 
 ## Setup via Claude Code or OpenClaw
 
-Copy and paste this prompt into [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [OpenClaw](https://github.com/nicobailon/openclaw) to set up ArchGuard automatically:
+### Install ArchGuard
+
+Copy and paste this prompt into [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [OpenClaw](https://github.com/openclaw/openclaw) to install ArchGuard and run a first analysis:
 
 ```
-Clone https://github.com/rjc25/ArchGuard, install dependencies with pnpm, build the project, then run "archguard init" in my current repo to analyze the codebase and generate AI agent context files. Configure the MCP server for whatever coding agent I'm using (Cursor, Claude Code, Copilot, Windsurf, or Kiro). Use Sonnet 4.6 as the default model. Walk me through setting my ANTHROPIC_API_KEY if I don't have one.
+Install ArchGuard from source (https://github.com/rjc25/ArchGuard). Clone the repo, install
+dependencies with pnpm, build all packages, and link the CLI globally so "archguard" is in PATH.
+Then in my current project directory: run "archguard init" to generate .archguard.yml, run
+"archguard analyze" to extract architectural decisions from my codebase, and run "archguard sync"
+to generate AI agent context files (CLAUDE.md, .cursorrules, copilot-instructions.md, etc.).
+Configure the MCP server in my editor's config (Claude Code, Cursor, Windsurf, or Kiro — whichever
+I'm using). Use Sonnet as the default model for reviews/summaries and Opus for analysis. If
+ANTHROPIC_API_KEY isn't set, walk me through getting one from console.anthropic.com. Show me
+the generated CLAUDE.md and a summary of the architectural decisions found.
+```
+
+### Integrate ArchGuard into Your AI Agents
+
+If you're running autonomous coding agents (Claude Code sub-agents, OpenClaw sub-agents, Devin, etc.) and want them to stay architecturally aligned, paste this prompt:
+
+```
+Set up ArchGuard as architectural guardrails for me and my sub-agents. Here's what I need:
+
+1. CONTEXT FILES: Run "archguard analyze" and "archguard sync" on my repo to generate CLAUDE.md
+   (or .cursorrules, etc.). This file should be fed to every sub-agent I spawn as part of their
+   system context so they follow my architectural decisions.
+
+2. MCP SERVER: Configure "archguard serve" as an MCP server (stdio transport) in my editor config.
+   This gives me and my agents real-time access to:
+   - get_architectural_decisions: Search decisions by keyword
+   - check_architectural_compliance: Validate code snippets against all decisions
+   - get_architectural_guidance: Get relevant constraints for a task before writing code
+
+3. PRE-FLIGHT CHECKS: Before any sub-agent starts coding, it should call
+   get_architectural_guidance with a description of its task to get relevant constraints.
+   After it finishes, run "archguard review --diff <branch>" to catch violations before merging.
+
+4. SPRINT REVIEWS: Set up "archguard summary --type sprint_review --period sprint" to generate
+   sprint reviews with velocity metrics, architectural impact analysis, and code quality scores.
+
+5. KEEP IT FRESH: After significant refactors or new architectural decisions, re-run
+   "archguard analyze" and "archguard sync" to update the context files. Set up
+   "archguard watch" in a background terminal to auto-sync on file changes.
+
+The goal: every agent that touches my code should know my architectural decisions and get flagged
+if it violates them. No more architectural drift from autonomous agents.
 ```
 
 ## Features
