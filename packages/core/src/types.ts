@@ -434,6 +434,8 @@ export interface ArchGuardConfig {
   };
   summaries: {
     enabled: boolean;
+    /** Length of a sprint in days for sprint_review summaries. Default: 14 */
+    sprintLengthDays: number;
     schedules: SummarySchedule[];
   };
   layers: LayerDefinition[];

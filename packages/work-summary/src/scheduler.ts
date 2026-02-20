@@ -213,7 +213,10 @@ export class SummaryScheduler {
     const managed = this.jobs.get(jobKey);
 
     try {
-      const { periodStart, periodEnd, periodLabel } = computePeriod(schedule.type);
+      const { periodStart, periodEnd, periodLabel } = computePeriod(
+        schedule.type,
+        this.config.summaries.sprintLengthDays,
+      );
 
       // Gather external PR data if a provider is configured
       const pullRequests = this.schedulerConfig.pullRequestProvider
@@ -270,10 +273,10 @@ export class SummaryScheduler {
  * Compute the time period for a summary based on its type.
  * - standup: last 24 hours
  * - one_on_one: last 7 days
- * - sprint_review: last 14 days (2-week sprint)
+ * - sprint_review: uses sprintLengthDays from config (default 14)
  * - progress_report: last 30 days
  */
-function computePeriod(type: SummaryType): {
+function computePeriod(type: SummaryType, sprintLengthDays = 14): {
   periodStart: string;
   periodEnd: string;
   periodLabel: string;
@@ -300,7 +303,7 @@ function computePeriod(type: SummaryType): {
     }
     case 'sprint_review': {
       const sprintStart = new Date(now);
-      sprintStart.setDate(sprintStart.getDate() - 14);
+      sprintStart.setDate(sprintStart.getDate() - sprintLengthDays);
       periodStart = sprintStart.toISOString().slice(0, 10);
       periodLabel = `Sprint ${periodStart} to ${periodEnd}`;
       break;

@@ -93,6 +93,10 @@ export function registerSummaryCommand(program: Command): void {
       'Time period: weekly or sprint',
       'weekly'
     )
+    .option(
+      '--days <number>',
+      'Custom period length in days (overrides --period)'
+    )
     .option('--json', 'Output as JSON')
     .option('--output <file>', 'Write summary to a file')
     .option('--path <dir>', 'Project directory', '.')
@@ -101,6 +105,7 @@ export function registerSummaryCommand(program: Command): void {
         dev?: string;
         type: string;
         period: string;
+        days?: string;
         json?: boolean;
         output?: string;
         path: string;
@@ -153,10 +158,14 @@ export function registerSummaryCommand(program: Command): void {
           // Calculate period dates based on the selected period
           const nowDate = new Date();
           const periodEnd = nowDate.toISOString().slice(0, 10);
-          const periodStart =
-            options.period === 'sprint'
-              ? new Date(nowDate.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-              : new Date(nowDate.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+          const periodDays = options.days
+            ? parseInt(options.days, 10)
+            : options.period === 'sprint'
+              ? config.summaries.sprintLengthDays
+              : 7;
+          const periodStart = new Date(
+            nowDate.getTime() - periodDays * 24 * 60 * 60 * 1000
+          ).toISOString().slice(0, 10);
 
           const developerName = options.dev ?? 'team';
 

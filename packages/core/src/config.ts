@@ -152,6 +152,7 @@ const configSchema = z.object({
   summaries: z
     .object({
       enabled: z.boolean().default(true),
+      sprintLengthDays: z.number().min(1).max(90).default(14),
       schedules: z.array(summaryScheduleSchema).default([]),
     })
     .default({}),
@@ -319,6 +320,7 @@ velocity:
 # Work summaries
 summaries:
   enabled: true
+  sprint_length_days: 14    # Length of a sprint in days (used by sprint_review summaries)
   schedules: []
 
 # Layer definitions for dependency enforcement
