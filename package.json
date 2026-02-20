@@ -1,0 +1,26 @@
+{
+  "name": "archguard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source architectural guardrails & engineering intelligence platform",
+  "license": "MIT",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean",
+    "db:migrate": "pnpm --filter @archguard/core db:migrate",
+    "db:seed": "pnpm --filter @archguard/core db:seed"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

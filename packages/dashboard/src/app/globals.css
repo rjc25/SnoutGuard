@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand */
+    --brand-primary: #4f46e5;
+    --brand-primary-hover: #4338ca;
+    --brand-primary-light: #eef2ff;
+
+    /* Sidebar */
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #e2e8f0;
+    --sidebar-text-muted: #94a3b8;
+    --sidebar-accent: #4f46e5;
+    --sidebar-accent-hover: #4338ca;
+    --sidebar-border: #1e293b;
+
+    /* Content area */
+    --content-bg: #f8fafc;
+    --content-surface: #ffffff;
+    --content-border: #e2e8f0;
+
+    /* Text */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+
+    /* Status colors */
+    --status-success: #22c55e;
+    --status-warning: #f59e0b;
+    --status-error: #ef4444;
+    --status-info: #3b82f6;
+
+    /* Metrics */
+    --health-excellent: #22c55e;
+    --health-good: #84cc16;
+    --health-fair: #f59e0b;
+    --health-poor: #ef4444;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Radii */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+  }
+
+  * {
+    border-color: var(--content-border);
+  }
+
+  body {
+    color: var(--text-primary);
+    background: var(--content-bg);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600;
+  }
+
+  .input-field {
+    @apply block w-full rounded-lg border-0 px-3.5 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 text-sm leading-6 transition-shadow;
+  }
+
+  .card {
+    @apply rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5;
+  }
+
+  .card-padded {
+    @apply card p-6;
+  }
+
+  .metric-badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+
+  .metric-badge-success {
+    @apply metric-badge bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20;
+  }
+
+  .metric-badge-warning {
+    @apply metric-badge bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20;
+  }
+
+  .metric-badge-error {
+    @apply metric-badge bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link bg-brand-600/20 text-white;
+  }
+
+  .sidebar-link-inactive {
+    @apply sidebar-link text-slate-400 hover:bg-slate-800 hover:text-slate-200;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sidebar-border) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--sidebar-border);
+    border-radius: 3px;
+  }
+}
