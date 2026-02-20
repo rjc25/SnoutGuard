@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Save,
   Shield,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
@@ -20,8 +21,18 @@ interface SSOConfig {
   certificate: string;
   spEntityId: string;
   acsUrl: string;
+  defaultRole: 'member' | 'admin' | 'viewer';
   enforceSSO: boolean;
+  allowedDomains: string[];
+  lastTestedAt?: string;
+  testStatus?: 'success' | 'failed';
 }
+
+const roleOptions: { value: SSOConfig['defaultRole']; label: string; description: string }[] = [
+  { value: 'viewer', label: 'Viewer', description: 'Read-only access to dashboards and reviews' },
+  { value: 'member', label: 'Member', description: 'Can create decisions and manage repositories' },
+  { value: 'admin', label: 'Admin', description: 'Full access including organization settings' },
+];
 
 export default function SSOPage() {
   const [config, setConfig] = useState<SSOConfig>({
@@ -31,10 +42,13 @@ export default function SSOPage() {
     certificate: '',
     spEntityId: '',
     acsUrl: '',
+    defaultRole: 'member',
     enforceSSO: false,
+    allowedDomains: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -74,6 +88,29 @@ export default function SSOPage() {
     }
   }, [config]);
 
+  const handleTestConnection = useCallback(async () => {
+    setTesting(true);
+    setError(null);
+    try {
+      const result = await apiFetch<{ status: 'success' | 'failed'; message?: string }>(
+        '/settings/sso/test',
+        { method: 'POST' },
+      );
+      setConfig((prev) => ({
+        ...prev,
+        testStatus: result.status,
+        lastTestedAt: new Date().toISOString(),
+      }));
+      if (result.status === 'failed' && result.message) {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'SSO connection test failed');
+    } finally {
+      setTesting(false);
+    }
+  }, []);
+
   const handleCopy = useCallback((field: string, value: string) => {
     navigator.clipboard.writeText(value);
     setCopied(field);
@@ -96,11 +133,33 @@ export default function SSOPage() {
       </Link>
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">SAML SSO Configuration</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Configure SAML-based Single Sign-On for your organization.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">SAML SSO Configuration</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Configure SAML 2.0 Single Sign-On for your organization.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleTestConnection}
+            disabled={testing || !config.idpEntityId || !config.ssoUrl}
+            className="btn-secondary gap-2"
+          >
+            <Shield className="w-4 h-4" />
+            {testing ? 'Testing...' : 'Test Connection'}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="btn-primary gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
       </div>
 
       {/* Success / Error banners */}
@@ -116,15 +175,57 @@ export default function SSOPage() {
         </div>
       )}
 
+      {/* Test status */}
+      {config.testStatus && (
+        <div
+          className={cn(
+            'rounded-lg border p-3 flex items-center gap-2',
+            config.testStatus === 'success'
+              ? 'bg-green-50 border-green-200'
+              : 'bg-red-50 border-red-200',
+          )}
+        >
+          {config.testStatus === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+          ) : (
+            <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+          )}
+          <p
+            className={cn(
+              'text-sm',
+              config.testStatus === 'success' ? 'text-green-800' : 'text-red-800',
+            )}
+          >
+            {config.testStatus === 'success'
+              ? 'SSO connection test passed. Your identity provider is configured correctly.'
+              : 'SSO connection test failed. Check your configuration and try again.'}
+          </p>
+        </div>
+      )}
+
       {/* Enable SSO toggle */}
       <div className="card-padded">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-brand-600" />
+            <div
+              className={cn(
+                'w-10 h-10 rounded-lg flex items-center justify-center',
+                config.enabled ? 'bg-green-100' : 'bg-gray-100',
+              )}
+            >
+              <Shield
+                className={cn(
+                  'w-5 h-5',
+                  config.enabled ? 'text-green-600' : 'text-gray-400',
+                )}
+              />
+            </div>
             <div>
               <h2 className="text-sm font-semibold text-gray-900">Enable SAML SSO</h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                Allow team members to sign in using your identity provider.
+                {config.enabled
+                  ? 'SSO is active. Team members will authenticate through your identity provider.'
+                  : 'SSO is disabled. Team members authenticate with email and password.'}
               </p>
             </div>
           </div>
@@ -148,7 +249,7 @@ export default function SSOPage() {
 
       {/* Service Provider info (read-only) */}
       <div className="card-padded">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">
+        <h2 className="text-sm font-semibold text-gray-900 mb-1">
           Service Provider (SP) Details
         </h2>
         <p className="text-xs text-gray-500 mb-4">
@@ -168,9 +269,9 @@ export default function SSOPage() {
               <button
                 type="button"
                 onClick={() => handleCopy('spEntityId', config.spEntityId)}
-                className="btn-ghost gap-1"
+                className="btn-ghost gap-1.5 text-xs shrink-0"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="w-3.5 h-3.5" />
                 {copied === 'spEntityId' ? 'Copied' : 'Copy'}
               </button>
             </div>
@@ -190,9 +291,9 @@ export default function SSOPage() {
               <button
                 type="button"
                 onClick={() => handleCopy('acsUrl', config.acsUrl)}
-                className="btn-ghost gap-1"
+                className="btn-ghost gap-1.5 text-xs shrink-0"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="w-3.5 h-3.5" />
                 {copied === 'acsUrl' ? 'Copied' : 'Copy'}
               </button>
             </div>
@@ -202,11 +303,11 @@ export default function SSOPage() {
 
       {/* Identity Provider configuration */}
       <div className="card-padded">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">
+        <h2 className="text-sm font-semibold text-gray-900 mb-1">
           Identity Provider (IdP) Configuration
         </h2>
         <p className="text-xs text-gray-500 mb-4">
-          Enter the details from your identity provider (Okta, Azure AD, Google Workspace, etc.).
+          Enter the SAML 2.0 details from your identity provider (Okta, Azure AD, Google Workspace, etc.).
         </p>
 
         <div className="space-y-4">
@@ -222,6 +323,9 @@ export default function SSOPage() {
               placeholder="https://idp.example.com/saml/metadata"
               className="input-field font-mono text-sm"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              The unique identifier for your identity provider. Also known as the Issuer.
+            </p>
           </div>
 
           <div>
@@ -236,6 +340,9 @@ export default function SSOPage() {
               placeholder="https://idp.example.com/saml/login"
               className="input-field font-mono text-sm"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              The URL where ArchGuard will redirect users for authentication.
+            </p>
           </div>
 
           <div>
@@ -246,11 +353,75 @@ export default function SSOPage() {
               id="certificate"
               value={config.certificate}
               onChange={(e) => setConfig({ ...config, certificate: e.target.value })}
-              placeholder="-----BEGIN CERTIFICATE-----&#10;MIIDBzCCAe+gAwIBAgIJ...&#10;-----END CERTIFICATE-----"
-              className="input-field min-h-[160px] font-mono text-xs"
+              placeholder={"-----BEGIN CERTIFICATE-----\nMIIDBzCCAe+gAwIBAgIJ...\n-----END CERTIFICATE-----"}
+              className="input-field min-h-[160px] font-mono text-xs leading-relaxed"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Paste the full PEM-encoded X.509 certificate from your IdP.
+              Paste the full PEM-encoded X.509 certificate from your identity provider.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Provisioning Settings */}
+      <div className="card-padded">
+        <h2 className="text-sm font-semibold text-gray-900 mb-1">Provisioning Settings</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          Configure how new users are provisioned when they first sign in through SSO.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="defaultRole" className="block text-sm font-medium text-gray-700 mb-1">
+              Default Role
+            </label>
+            <select
+              id="defaultRole"
+              value={config.defaultRole}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  defaultRole: e.target.value as SSOConfig['defaultRole'],
+                })
+              }
+              className="input-field w-64"
+            >
+              {roleOptions.map((role) => (
+                <option key={role.value} value={role.value}>
+                  {role.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {roleOptions.find((r) => r.value === config.defaultRole)?.description}
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="allowedDomains"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Allowed Email Domains
+            </label>
+            <input
+              id="allowedDomains"
+              type="text"
+              value={config.allowedDomains.join(', ')}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  allowedDomains: e.target.value
+                    .split(',')
+                    .map((d) => d.trim())
+                    .filter(Boolean),
+                })
+              }
+              placeholder="example.com, corp.example.com"
+              className="input-field"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Comma-separated list of email domains allowed to sign in via SSO.
             </p>
           </div>
         </div>
@@ -290,7 +461,8 @@ export default function SSOPage() {
         <div className="flex-1">
           <p className="text-sm text-blue-900">Need help setting up SSO?</p>
           <p className="text-xs text-blue-700 mt-0.5">
-            Check our documentation for step-by-step guides on configuring SAML SSO with popular identity providers.
+            Check our documentation for step-by-step guides on configuring SAML SSO with popular
+            identity providers including Okta, Azure AD, Google Workspace, and OneLogin.
           </p>
         </div>
         <a href="#" className="btn-ghost text-blue-700 gap-1 text-xs shrink-0">
@@ -298,7 +470,7 @@ export default function SSOPage() {
         </a>
       </div>
 
-      {/* Save button */}
+      {/* Save button (bottom) */}
       <div className="flex items-center justify-end gap-3">
         <Link href="/settings" className="btn-ghost">
           Cancel
