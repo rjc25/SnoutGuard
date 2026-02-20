@@ -46,8 +46,8 @@ archguard review --diff main
 
 ```bash
 # Clone and run with Docker
-git clone https://github.com/rjc25/codereviewagent.git
-cd codereviewagent
+git clone https://github.com/rjc25/ArchGuard.git
+cd ArchGuard
 pnpm install
 pnpm build
 
@@ -302,8 +302,8 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ```bash
 # Development setup
-git clone https://github.com/rjc25/codereviewagent.git
-cd codereviewagent
+git clone https://github.com/rjc25/ArchGuard.git
+cd ArchGuard
 pnpm install
 pnpm build
 pnpm test
