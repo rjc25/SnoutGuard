@@ -168,6 +168,8 @@ This means the enforcement is **baked into the context file itself** — every a
 - Output formats: terminal, GitHub PR comments, Bitbucket PR comments, JSON
 - CI mode with configurable severity threshold
 
+> ArchGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
+
 **Cost Tracking** (`archguard costs`)
 - Shows current model assignments with per-million-token pricing
 - Estimates costs for typical operations (analysis, review, summary)
