@@ -98,8 +98,6 @@ export {
 
 /** Options for the reviewChanges function */
 export interface ReviewOptions {
-  /** Skip LLM review (--no-llm flag) */
-  skipLlm?: boolean;
   /** Repository ID for tracking */
   repoId?: string;
   /** PR number if triggered by a pull request */
@@ -144,7 +142,6 @@ export async function reviewChanges(
   options: ReviewOptions = {}
 ): Promise<ReviewResult> {
   const {
-    skipLlm = false,
     repoId = '',
     prNumber,
     prUrl,
@@ -178,20 +175,17 @@ export async function reviewChanges(
   };
   const ruleViolations = checkRules(diffAnalysis, ruleConfig);
 
-  // Step 3: Run LLM review (if enabled)
-  let llmViolations: Violation[] = [];
-  if (!skipLlm && config.analysis.llmAnalysis) {
-    const llmOptions: LlmReviewOptions = {
-      maxContexts: maxLlmContexts,
-      additionalInstructions,
-    };
-    llmViolations = await runLlmReview(
-      diffAnalysis,
-      decisions,
-      config,
-      llmOptions
-    );
-  }
+  // Step 3: Run LLM review (always — API key is required)
+  const llmOptions: LlmReviewOptions = {
+    maxContexts: maxLlmContexts,
+    additionalInstructions,
+  };
+  const llmViolations = await runLlmReview(
+    diffAnalysis,
+    decisions,
+    config,
+    llmOptions
+  );
 
   // Step 4: Combine and deduplicate violations
   const allViolations = deduplicateViolations([
