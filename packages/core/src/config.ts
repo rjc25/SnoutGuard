@@ -95,7 +95,7 @@ const configSchema = z.object({
           summary: z.string().default('claude-sonnet-4-6'),
         })
         .default({}),
-      maxTokensPerAnalysis: z.number().default(8192),
+      maxTokensPerAnalysis: z.number().default(16384),
       cacheTtlHours: z.number().default(24),
       maxRetries: z.number().default(3),
       retryBaseDelayMs: z.number().default(1000),
@@ -278,7 +278,7 @@ llm:
     mcp: claude-sonnet-4-6
     # Sonnet for work summaries (summarization)
     summary: claude-sonnet-4-6
-  max_tokens_per_analysis: 8192
+  max_tokens_per_analysis: 16384
   cache_ttl_hours: 24
   max_retries: 3
   retry_base_delay_ms: 1000
