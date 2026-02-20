@@ -136,34 +136,52 @@ export function registerVelocityCommand(program: Command): void {
         const spinner = ora('Calculating velocity metrics...').start();
 
         try {
-          const { calculateVelocity, calculateTeamVelocity } = await import(
+          const { calculateVelocity } = await import(
             '@archguard/velocity'
           );
 
+          // Calculate period dates
+          const nowDate = new Date();
+          const periodEnd = nowDate.toISOString().slice(0, 10);
+          let periodStart: string;
+          switch (period) {
+            case 'daily':
+              periodStart = new Date(nowDate.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+              break;
+            case 'monthly':
+              periodStart = new Date(nowDate.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+              break;
+            case 'weekly':
+            default:
+              periodStart = new Date(nowDate.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+              break;
+          }
+
+          spinner.text = options.dev
+            ? `Calculating velocity for ${options.dev}...`
+            : 'Calculating velocity metrics...';
+
+          const result = await calculateVelocity({
+            projectDir,
+            teamId: 'default',
+            period,
+            periodStart,
+            periodEnd,
+            config,
+          });
+
+          spinner.stop();
+
           if (options.team) {
-            spinner.text = 'Calculating team velocity...';
-            const teamVelocity = await calculateTeamVelocity(projectDir, config, {
-              period,
-            });
-
-            spinner.stop();
-
             if (options.json) {
-              console.log(JSON.stringify(teamVelocity, null, 2));
+              console.log(JSON.stringify(result.teamVelocity, null, 2));
             } else {
-              console.log(formatTeamVelocity(teamVelocity));
+              console.log(formatTeamVelocity(result.teamVelocity));
             }
           } else {
-            spinner.text = options.dev
-              ? `Calculating velocity for ${options.dev}...`
-              : 'Calculating developer velocities...';
-
-            const scores = await calculateVelocity(projectDir, config, {
-              period,
-              developer: options.dev,
-            });
-
-            spinner.stop();
+            const scores = options.dev
+              ? result.scores.filter((s) => s.developerId === options.dev)
+              : result.scores;
 
             if (options.json) {
               console.log(JSON.stringify(scores, null, 2));

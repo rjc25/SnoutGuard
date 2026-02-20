@@ -35,8 +35,6 @@ export function registerServeCommand(program: Command): void {
           process.exit(1);
         }
 
-        const spinner: ReturnType<typeof ora> | null = null;
-
         try {
           const { startMcpServer } = await import('@archguard/mcp-server');
 
@@ -45,32 +43,10 @@ export function registerServeCommand(program: Command): void {
             projectDir,
           });
 
-          if (spinner) {
-            spinner.succeed(`MCP server running on port ${chalk.bold(String(port))}`);
-            console.log(
-              chalk.gray('  Press Ctrl+C to stop\n')
-            );
-
-            // Keep alive for SSE mode
-            const shutdown = () => {
-              console.log(chalk.gray('\n  Stopping MCP server...'));
-              process.exit(0);
-            };
-
-            process.on('SIGINT', shutdown);
-            process.on('SIGTERM', shutdown);
-
-            await new Promise<void>(() => {
-              // Keep event loop alive
-            });
-          }
           // For stdio transport, the server handles I/O directly
         } catch (error: unknown) {
-          if (spinner) {
-            spinner.fail('Failed to start MCP server');
-          }
           const message = error instanceof Error ? error.message : String(error);
-          console.error(chalk.red(`\n  ${message}\n`));
+          console.error(chalk.red(`\n  Failed to start MCP server: ${message}\n`));
           process.exit(1);
         }
       }

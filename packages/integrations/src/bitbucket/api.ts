@@ -363,7 +363,7 @@ async function fetchAllPages<T>(
   let nextUrl: string | undefined = url;
 
   while (nextUrl) {
-    const page = await fetchJson<PaginatedResponse<T>>(client, nextUrl);
+    const page: PaginatedResponse<T> = await fetchJson<PaginatedResponse<T>>(client, nextUrl);
     results.push(...page.values);
     nextUrl = page.next;
   }

@@ -167,10 +167,10 @@ async function handleStatusCommand(
   await respond({
     response_type: 'in_channel',
     text: message.text,
-    blocks: message.blocks as Record<string, unknown>[],
+    blocks: message.blocks as unknown[],
     attachments: message.attachments?.map((a) => ({
       color: a.color,
-      blocks: a.blocks as Record<string, unknown>[],
+      blocks: a.blocks as unknown[],
     })),
   });
 
@@ -179,7 +179,7 @@ async function handleStatusCommand(
     await respond({
       response_type: 'in_channel',
       text: velocityMessage.text,
-      blocks: velocityMessage.blocks as Record<string, unknown>[],
+      blocks: velocityMessage.blocks as unknown[],
     });
   }
 }
@@ -201,7 +201,7 @@ async function handleDecisionsCommand(
   await respond({
     response_type: 'in_channel',
     text: message.text,
-    blocks: message.blocks as Record<string, unknown>[],
+    blocks: message.blocks as unknown[],
   });
 }
 
@@ -246,10 +246,10 @@ async function handleReviewCommand(
   await respond({
     response_type: 'in_channel',
     text: message.text,
-    blocks: message.blocks as Record<string, unknown>[],
+    blocks: message.blocks as unknown[],
     attachments: message.attachments?.map((a) => ({
       color: a.color,
-      blocks: a.blocks as Record<string, unknown>[],
+      blocks: a.blocks as unknown[],
     })),
   });
 }
@@ -287,10 +287,10 @@ async function handleSummaryCommand(
   await respond({
     response_type: 'in_channel',
     text: message.text,
-    blocks: message.blocks as Record<string, unknown>[],
+    blocks: message.blocks as unknown[],
     attachments: message.attachments?.map((a) => ({
       color: a.color,
-      blocks: a.blocks as Record<string, unknown>[],
+      blocks: a.blocks as unknown[],
     })),
   });
 }
@@ -320,10 +320,10 @@ async function handleBlockersCommand(
   await respond({
     response_type: 'in_channel',
     text: message.text,
-    blocks: message.blocks as Record<string, unknown>[],
+    blocks: message.blocks as unknown[],
     attachments: message.attachments?.map((a) => ({
       color: a.color,
-      blocks: a.blocks as Record<string, unknown>[],
+      blocks: a.blocks as unknown[],
     })),
   });
 }
@@ -363,7 +363,7 @@ async function handleHelpCommand(respond: RespondFn): Promise<void> {
           ].join('\n'),
         },
       },
-    ] as Record<string, unknown>[],
+    ] as unknown[],
   });
 }
 

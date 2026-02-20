@@ -52,7 +52,7 @@ const workers = new Map<string, Worker>();
 export function getQueue(name: QueueName): Queue {
   if (!queues.has(name)) {
     const queue = new Queue(name, {
-      connection: getRedisConnection(),
+      connection: getRedisConnection() as never,
       defaultJobOptions: {
         removeOnComplete: { age: 24 * 3600, count: 1000 },
         removeOnFail: { age: 7 * 24 * 3600, count: 5000 },
@@ -87,7 +87,7 @@ export function registerWorker(
   }
 
   const worker = new Worker(name, processor, {
-    connection: getRedisConnection(),
+    connection: getRedisConnection() as never,
     concurrency,
     limiter: {
       max: concurrency * 2,

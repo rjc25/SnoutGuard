@@ -104,38 +104,54 @@ export function registerSyncCommand(program: Command): void {
             return;
           }
 
-          // Generate each format
-          let generated = 0;
-          for (const format of formats) {
-            spinner.text = `Generating ${format} context file...`;
+          // Create a SyncEngine with the determined formats
+          const { SyncEngine } = await import('@archguard/context-sync');
 
-            try {
-              const { generateContextFile } = await import('@archguard/context-sync');
-              const result = await generateContextFile(format, decisions, config, {
-                outputDir,
-                preserveUserSections: config.sync.preserveUserSections,
-              });
+          // Override config formats to only generate the requested ones
+          const syncConfig = {
+            ...config,
+            sync: {
+              ...config.sync,
+              formats,
+            },
+          };
 
-              if (options.dryRun) {
-                console.log(chalk.gray(`\n  [dry-run] Would write: ${result.outputPath}`));
-                console.log(chalk.gray(`  Content length: ${result.content.length} chars\n`));
-              } else {
-                generated++;
-              }
-            } catch (formatError: unknown) {
-              const msg =
-                formatError instanceof Error
-                  ? formatError.message
-                  : String(formatError);
-              spinner.text = `Skipping ${format}: ${msg}`;
-            }
-          }
+          const engine = new SyncEngine({
+            config: syncConfig,
+            decisions,
+            repoId: 'local',
+            projectRoot: projectDir,
+          });
 
           if (options.dryRun) {
+            // Preview what would be generated
+            for (const format of formats) {
+              spinner.text = `Previewing ${format} context file...`;
+              try {
+                const content = engine.renderFormat(format);
+                const outputPaths = engine.getOutputPaths();
+                console.log(chalk.gray(`\n  [dry-run] Would write: ${outputPaths[format]}`));
+                console.log(chalk.gray(`  Content length: ${content.length} chars\n`));
+              } catch (formatError: unknown) {
+                const msg =
+                  formatError instanceof Error
+                    ? formatError.message
+                    : String(formatError);
+                spinner.text = `Skipping ${format}: ${msg}`;
+              }
+            }
             spinner.succeed('Dry run complete');
           } else {
+            // Run the sync
+            spinner.text = 'Generating context files...';
+            const syncResult = engine.sync();
+
+            for (const err of syncResult.errors) {
+              console.log(chalk.yellow(`\n  Skipped ${err.format}: ${err.error}`));
+            }
+
             spinner.succeed(
-              `Generated ${generated} context file(s) in ${chalk.bold(outputDir)}`
+              `Generated ${syncResult.records.length} context file(s) in ${chalk.bold(outputDir)}`
             );
           }
 

@@ -15,6 +15,7 @@ import {
   generateId,
   now,
   findProjectRoot,
+  eq,
   type ArchDecision,
   type ArchCategory,
   type DecisionStatus,
@@ -225,7 +226,7 @@ export function registerDecisionsCommand(program: Command): void {
       try {
         const db = initializeDatabase();
         const { schema } = await import('@archguard/core');
-        const { eq } = await import('drizzle-orm');
+        // eq is imported from @archguard/core at the top of this file
 
         const rows = await db
           .select()
@@ -272,7 +273,7 @@ export function registerDecisionsCommand(program: Command): void {
       try {
         const db = initializeDatabase();
         const { schema } = await import('@archguard/core');
-        const { eq } = await import('drizzle-orm');
+        // eq is imported from @archguard/core at the top of this file
 
         const rows = await db
           .select()
@@ -318,7 +319,7 @@ export function registerDecisionsCommand(program: Command): void {
       try {
         const db = initializeDatabase();
         const { schema } = await import('@archguard/core');
-        const { eq } = await import('drizzle-orm');
+        // eq is imported from @archguard/core at the top of this file
 
         const rows = await db
           .select()

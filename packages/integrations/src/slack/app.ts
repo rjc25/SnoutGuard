@@ -102,10 +102,10 @@ export function createSlackApp(
     app.event('app_mention', async ({ event, say }) => {
       try {
         await mentionHandler({
-          user: event.user,
-          text: event.text,
-          channel: event.channel,
-          ts: event.ts,
+          user: event.user ?? '',
+          text: event.text ?? '',
+          channel: event.channel ?? '',
+          ts: event.ts ?? '',
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -136,10 +136,10 @@ export function createSlackApp(
           reaction: event.reaction,
           itemUser: event.item_user ?? '',
           channel: 'item' in event && event.item && typeof event.item === 'object' && 'channel' in event.item
-            ? (event.item as Record<string, string>).channel
+            ? (event.item as unknown as Record<string, string>).channel
             : '',
           ts: 'item' in event && event.item && typeof event.item === 'object' && 'ts' in event.item
-            ? (event.item as Record<string, string>).ts
+            ? (event.item as unknown as Record<string, string>).ts
             : '',
         });
       } catch (error) {
@@ -155,8 +155,8 @@ export function createSlackApp(
     app.event('app_home_opened', async ({ event }) => {
       try {
         await appHomeHandler({
-          user: event.user,
-          tab: event.tab,
+          user: event.user ?? '',
+          tab: event.tab ?? '',
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

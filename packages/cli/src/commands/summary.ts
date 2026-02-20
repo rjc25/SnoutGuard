@@ -131,12 +131,35 @@ export function registerSummaryCommand(program: Command): void {
         ).start();
 
         try {
-          const { generateSummary } = await import('@archguard/work-summary');
+          const { generateSummary, collectData } = await import('@archguard/work-summary');
 
-          const summary = await generateSummary(projectDir, config, {
+          // Calculate period dates based on the selected period
+          const now = new Date();
+          const periodEnd = now.toISOString().slice(0, 10);
+          const periodStart =
+            options.period === 'sprint'
+              ? new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+              : new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+          const developerName = options.dev ?? 'team';
+
+          // Collect data from git history
+          const data = await collectData({
+            repoPath: projectDir,
+            developer: developerName,
+            periodStart,
+            periodEnd,
+          });
+
+          const summary = await generateSummary({
+            data,
             type: summaryType,
-            period: options.period as 'weekly' | 'sprint',
-            developer: options.dev,
+            developerName,
+            period: options.period,
+            teamId: 'default',
+            noLlm: !config.analysis.llmAnalysis,
+            projectDir,
+            config,
           });
 
           spinner.succeed('Summary generated');

@@ -93,7 +93,7 @@ async function processSummary(job: Job<SummaryJobData>): Promise<{ summaryId: st
     const prompt = buildSummaryPrompt(type, dataPoints, periodStart, periodEnd, developerId);
 
     const response = await analyzeWithLlm(llmClient, config, {
-      prompt,
+      userPrompt: prompt,
       systemPrompt: 'You are a technical writing assistant that generates clear, data-driven work summaries for engineering teams.',
       maxTokens: 2048,
     });

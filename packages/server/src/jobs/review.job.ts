@@ -75,7 +75,7 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
   const config = loadConfig(process.cwd());
 
   // Dynamically import reviewer
-  const { checkRules } = await import('@archguard/reviewer/rule-engine');
+  const { checkRules } = await import('@archguard/reviewer');
 
   await job.updateProgress(40);
 
@@ -87,7 +87,7 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
 
   // Run rule engine (placeholder - actual diff analysis would happen here)
   const violations = checkRules(
-    { fileDiffs: [], changeContexts: [], summary: { filesChanged: 0, additions: 0, deletions: 0, changedModules: [] } },
+    { fileDiffs: [], categorized: { newFiles: [], modifications: [], deletions: [], renames: [] }, changeContexts: [], summary: { totalFiles: 0, totalAdditions: 0, totalDeletions: 0, newFileCount: 0, modifiedCount: 0, deletedCount: 0, renamedCount: 0, fileExtensions: [], touchedDirectories: [] } },
     { decisions, customRules: config.rules }
   );
 
@@ -122,7 +122,7 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
   // If this is a PR review triggered by webhook, post results back to GitHub
   if (prNumber && triggeredBy === 'webhook' && repo.provider === 'github') {
     try {
-      const { createGitHubClient, createComment } = await import('@archguard/integrations/github/api');
+      const { createGitHubClient, createGitHubComment } = await import('@archguard/integrations');
       const token = process.env.GITHUB_TOKEN;
       if (token) {
         const octokit = createGitHubClient({ token });
@@ -130,7 +130,7 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
         const summary = `## ArchGuard Review\n\n` +
           `**${violations.length}** violations found: ` +
           `${errors} errors, ${warnings} warnings, ${infos} info\n`;
-        await createComment(octokit, { owner, repo: repoName, pullNumber: prNumber }, summary);
+        await createGitHubComment(octokit, { owner, repo: repoName, pullNumber: prNumber }, summary);
       }
     } catch {
       // Non-fatal: log but don't fail the job

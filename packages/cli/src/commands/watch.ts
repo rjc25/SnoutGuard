@@ -8,7 +8,14 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as path from 'node:path';
-import { loadConfig, findProjectRoot } from '@archguard/core';
+import {
+  loadConfig,
+  findProjectRoot,
+  initializeDatabase,
+  type ArchDecision,
+  type ArchCategory,
+  type SyncFormat,
+} from '@archguard/core';
 
 export function registerWatchCommand(program: Command): void {
   program
@@ -42,32 +49,67 @@ export function registerWatchCommand(program: Command): void {
         const spinner = ora('Starting file watcher...').start();
 
         try {
-          const { startWatcher } = await import('@archguard/context-sync');
+          const { SyncEngine } = await import('@archguard/context-sync');
 
-          const watcher = await startWatcher(projectDir, config, {
-            formats: options.format === 'all' ? config.sync.formats : [options.format as any],
-            debounceMs,
-            onChange: (event) => {
-              console.log(
-                chalk.gray(
-                  `  [${new Date().toLocaleTimeString()}] ${event.type}: ${event.path}`
-                )
-              );
+          // Determine which formats to use
+          const formats: SyncFormat[] =
+            options.format === 'all'
+              ? config.sync.formats
+              : [options.format as SyncFormat];
+
+          // Load decisions from database
+          const db = initializeDatabase();
+          const { schema } = await import('@archguard/core');
+          const rows = await db.select().from(schema.decisions);
+
+          const decisions: ArchDecision[] = rows.map((row) => ({
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            category: row.category as ArchCategory,
+            status: row.status as ArchDecision['status'],
+            confidence: row.confidence,
+            evidence: [],
+            constraints: JSON.parse(row.constraints ?? '[]'),
+            relatedDecisions: JSON.parse(row.relatedDecisions ?? '[]'),
+            tags: JSON.parse(row.tags ?? '[]'),
+            detectedAt: row.detectedAt,
+            confirmedBy: row.confirmedBy ?? undefined,
+          }));
+
+          // Create sync engine with the requested formats
+          const syncConfig = {
+            ...config,
+            sync: {
+              ...config.sync,
+              formats,
             },
-            onSync: (result) => {
+          };
+
+          const engine = new SyncEngine({
+            config: syncConfig,
+            decisions,
+            repoId: 'local',
+            projectRoot: projectDir,
+          });
+
+          // Start watch mode with the SyncEngine
+          await engine.startWatch(undefined, (result) => {
+            const timestamp = new Date().toLocaleTimeString();
+            for (const record of result.records) {
               console.log(
                 chalk.green(
-                  `  [${new Date().toLocaleTimeString()}] Synced ${result.format} -> ${result.outputPath}`
+                  `  [${timestamp}] Synced ${record.format} -> ${record.outputPath}`
                 )
               );
-            },
-            onError: (error) => {
+            }
+            for (const err of result.errors) {
               console.error(
                 chalk.red(
-                  `  [${new Date().toLocaleTimeString()}] Error: ${error.message}`
+                  `  [${timestamp}] Error in ${err.format}: ${err.error}`
                 )
               );
-            },
+            }
           });
 
           spinner.succeed('Watching for changes (press Ctrl+C to stop)');
@@ -76,7 +118,7 @@ export function registerWatchCommand(program: Command): void {
           // Keep the process alive and handle shutdown
           const shutdown = () => {
             console.log(chalk.gray('\n  Stopping watcher...'));
-            watcher.close();
+            engine.stopWatch();
             process.exit(0);
           };
 

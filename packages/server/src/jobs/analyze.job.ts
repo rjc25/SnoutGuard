@@ -126,10 +126,10 @@ async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId:
   await db.insert(schema.archSnapshots).values({
     id: snapshotId,
     repoId,
-    commitSha: result.drift.currentSnapshot.commitSha,
-    driftScore: result.drift.currentSnapshot.driftScore,
+    commitSha: result.drift.snapshot.commitSha,
+    driftScore: result.drift.snapshot.driftScore,
     decisionCount: result.decisions.length,
-    dependencyStats: JSON.stringify(result.drift.currentSnapshot.dependencyStats),
+    dependencyStats: JSON.stringify(result.drift.snapshot.dependencyStats),
     createdAt: timestamp,
   });
 
@@ -152,7 +152,7 @@ async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId:
   await job.updateProgress(90);
 
   // Store dependencies
-  for (const node of result.dependencyGraph.nodes) {
+  for (const node of result.dependencyGraph.nodes.values()) {
     for (const target of node.imports) {
       await db.insert(schema.dependencies).values({
         id: generateId(),

@@ -14,6 +14,12 @@ export {
   createSqliteClient,
   initializeDatabase,
   schema,
+  eq,
+  and,
+  or,
+  desc,
+  asc,
+  sql,
   type DbClient,
 } from './db/index.js';
 

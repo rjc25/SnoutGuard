@@ -5,7 +5,7 @@
  * work summaries, and blocker alerts.
  */
 
-import type { WebClient } from '@slack/web-api';
+import type { WebClient, KnownBlock } from '@slack/web-api';
 import type {
   ReviewResult,
   DriftEvent,
@@ -164,11 +164,11 @@ async function sendMessage(
     const response = await client.chat.postMessage({
       channel,
       text: message.text,
-      blocks: message.blocks as unknown as Record<string, unknown>[],
+      blocks: message.blocks as unknown as KnownBlock[],
       ...(message.attachments && {
         attachments: message.attachments.map((a) => ({
           color: a.color,
-          blocks: a.blocks as unknown as Record<string, unknown>[],
+          blocks: a.blocks as unknown as KnownBlock[],
         })),
       }),
     });
@@ -207,11 +207,11 @@ export async function sendThreadedReply(
       channel,
       thread_ts: threadTs,
       text: message.text,
-      blocks: message.blocks as unknown as Record<string, unknown>[],
+      blocks: message.blocks as unknown as KnownBlock[],
       ...(message.attachments && {
         attachments: message.attachments.map((a) => ({
           color: a.color,
-          blocks: a.blocks as unknown as Record<string, unknown>[],
+          blocks: a.blocks as unknown as KnownBlock[],
         })),
       }),
     });
@@ -250,11 +250,11 @@ export async function updateMessage(
       channel,
       ts,
       text: message.text,
-      blocks: message.blocks as unknown as Record<string, unknown>[],
+      blocks: message.blocks as unknown as KnownBlock[],
       ...(message.attachments && {
         attachments: message.attachments.map((a) => ({
           color: a.color,
-          blocks: a.blocks as unknown as Record<string, unknown>[],
+          blocks: a.blocks as unknown as KnownBlock[],
         })),
       }),
     });

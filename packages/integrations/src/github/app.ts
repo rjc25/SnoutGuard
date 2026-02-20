@@ -145,7 +145,7 @@ export function createGitHubApp(
         action: 'synchronize',
         headSha: payload.pull_request.head.sha,
         baseRef: payload.pull_request.base.ref,
-        author: payload.pull_request.user.login,
+        author: payload.pull_request.user?.login ?? '',
         prTitle: payload.pull_request.title,
         prBody: payload.pull_request.body ?? '',
       };
@@ -166,7 +166,7 @@ export function createGitHubApp(
   // ── Push Events ───────────────────────────────────────────────
   app.webhooks.on('push', async ({ octokit, payload }) => {
     const repo: RepoRef = {
-      owner: payload.repository.owner.login,
+      owner: payload.repository.owner?.login ?? '',
       repo: payload.repository.name,
     };
 

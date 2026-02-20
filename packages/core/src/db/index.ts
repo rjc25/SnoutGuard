@@ -250,3 +250,7 @@ function getDefaultDbPath(): string {
 }
 
 export { schema };
+
+// Re-export commonly used drizzle-orm operators so downstream packages
+// do not need a direct dependency on drizzle-orm.
+export { eq, and, or, desc, asc, sql } from 'drizzle-orm';
