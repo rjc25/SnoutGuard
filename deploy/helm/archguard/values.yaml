@@ -1,0 +1,121 @@
+# ArchGuard Helm Chart Values
+
+replicaCount:
+  server: 2
+  dashboard: 2
+  worker: 3
+
+image:
+  server:
+    repository: ghcr.io/archguard/server
+    tag: latest
+    pullPolicy: IfNotPresent
+  dashboard:
+    repository: ghcr.io/archguard/dashboard
+    tag: latest
+    pullPolicy: IfNotPresent
+  worker:
+    repository: ghcr.io/archguard/worker
+    tag: latest
+    pullPolicy: IfNotPresent
+
+# External secrets (must be created separately)
+existingSecrets:
+  anthropicApiKey: archguard-secrets
+  sessionSecret: archguard-secrets
+  githubApp: archguard-github-secrets
+  slack: archguard-slack-secrets
+
+# Server configuration
+server:
+  port: 3000
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Dashboard configuration
+dashboard:
+  port: 3000
+  apiUrl: http://archguard-server:3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Worker configuration
+worker:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilization: 70
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: archguard.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: server
+        - path: /
+          pathType: Prefix
+          service: dashboard
+  tls:
+    - secretName: archguard-tls
+      hosts:
+        - archguard.example.com
+
+# PostgreSQL subchart
+postgresql:
+  enabled: true
+  auth:
+    username: archguard
+    password: ""  # Set via secret
+    database: archguard
+  primary:
+    persistence:
+      size: 20Gi
+
+# Redis subchart
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      size: 5Gi
+
+# Use external database instead of subchart
+externalDatabase:
+  enabled: false
+  host: ""
+  port: 5432
+  username: archguard
+  password: ""
+  database: archguard
+
+# Use external Redis instead of subchart
+externalRedis:
+  enabled: false
+  host: ""
+  port: 6379
+  password: ""

@@ -1,0 +1,28 @@
+{
+  "name": "@archguard/integrations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@archguard/core": "workspace:*",
+    "@archguard/reviewer": "workspace:*",
+    "@archguard/velocity": "workspace:*",
+    "@archguard/work-summary": "workspace:*",
+    "@octokit/app": "^15.0.0",
+    "@octokit/rest": "^21.0.0",
+    "@slack/bolt": "^4.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
