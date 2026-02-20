@@ -1145,7 +1145,7 @@ analysis:
 # LLM settings
 llm:
   provider: anthropic
-  model: claude-sonnet-4-20250514
+  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
   max_tokens_per_analysis: 4096
   cache_ttl_hours: 24

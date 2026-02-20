@@ -172,39 +172,95 @@ archguard serve --transport stdio
 
 ## Configuration
 
-ArchGuard is configured via `.archguard.yml` in your project root:
+ArchGuard is configured via `.archguard.yml` in your project root. Run `archguard init` to generate one with defaults.
+
+The config file uses `snake_case` keys (e.g. `max_file_size_kb`), which are automatically converted to camelCase internally.
 
 ```yaml
 version: 1
 
 analysis:
-  include: ["src/**", "lib/**"]
-  exclude: ["**/*.test.*", "**/node_modules/**"]
-  languages: [typescript, python]
+  include:
+    - "src/**"
+    - "lib/**"
+  exclude:
+    - "**/*.test.*"
+    - "**/*.spec.*"
+    - "**/node_modules/**"
+    - "**/dist/**"
+  languages:
+    - typescript
+    - python
+  max_file_size_kb: 500
   llm_analysis: true
+  analysis_period_months: 6
 
 llm:
   provider: anthropic
-  model: claude-sonnet-4-20250514
+  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
+  max_tokens_per_analysis: 4096
+  cache_ttl_hours: 24
 
 sync:
-  formats: [cursorrules, claude, copilot, windsurf, kiro]
+  formats:
+    - cursorrules
+    - claude
+    - copilot
+    - windsurf
+    - kiro
+  output_dir: "."
   preserve_user_sections: true
+  auto_commit: false
+  auto_pr: false
+
+mcp:
+  transport: stdio
+  llm_enhanced: true
 
 review:
   severity_threshold: warning
+  max_violations: 50
+  auto_fix_suggestions: true
   auto_review_prs: true
 
 velocity:
   enabled: true
+  calculation_schedule: "0 0 * * *"
   complexity_weight: 0.4
   arch_impact_weight: 0.3
+  review_weight: 0.15
+  refactoring_weight: 0.15
+  stale_pr_days: 3
+  long_branch_days: 7
+
+summaries:
+  enabled: true
+  schedules:
+    - type: standup
+      cron: "0 10 * * *"
+    - type: one_on_one
+      cron: "0 9 * * 1"
+      slack_channel: "#1-1-summaries"
+
+slack:
+  bot_token_env: SLACK_BOT_TOKEN
+  signing_secret_env: SLACK_SIGNING_SECRET
+  notifications:
+    violations:
+      channel: "#arch-violations"
+      severity_threshold: warning
+    drift:
+      channel: "#arch-drift"
+      score_threshold: 0.3
+    blockers:
+      channel: "#dev-blockers"
 
 rules:
   - name: "No direct DB access outside repositories"
     pattern: "import.*from.*prisma"
-    allowed_in: ["src/infrastructure/repositories/**"]
+    allowed_in:
+      - "src/infrastructure/repositories/**"
     severity: error
 ```
 
