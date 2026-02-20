@@ -1,0 +1,44 @@
+{
+  "name": "@archguard/cli",
+  "version": "0.1.0",
+  "description": "Architectural guardrails for AI coding agents — analyze codebases, generate context files, run MCP server, review PRs",
+  "bin": {
+    "archguard": "./dist/archguard.cjs"
+  },
+  "files": [
+    "dist/archguard.cjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0"
+  },
+  "optionalDependencies": {
+    "chokidar": "^4.0.0"
+  },
+  "keywords": [
+    "architecture",
+    "guardrails",
+    "ai",
+    "coding-agents",
+    "claude",
+    "cursor",
+    "mcp",
+    "code-review",
+    "developer-tools",
+    "typescript"
+  ],
+  "author": "rjc25",
+  "license": "MIT",
+  "homepage": "https://github.com/rjc25/ArchGuard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rjc25/ArchGuard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rjc25/ArchGuard/issues"
+  }
+}

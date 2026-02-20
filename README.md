@@ -38,19 +38,24 @@ export ANTHROPIC_API_KEY=sk-ant-...
 # Get one at: https://console.anthropic.com/settings/keys
 ```
 
+## Install
+
+```bash
+# npm (recommended — requires Node.js 20+)
+npm install -g @archguard/cli
+
+# Or download a standalone binary from GitHub Releases:
+# https://github.com/rjc25/ArchGuard/releases
+# (Includes Node.js native deps — just unzip and run)
+
+# Or build from source:
+git clone https://github.com/rjc25/ArchGuard
+cd ArchGuard && pnpm install && pnpm build && npm link packages/cli
+```
+
 ## Quick Start
 
 ```bash
-# Clone and build from source
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard
-pnpm install
-pnpm build
-
-# Link the CLI globally
-npm link packages/cli
-
-# In any project:
 cd ~/your-project
 archguard init                    # Generate .archguard.yml
 archguard analyze                 # Extract decisions (Opus, ~$10-16)
@@ -302,9 +307,7 @@ See the full [Configuration Reference](docs/configuration.md) for all options.
 ```yaml
 - name: Architectural Review
   run: |
-    git clone https://github.com/rjc25/ArchGuard /tmp/archguard
-    cd /tmp/archguard && pnpm install && pnpm build && npm link packages/cli
-    cd $GITHUB_WORKSPACE
+    npm install -g @archguard/cli
     archguard review --diff origin/main --ci --format github
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

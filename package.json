@@ -13,9 +13,12 @@
     "clean": "turbo clean",
     "db:migrate": "pnpm --filter @archguard/core db:migrate",
     "db:seed": "pnpm --filter @archguard/core db:seed",
-    "install-cli": "pnpm build && cd packages/cli && npm link"
+    "install-cli": "pnpm build && cd packages/cli && npm link",
+    "bundle": "pnpm build && node scripts/bundle-cli.mjs",
+    "publish-npm": "./scripts/publish-npm.sh"
   },
   "devDependencies": {
+    "esbuild": "^0.27.3",
     "turbo": "^2.3.0",
     "typescript": "^5.7.0",
     "vitest": "^2.1.0"
