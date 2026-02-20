@@ -2,6 +2,8 @@
  * Async codebase analysis job.
  * Processes analysis requests from the queue, running the full
  * analyzer pipeline and storing results in the database.
+ *
+ * Requires an Anthropic API key — the LLM IS the product.
  */
 
 import type { Job } from 'bullmq';
@@ -12,6 +14,7 @@ import {
   generateId,
   now,
   loadConfig,
+  requireApiKey,
   type DbClient,
 } from '@archguard/core';
 import {
@@ -24,12 +27,13 @@ import {
  * Process an analysis job.
  * Steps:
  * 1. Load repository and config
- * 2. Run the analyzer pipeline
- * 3. Store decisions, snapshots, and drift events
- * 4. Update repository last-analyzed timestamp
+ * 2. Validate API key
+ * 3. Run the analyzer pipeline
+ * 4. Store decisions, snapshots, and drift events
+ * 5. Update repository last-analyzed timestamp
  */
 async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId: string; decisionsCount: number }> {
-  const { repoId, orgId, options } = job.data;
+  const { repoId, orgId } = job.data;
   const db = initializeDatabase();
 
   await job.updateProgress(5);
@@ -48,10 +52,9 @@ async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId:
   const repo = repoRows[0];
   await job.updateProgress(10);
 
-  // Load project config
-  // In a server context, we would clone/pull the repo first.
-  // For now, we use defaults and the repo config.
+  // Load project config and validate API key
   const config = loadConfig(process.cwd());
+  requireApiKey(config);
   await job.updateProgress(15);
 
   // Dynamically import analyzer to avoid circular dependencies at startup
@@ -78,10 +81,9 @@ async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId:
 
   await job.updateProgress(20);
 
-  // Run the analysis pipeline
+  // Run the analysis pipeline (LLM is always used)
   const result = await runAnalysis(process.cwd(), config, {
     repoId,
-    useLlm: options?.useLlm,
     previousSnapshot,
   });
 

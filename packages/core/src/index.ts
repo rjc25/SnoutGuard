@@ -29,10 +29,24 @@ export { seedDatabase, seedTestData } from './db/seed.js';
 // LLM
 export {
   createLlmClient,
+  requireApiKey,
+  getModelForOperation,
   analyzeWithLlm,
+  analyzeWithLlmValidated,
   streamAnalysis,
   clearCache,
+  resetRunCost,
+  getRunCost,
+  getCallHistory,
+  estimateTokens,
+  extractJson,
+  LlmError,
+  LlmAuthError,
+  LlmRateLimitError,
+  LlmValidationError,
+  LlmCostLimitError,
   type AnalysisOptions,
+  type LlmOperation,
 } from './llm.js';
 
 // Git

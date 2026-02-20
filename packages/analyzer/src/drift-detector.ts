@@ -2,6 +2,9 @@
  * Architectural drift detection.
  * Compares current analysis results against historical snapshots
  * to identify architectural drift over time.
+ *
+ * Tracks: decision changes, coupling trends, circular deps,
+ * instability shifts, and layer violation trends.
  */
 
 import {
@@ -11,6 +14,7 @@ import {
   type ArchSnapshot,
   type DriftEvent,
   type DriftEventType,
+  type LayerViolation,
 } from '@archguard/core';
 import type { DependencyGraph } from './dependency-mapper.js';
 
@@ -29,7 +33,8 @@ export function detectDrift(
   commitSha: string,
   currentDecisions: ArchDecision[],
   currentGraph: DependencyGraph,
-  previousSnapshot?: ArchSnapshot
+  previousSnapshot?: ArchSnapshot,
+  layerViolations?: LayerViolation[]
 ): DriftResult {
   const events: DriftEvent[] = [];
   const snapshotId = generateId();
@@ -46,6 +51,8 @@ export function detectDrift(
         totalModules: currentGraph.totalModules,
         circularDeps: currentGraph.circularDeps.length,
         avgCoupling: currentGraph.avgCoupling,
+        avgInstability: currentGraph.avgInstability,
+        avgDistance: currentGraph.avgDistance,
       },
       createdAt: now(),
     };
@@ -113,8 +120,7 @@ export function detectDrift(
   }
 
   // Detect new circular dependencies
-  const prevCircularCount =
-    previousSnapshot.dependencyStats.circularDeps;
+  const prevCircularCount = previousSnapshot.dependencyStats.circularDeps;
   const currentCircularCount = currentGraph.circularDeps.length;
 
   if (currentCircularCount > prevCircularCount) {
@@ -145,6 +151,34 @@ export function detectDrift(
     });
   }
 
+  // Detect instability increase
+  const prevInstability = previousSnapshot.dependencyStats.avgInstability ?? 0;
+  const instabilityIncrease = currentGraph.avgInstability - prevInstability;
+  if (instabilityIncrease > 0.1) {
+    events.push({
+      id: generateId(),
+      repoId,
+      type: 'new_violation_trend',
+      description: `Average module instability increased by ${(instabilityIncrease * 100).toFixed(1)}% (${prevInstability.toFixed(2)} → ${currentGraph.avgInstability.toFixed(2)}). Modules are becoming less stable.`,
+      severity: instabilityIncrease > 0.2 ? 'high' : 'medium',
+      detectedAt: now(),
+      snapshotId,
+    });
+  }
+
+  // Detect layer violations if provided
+  if (layerViolations && layerViolations.length > 0) {
+    events.push({
+      id: generateId(),
+      repoId,
+      type: 'layer_violation_introduced',
+      description: `${layerViolations.length} layer boundary violation(s) detected. ${layerViolations.slice(0, 3).map((v) => `${v.sourceLayer} → ${v.targetLayer}`).join(', ')}${layerViolations.length > 3 ? ` and ${layerViolations.length - 3} more` : ''}.`,
+      severity: layerViolations.length > 5 ? 'high' : layerViolations.length > 2 ? 'medium' : 'low',
+      detectedAt: now(),
+      snapshotId,
+    });
+  }
+
   // Calculate overall drift score (0-100)
   const driftScore = calculateDriftScore(events, currentDecisions, previousSnapshot);
 
@@ -158,6 +192,8 @@ export function detectDrift(
       totalModules: currentGraph.totalModules,
       circularDeps: currentGraph.circularDeps.length,
       avgCoupling: currentGraph.avgCoupling,
+      avgInstability: currentGraph.avgInstability,
+      avgDistance: currentGraph.avgDistance,
     },
     createdAt: now(),
   };

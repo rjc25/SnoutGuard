@@ -13,6 +13,7 @@ import {
   generateId,
   now,
   loadConfig,
+  requireApiKey,
   createLlmClient,
   analyzeWithLlm,
 } from '@archguard/core';
@@ -36,8 +37,9 @@ async function processSummary(job: Job<SummaryJobData>): Promise<{ summaryId: st
 
   await job.updateProgress(10);
 
-  // Load config for LLM settings
+  // Load config and validate API key
   const config = loadConfig(process.cwd());
+  requireApiKey(config);
 
   // Gather velocity scores for the period
   const velocityFilter = developerId
@@ -84,25 +86,15 @@ async function processSummary(job: Job<SummaryJobData>): Promise<{ summaryId: st
 
   await job.updateProgress(50);
 
-  // Generate summary content
-  let content: string;
+  // Generate summary content using LLM (always required)
+  const llmClient = createLlmClient(config);
+  const prompt = buildSummaryPrompt(type, dataPoints, periodStart, periodEnd, developerId);
 
-  try {
-    // Use LLM to generate a well-formatted summary
-    const llmClient = createLlmClient(config);
-    const prompt = buildSummaryPrompt(type, dataPoints, periodStart, periodEnd, developerId);
-
-    const response = await analyzeWithLlm(llmClient, config, {
-      userPrompt: prompt,
-      systemPrompt: 'You are a technical writing assistant that generates clear, data-driven work summaries for engineering teams.',
-      maxTokens: 2048,
-    });
-
-    content = response;
-  } catch {
-    // Fallback to template-based summary if LLM is unavailable
-    content = buildTemplateSummary(type, dataPoints, periodStart, periodEnd);
-  }
+  const content = await analyzeWithLlm(llmClient, config, {
+    userPrompt: prompt,
+    systemPrompt: SUMMARY_SYSTEM_PROMPT,
+    maxTokens: 2048,
+  }, 'summary');
 
   await job.updateProgress(80);
 
@@ -127,8 +119,24 @@ async function processSummary(job: Job<SummaryJobData>): Promise<{ summaryId: st
   return { summaryId };
 }
 
+/** System prompt for summary generation */
+const SUMMARY_SYSTEM_PROMPT = `<role>
+You are an expert technical writing assistant that generates clear, data-driven
+work summaries for engineering teams. Your summaries are concise, actionable,
+and backed by specific metrics.
+</role>
+
+<guidelines>
+- Use markdown formatting with headers and bullet points
+- Lead with the most impactful accomplishments
+- Include specific numbers from the provided data
+- Flag any concerns or blockers prominently
+- Keep the tone professional but approachable
+- Tailor the depth and focus based on the summary type
+</guidelines>`;
+
 /**
- * Build a prompt for LLM-based summary generation.
+ * Build a structured prompt for LLM-based summary generation.
  */
 function buildSummaryPrompt(
   type: string,
@@ -137,56 +145,31 @@ function buildSummaryPrompt(
   periodEnd: string,
   developerId?: string
 ): string {
-  const context = developerId ? `for developer ${developerId}` : 'for the team';
+  const context = developerId ? `developer ${developerId}` : 'the team';
   const periodLabel = `${new Date(periodStart).toLocaleDateString()} to ${new Date(periodEnd).toLocaleDateString()}`;
+  const typeLabel = type.replace(/_/g, ' ');
 
-  return `Generate a ${type.replace(/_/g, ' ')} summary ${context} for the period ${periodLabel}.
+  return `<summary_request>
+<type>${typeLabel}</type>
+<scope>${context}</scope>
+<period>${periodLabel}</period>
+</summary_request>
 
-Data points:
+<activity_data>
 ${JSON.stringify(dataPoints, null, 2)}
+</activity_data>
 
-Requirements:
-- Keep it concise and actionable
-- Highlight key accomplishments
-- Note any concerns or blockers
-- Use bullet points for readability
-- Include specific numbers from the data`;
-}
+<format_instructions>
+Generate a ${typeLabel} summary for ${context} covering ${periodLabel}.
 
-/**
- * Build a template-based summary as LLM fallback.
- */
-function buildTemplateSummary(
-  type: string,
-  dataPoints: Record<string, unknown>,
-  periodStart: string,
-  periodEnd: string
-): string {
-  const period = `${new Date(periodStart).toLocaleDateString()} - ${new Date(periodEnd).toLocaleDateString()}`;
-  const commits = dataPoints.commits as number;
-  const prsOpened = dataPoints.prsOpened as number;
-  const prsMerged = dataPoints.prsMerged as number;
-  const violations = dataPoints.violationsIntroduced as number;
+Structure:
+1. **Overview** — One-sentence summary of the period
+2. **Key Accomplishments** — Top 3-5 achievements with specific numbers
+3. **Concerns** — Any items needing attention (violations, stalled work)
+4. **Action Items** — Concrete next steps
 
-  return `# ${type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Summary
-
-**Period:** ${period}
-
-## Key Metrics
-- **Commits:** ${commits}
-- **PRs Opened:** ${prsOpened}
-- **PRs Merged:** ${prsMerged}
-- **Violations Found:** ${violations}
-
-## Highlights
-${commits > 0 ? `- ${commits} commits made during this period` : '- No commit activity in this period'}
-${prsMerged > 0 ? `- ${prsMerged} pull requests successfully merged` : ''}
-${violations > 0 ? `- ${violations} architectural violations detected - review recommended` : '- No architectural violations detected'}
-
-## Action Items
-${violations > 0 ? '- Review and address architectural violations' : '- Continue maintaining architectural quality'}
-- Review velocity trends for optimization opportunities
-`;
+Keep it under 500 words. Use the exact numbers from the activity data.
+</format_instructions>`;
 }
 
 /**

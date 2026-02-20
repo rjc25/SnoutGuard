@@ -25,6 +25,12 @@ const summaryScheduleSchema = z.object({
   slackChannel: z.string().optional(),
 });
 
+const layerDefinitionSchema = z.object({
+  name: z.string(),
+  patterns: z.array(z.string()),
+  allowedDependencies: z.array(z.string()),
+});
+
 const configSchema = z.object({
   version: z.number().default(1),
   server: z
@@ -57,17 +63,27 @@ const configSchema = z.object({
         )
         .default(['typescript']),
       maxFileSizeKb: z.number().default(500),
-      llmAnalysis: z.boolean().default(true),
       analysisPeriodMonths: z.number().default(6),
     })
     .default({}),
   llm: z
     .object({
       provider: z.string().default('anthropic'),
-      model: z.string().default('claude-sonnet-4-6'),
       apiKeyEnv: z.string().default('ANTHROPIC_API_KEY'),
-      maxTokensPerAnalysis: z.number().default(4096),
+      models: z
+        .object({
+          analyze: z.string().default('claude-opus-4-6'),
+          review: z.string().default('claude-sonnet-4-6'),
+          mcp: z.string().default('claude-sonnet-4-6'),
+          summary: z.string().default('claude-sonnet-4-6'),
+        })
+        .default({}),
+      maxTokensPerAnalysis: z.number().default(8192),
       cacheTtlHours: z.number().default(24),
+      maxRetries: z.number().default(3),
+      retryBaseDelayMs: z.number().default(1000),
+      requestTimeoutMs: z.number().default(120_000),
+      maxCostPerRun: z.number().default(5.0),
     })
     .default({}),
   sync: z
@@ -94,7 +110,6 @@ const configSchema = z.object({
   mcp: z
     .object({
       transport: z.enum(['stdio', 'sse']).default('stdio'),
-      llmEnhanced: z.boolean().default(true),
     })
     .default({}),
   review: z
@@ -123,6 +138,28 @@ const configSchema = z.object({
       schedules: z.array(summaryScheduleSchema).default([]),
     })
     .default({}),
+  layers: z.array(layerDefinitionSchema).default([
+    {
+      name: 'presentation',
+      patterns: ['**/presentation/**', '**/ui/**', '**/pages/**', '**/components/**', '**/views/**'],
+      allowedDependencies: ['application', 'domain'],
+    },
+    {
+      name: 'application',
+      patterns: ['**/application/**', '**/services/**', '**/use-cases/**', '**/usecases/**'],
+      allowedDependencies: ['domain'],
+    },
+    {
+      name: 'domain',
+      patterns: ['**/domain/**', '**/entities/**', '**/models/**'],
+      allowedDependencies: [],
+    },
+    {
+      name: 'infrastructure',
+      patterns: ['**/infrastructure/**', '**/repositories/**', '**/adapters/**', '**/db/**'],
+      allowedDependencies: ['domain', 'application'],
+    },
+  ]),
   slack: z
     .object({
       botTokenEnv: z.string(),
@@ -192,18 +229,30 @@ analysis:
   languages:
     - typescript
   max_file_size_kb: 500
-  llm_analysis: true
   analysis_period_months: 6
 
-# LLM settings
+# LLM settings — an Anthropic API key is required
+# Get one at https://console.anthropic.com
 llm:
   provider: anthropic
-  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
-  max_tokens_per_analysis: 4096
+  models:
+    # Opus for deep analysis (runs infrequently, quality matters most)
+    analyze: claude-opus-4-6
+    # Sonnet for PR review (runs on every PR, speed matters)
+    review: claude-sonnet-4-6
+    # Sonnet for MCP server queries (fast responses)
+    mcp: claude-sonnet-4-6
+    # Sonnet for work summaries (summarization)
+    summary: claude-sonnet-4-6
+  max_tokens_per_analysis: 8192
   cache_ttl_hours: 24
+  max_retries: 3
+  retry_base_delay_ms: 1000
+  request_timeout_ms: 120000
+  max_cost_per_run: 5.00
 
-# Context file sync
+# Context file sync (no LLM needed — pure templating)
 sync:
   formats:
     - cursorrules
@@ -215,7 +264,6 @@ sync:
 # MCP server
 mcp:
   transport: stdio
-  llm_enhanced: true
 
 # Architectural review
 review:
@@ -239,6 +287,43 @@ velocity:
 summaries:
   enabled: true
   schedules: []
+
+# Layer definitions for dependency enforcement
+# Dependencies flow: presentation -> application -> domain <- infrastructure
+layers:
+  - name: presentation
+    patterns:
+      - "**/presentation/**"
+      - "**/ui/**"
+      - "**/pages/**"
+      - "**/components/**"
+      - "**/views/**"
+    allowed_dependencies:
+      - application
+      - domain
+  - name: application
+    patterns:
+      - "**/application/**"
+      - "**/services/**"
+      - "**/use-cases/**"
+      - "**/usecases/**"
+    allowed_dependencies:
+      - domain
+  - name: domain
+    patterns:
+      - "**/domain/**"
+      - "**/entities/**"
+      - "**/models/**"
+    allowed_dependencies: []
+  - name: infrastructure
+    patterns:
+      - "**/infrastructure/**"
+      - "**/repositories/**"
+      - "**/adapters/**"
+      - "**/db/**"
+    allowed_dependencies:
+      - domain
+      - application
 
 # Custom architectural rules
 rules: []

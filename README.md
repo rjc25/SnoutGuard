@@ -10,6 +10,17 @@
 
 ArchGuard analyzes your codebase to automatically extract architectural decisions, syncs them to AI agent context files (CLAUDE.md, .cursorrules, copilot-instructions.md, and more), provides an MCP server for real-time architectural guidance, runs architectural code reviews on PRs, tracks team velocity weighted by code complexity, and generates developer work summaries.
 
+## Prerequisites
+
+**An Anthropic API key is required.** ArchGuard uses Claude as its core analysis engine — the LLM is the product, not an optional enhancement.
+
+```bash
+# Set your API key
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Get an API key at: https://console.anthropic.com/settings/keys
+```
+
 ## Why ArchGuard?
 
 AI coding agents are powerful but architecturally unaware. They generate code that works but often violates your team's established patterns, introduces layer violations, or creates inconsistencies. Meanwhile, engineering managers lack visibility into what AI-assisted development is actually producing.
@@ -25,21 +36,27 @@ ArchGuard solves both problems:
 # Install globally
 npm install -g @archguard/cli
 
+# Set your Anthropic API key
+export ANTHROPIC_API_KEY=sk-ant-...
+
 # Initialize in your project
 cd your-project
 archguard init
 
-# Analyze your codebase
+# Analyze your codebase (uses Claude Opus)
 archguard analyze
 
-# Generate AI agent context files
+# Generate AI agent context files (no LLM needed)
 archguard sync
 
 # Start the MCP server for real-time guidance
 archguard serve
 
-# Review changes against architectural decisions
+# Review changes against architectural decisions (uses Claude Sonnet)
 archguard review --diff main
+
+# Check model assignments and estimated costs
+archguard costs
 ```
 
 ## Quick Start (Server Mode)
@@ -51,7 +68,7 @@ cd archguard
 
 # Set up environment
 cp .env.example .env
-# Edit .env with your ANTHROPIC_API_KEY
+# Edit .env with your ANTHROPIC_API_KEY (required)
 
 # Start all services
 docker-compose up -d
@@ -65,11 +82,14 @@ docker-compose up -d
 ### Architecture Agent
 
 **Codebase Analysis** (`archguard analyze`)
-- Scans your codebase using AST parsing and LLM analysis
+- Scans your codebase using AST parsing and LLM analysis (Claude Opus by default)
 - Detects architectural patterns: MVC, Clean Architecture, Repository, DI, Event-Driven, and more
-- Maps module dependencies and identifies circular dependencies
+- Maps module dependencies with Robert C. Martin coupling metrics (Ca, Ce, Instability, Abstractness, Distance)
+- Identifies circular dependencies and coupling hotspots
+- Detects layer boundary violations against configurable layer hierarchy
 - Tracks architectural drift over time with configurable time windows
 - Works with TypeScript, JavaScript, Python, Go, Rust, and Java
+- Reports LLM cost per run with detailed per-call breakdown
 
 **Context File Sync** (`archguard sync`)
 - Auto-generates context files from your architectural decisions:
@@ -82,6 +102,7 @@ docker-compose up -d
   - Custom Handlebars templates
 - Watch mode auto-syncs on file changes
 - Preserves user-added sections
+- **No LLM needed** — pure templating from analysis results
 
 **MCP Server** (`archguard serve`)
 - Exposes architectural decisions via Model Context Protocol
@@ -89,13 +110,19 @@ docker-compose up -d
 - Resources: decisions, patterns, constraints, dependencies
 - Works with Claude Code, Cursor, Windsurf, and other MCP-compatible agents
 - Supports stdio and SSE transports
+- Uses Claude Sonnet for fast query responses
 
 **Architectural Code Review** (`archguard review`)
-- Reviews git diffs against established architectural decisions
-- Fast pass: deterministic rule matching (import violations, file placement, naming conventions)
-- Deep pass: LLM-powered nuanced review
+- Reviews git diffs against established architectural decisions (Claude Sonnet by default)
+- Expert-level prompts with XML-tagged context and Zod-validated structured output
 - Output formats: terminal, GitHub PR comments, Bitbucket PR comments, JSON
 - CI mode with configurable severity threshold
+
+**Cost Tracking** (`archguard costs`)
+- Shows current model assignments with per-million-token pricing
+- Estimates costs for typical operations (analysis, review, summary)
+- Monthly cost estimates for active teams
+- Configurable `max_cost_per_run` safety limit
 
 ### Management Agent
 
@@ -108,7 +135,7 @@ docker-compose up -d
 - Automatic blocker detection: stalled PRs, long-lived branches, review bottlenecks
 
 **Work Summary Generation** (`archguard summary`)
-- AI-powered summaries from code analysis
+- AI-powered summaries from code analysis (Claude Sonnet)
 - Templates: 1:1 meeting prep, daily standup, sprint review, stakeholder progress report
 - Scheduled auto-generation via cron
 - Slack delivery integration
@@ -126,9 +153,47 @@ docker-compose up -d
 - Velocity charts with Recharts (7-day and 30-day rolling averages)
 - Work summary viewer and editor
 - Drift timeline visualization
-- Interactive dependency graph
+- Interactive dependency graph with coupling metrics
+- Layer violation explorer
 - Team management with RBAC
 - Settings for integrations and custom rules
+
+## Model Configuration
+
+ArchGuard uses **tiered model defaults** optimized for each operation:
+
+| Operation | Default Model | Rationale |
+|-----------|--------------|-----------|
+| `archguard analyze` | Claude Opus | Deep analysis, runs infrequently — quality matters most |
+| `archguard review` | Claude Sonnet | Every PR, speed and cost matter |
+| `archguard sync` | No LLM | Pure templating from stored decisions |
+| MCP server queries | Claude Sonnet | Fast interactive responses |
+| Work summaries | Claude Sonnet | Summarization task, Sonnet excels |
+
+Each operation's model is independently configurable in `.archguard.yml`:
+
+```yaml
+llm:
+  provider: anthropic
+  api_key_env: ANTHROPIC_API_KEY
+  models:
+    analyze: claude-opus-4-6        # For deep codebase analysis
+    review: claude-sonnet-4-6       # For PR review
+    mcp: claude-sonnet-4-6          # For MCP server queries
+    summary: claude-sonnet-4-6      # For work summaries
+  max_cost_per_run: 5.00            # Safety limit in USD (0 = unlimited)
+```
+
+### Estimated Costs
+
+| Operation | Typical Cost | Frequency |
+|-----------|-------------|-----------|
+| Full analysis (Opus) | $0.50 - $3.00 | Weekly or on-demand |
+| PR review (Sonnet) | $0.01 - $0.10 | Per PR |
+| Work summary (Sonnet) | $0.02 - $0.05 | Daily/weekly |
+| MCP query (Sonnet) | $0.005 - $0.02 | Per query |
+
+Run `archguard costs` for detailed estimates based on your configuration.
 
 ## MCP Server Setup
 
@@ -192,15 +257,22 @@ analysis:
     - typescript
     - python
   max_file_size_kb: 500
-  llm_analysis: true
   analysis_period_months: 6
 
 llm:
   provider: anthropic
-  model: claude-sonnet-4-6
   api_key_env: ANTHROPIC_API_KEY
-  max_tokens_per_analysis: 4096
+  models:
+    analyze: claude-opus-4-6
+    review: claude-sonnet-4-6
+    mcp: claude-sonnet-4-6
+    summary: claude-sonnet-4-6
+  max_tokens_per_analysis: 8192
   cache_ttl_hours: 24
+  max_retries: 3
+  retry_base_delay_ms: 1000
+  request_timeout_ms: 120000
+  max_cost_per_run: 5.00
 
 sync:
   formats:
@@ -216,13 +288,39 @@ sync:
 
 mcp:
   transport: stdio
-  llm_enhanced: true
 
 review:
   severity_threshold: warning
   max_violations: 50
   auto_fix_suggestions: true
   auto_review_prs: true
+
+# Layer hierarchy for violation detection
+layers:
+  - name: presentation
+    patterns:
+      - "src/ui/**"
+      - "src/pages/**"
+      - "src/components/**"
+    allowed_dependencies:
+      - application
+  - name: application
+    patterns:
+      - "src/services/**"
+      - "src/usecases/**"
+    allowed_dependencies:
+      - domain
+  - name: domain
+    patterns:
+      - "src/domain/**"
+      - "src/models/**"
+    allowed_dependencies: []
+  - name: infrastructure
+    patterns:
+      - "src/infrastructure/**"
+      - "src/repositories/**"
+    allowed_dependencies:
+      - domain
 
 velocity:
   enabled: true
@@ -286,7 +384,7 @@ See the full [Configuration Reference](docs/configuration.md) for all options.
 ```bash
 # Production deployment
 cp .env.example .env
-# Edit .env with production values
+# Edit .env with production values (ANTHROPIC_API_KEY required)
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
@@ -313,7 +411,8 @@ ArchGuard is a TypeScript monorepo built with:
 - **Monorepo:** Turborepo + pnpm workspaces
 - **CLI:** Commander.js
 - **MCP Server:** @modelcontextprotocol/sdk
-- **LLM:** Anthropic SDK (Claude Sonnet)
+- **LLM:** Anthropic SDK (Claude Opus for analysis, Sonnet for everything else)
+- **Validation:** Zod schemas on all LLM responses
 - **Database:** PostgreSQL (server) / SQLite (local CLI)
 - **ORM:** Drizzle
 - **API Server:** Hono
@@ -326,9 +425,9 @@ ArchGuard is a TypeScript monorepo built with:
 
 ```
 packages/
-  core/           # Shared types, DB, LLM client, git helpers
-  analyzer/       # Codebase analysis engine
-  context-sync/   # AI agent context file generators
+  core/           # Shared types, DB, LLM client, git helpers, cost tracking
+  analyzer/       # Codebase analysis engine (decisions, dependencies, layers, drift)
+  context-sync/   # AI agent context file generators (no LLM)
   mcp-server/     # MCP server for real-time guidance
   reviewer/       # Architectural code review
   velocity/       # Team velocity tracking

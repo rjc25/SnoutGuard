@@ -179,17 +179,19 @@ export async function reviewChanges(
   const ruleViolations = checkRules(diffAnalysis, ruleConfig);
 
   // Step 3: Run LLM review (if enabled)
-  const llmOptions: LlmReviewOptions = {
-    skipLlm: skipLlm || !config.analysis.llmAnalysis,
-    maxContexts: maxLlmContexts,
-    additionalInstructions,
-  };
-  const llmViolations = await runLlmReview(
-    diffAnalysis,
-    decisions,
-    config,
-    llmOptions
-  );
+  let llmViolations: Violation[] = [];
+  if (!skipLlm && config.analysis.llmAnalysis) {
+    const llmOptions: LlmReviewOptions = {
+      maxContexts: maxLlmContexts,
+      additionalInstructions,
+    };
+    llmViolations = await runLlmReview(
+      diffAnalysis,
+      decisions,
+      config,
+      llmOptions
+    );
+  }
 
   // Step 4: Combine and deduplicate violations
   const allViolations = deduplicateViolations([

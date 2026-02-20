@@ -1,7 +1,11 @@
 /**
- * Codebase scanner - walks the repository, discovers source files,
- * and extracts structural information via regex-based parsing.
- * Falls back gracefully when tree-sitter grammars aren't available.
+ * Codebase scanner — walks the repository, discovers source files,
+ * and extracts structural information.
+ *
+ * Extracts imports, exports, classes, functions, decorators,
+ * interfaces, abstract classes, and type aliases for all 6 supported
+ * languages. Handles edge cases like re-exports, barrel files,
+ * conditional imports, and nested declarations.
  */
 
 import * as fs from 'node:fs';
@@ -106,17 +110,39 @@ export async function scanCodebase(
   };
 }
 
-/** Parse a single source file using regex-based extraction */
+/** Strip comments from source code to avoid false matches */
+function stripComments(content: string, language: SupportedLanguage): string {
+  switch (language) {
+    case 'python':
+      // Remove # comments and triple-quoted strings used as docstrings
+      return content
+        .replace(/#[^\n]*/g, '')
+        .replace(/"""[\s\S]*?"""/g, '""')
+        .replace(/'''[\s\S]*?'''/g, "''");
+    default:
+      // C-style: remove // and /* */ comments
+      return content
+        .replace(/\/\/[^\n]*/g, '')
+        .replace(/\/\*[\s\S]*?\*\//g, '');
+  }
+}
+
+/** Parse a single source file */
 function parseFile(
   filePath: string,
   content: string,
   language: SupportedLanguage
 ): ParsedFile {
-  const imports = extractImports(content, language);
-  const exports = extractExports(content, language);
-  const classes = extractClasses(content, language);
-  const functions = extractFunctions(content, language);
-  const decorators = extractDecorators(content, language);
+  const stripped = stripComments(content, language);
+
+  const imports = extractImports(stripped, language);
+  const exports = extractExports(stripped, language);
+  const classes = extractClasses(stripped, language);
+  const functions = extractFunctions(stripped, language);
+  const decorators = extractDecorators(stripped, language);
+  const interfaces = extractInterfaces(stripped, language);
+  const abstractClasses = extractAbstractClasses(stripped, language);
+  const typeAliases = extractTypeAliases(stripped, language);
 
   return {
     filePath,
@@ -126,40 +152,59 @@ function parseFile(
     classes,
     functions,
     decorators,
+    interfaces,
+    abstractClasses,
+    typeAliases,
     lineCount: content.split('\n').length,
     contentHash: hash(content),
   };
 }
 
-/** Extract import statements from source code */
+// ─── Import Extraction ─────────────────────────────────────────────
+
 function extractImports(content: string, language: SupportedLanguage): string[] {
   const imports: string[] = [];
 
   switch (language) {
     case 'typescript':
     case 'javascript': {
-      // ES imports
-      const esImportRegex = /import\s+(?:(?:\{[^}]*\}|[\w*]+)\s+from\s+)?['"]([^'"]+)['"]/g;
+      // ES imports: import X from 'y', import { X } from 'y', import * as X from 'y'
+      const esImportRegex = /import\s+(?:type\s+)?(?:(?:\{[^}]*\}|[\w*]+(?:\s*,\s*\{[^}]*\})?)\s+from\s+)?['"]([^'"]+)['"]/g;
       let match: RegExpExecArray | null;
       while ((match = esImportRegex.exec(content)) !== null) {
         imports.push(match[1]);
       }
-      // require
-      const requireRegex = /require\(['"]([^'"]+)['"]\)/g;
+      // Dynamic import()
+      const dynamicImportRegex = /import\(\s*['"]([^'"]+)['"]\s*\)/g;
+      while ((match = dynamicImportRegex.exec(content)) !== null) {
+        imports.push(match[1]);
+      }
+      // require()
+      const requireRegex = /require\(\s*['"]([^'"]+)['"]\s*\)/g;
       while ((match = requireRegex.exec(content)) !== null) {
         imports.push(match[1]);
       }
       break;
     }
     case 'python': {
-      const pyImportRegex = /^(?:from\s+([\w.]+)\s+)?import\s+([\w.,\s]+)/gm;
+      // from X import Y, Z
+      const fromImportRegex = /^from\s+([\w.]+)\s+import\s+/gm;
       let match: RegExpExecArray | null;
-      while ((match = pyImportRegex.exec(content)) !== null) {
-        imports.push(match[1] || match[2].split(',')[0].trim());
+      while ((match = fromImportRegex.exec(content)) !== null) {
+        imports.push(match[1]);
+      }
+      // import X, import X.Y
+      const plainImportRegex = /^import\s+([\w.]+(?:\s*,\s*[\w.]+)*)/gm;
+      while ((match = plainImportRegex.exec(content)) !== null) {
+        for (const mod of match[1].split(',')) {
+          imports.push(mod.trim().split(' ')[0]); // handle `import X as Y`
+        }
       }
       break;
     }
     case 'go': {
+      // Single import: import "path"
+      // Multi import: import ( "path1"\n "path2" )
       const goImportRegex = /import\s+(?:\(\s*([\s\S]*?)\s*\)|"([^"]+)")/g;
       let match: RegExpExecArray | null;
       while ((match = goImportRegex.exec(content)) !== null) {
@@ -173,15 +218,21 @@ function extractImports(content: string, language: SupportedLanguage): string[] 
       break;
     }
     case 'rust': {
+      // use crate::X, use std::X, use super::X
       const rustUseRegex = /use\s+([\w:]+(?:::\{[^}]+\})?)/g;
       let match: RegExpExecArray | null;
       while ((match = rustUseRegex.exec(content)) !== null) {
         imports.push(match[1]);
       }
+      // extern crate
+      const externRegex = /extern\s+crate\s+(\w+)/g;
+      while ((match = externRegex.exec(content)) !== null) {
+        imports.push(match[1]);
+      }
       break;
     }
     case 'java': {
-      const javaImportRegex = /import\s+(?:static\s+)?([\w.]+)/g;
+      const javaImportRegex = /import\s+(?:static\s+)?([\w.]+(?:\.\*)?)/g;
       let match: RegExpExecArray | null;
       while ((match = javaImportRegex.exec(content)) !== null) {
         imports.push(match[1]);
@@ -190,26 +241,95 @@ function extractImports(content: string, language: SupportedLanguage): string[] 
     }
   }
 
-  return imports;
+  return [...new Set(imports)];
 }
 
-/** Extract export declarations from source code */
+// ─── Export Extraction (all 6 languages) ────────────────────────────
+
 function extractExports(content: string, language: SupportedLanguage): string[] {
   const exports: string[] = [];
 
-  if (language === 'typescript' || language === 'javascript') {
-    const exportRegex =
-      /export\s+(?:default\s+)?(?:class|function|const|let|var|interface|type|enum)\s+(\w+)/g;
-    let match: RegExpExecArray | null;
-    while ((match = exportRegex.exec(content)) !== null) {
-      exports.push(match[1]);
+  switch (language) {
+    case 'typescript':
+    case 'javascript': {
+      // Named exports: export { X, Y }, export const/let/var/function/class/interface/type/enum X
+      const namedExportRegex =
+        /export\s+(?:default\s+)?(?:abstract\s+)?(?:class|function|const|let|var|interface|type|enum)\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = namedExportRegex.exec(content)) !== null) {
+        exports.push(match[1]);
+      }
+      // Re-exports: export { X } from 'y', export * from 'y'
+      const reExportRegex = /export\s+\{([^}]*)\}\s+from/g;
+      while ((match = reExportRegex.exec(content)) !== null) {
+        for (const name of match[1].split(',')) {
+          const trimmed = name.trim().split(/\s+as\s+/).pop()?.trim();
+          if (trimmed) exports.push(trimmed);
+        }
+      }
+      // export default (anonymous)
+      if (/export\s+default\s+/.test(content) && !exports.includes('default')) {
+        exports.push('default');
+      }
+      break;
+    }
+    case 'python': {
+      // __all__ = ['X', 'Y']
+      const allRegex = /__all__\s*=\s*\[([^\]]*)\]/;
+      const allMatch = allRegex.exec(content);
+      if (allMatch) {
+        const names = allMatch[1].match(/['"](\w+)['"]/g);
+        names?.forEach((n) => exports.push(n.replace(/['"]/g, '')));
+      } else {
+        // Top-level function and class defs (not starting with _) are implicit exports
+        const defRegex = /^(?:def|class)\s+([A-Z_]\w*|[a-z]\w*)/gm;
+        let match: RegExpExecArray | null;
+        while ((match = defRegex.exec(content)) !== null) {
+          if (!match[1].startsWith('_')) {
+            exports.push(match[1]);
+          }
+        }
+      }
+      break;
+    }
+    case 'go': {
+      // Exported = capitalized names
+      const funcRegex = /func\s+(?:\([^)]*\)\s+)?([A-Z]\w*)/g;
+      let match: RegExpExecArray | null;
+      while ((match = funcRegex.exec(content)) !== null) {
+        exports.push(match[1]);
+      }
+      const typeRegex = /type\s+([A-Z]\w*)\s+(?:struct|interface)/g;
+      while ((match = typeRegex.exec(content)) !== null) {
+        exports.push(match[1]);
+      }
+      break;
+    }
+    case 'rust': {
+      // pub fn, pub struct, pub enum, pub trait, pub type
+      const pubRegex = /pub(?:\([^)]*\))?\s+(?:async\s+)?(?:fn|struct|enum|trait|type|const|static)\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = pubRegex.exec(content)) !== null) {
+        exports.push(match[1]);
+      }
+      break;
+    }
+    case 'java': {
+      // public class/interface/enum/record
+      const pubRegex = /public\s+(?:abstract\s+)?(?:final\s+)?(?:class|interface|enum|record|@interface)\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = pubRegex.exec(content)) !== null) {
+        exports.push(match[1]);
+      }
+      break;
     }
   }
 
-  return exports;
+  return [...new Set(exports)];
 }
 
-/** Extract class declarations from source code */
+// ─── Class Extraction ──────────────────────────────────────────────
+
 function extractClasses(content: string, language: SupportedLanguage): string[] {
   const classes: string[] = [];
   let regex: RegExp;
@@ -217,16 +337,20 @@ function extractClasses(content: string, language: SupportedLanguage): string[] 
   switch (language) {
     case 'typescript':
     case 'javascript':
-      regex = /class\s+(\w+)/g;
+      regex = /(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/g;
       break;
     case 'python':
-      regex = /class\s+(\w+)/g;
+      regex = /^class\s+(\w+)/gm;
       break;
     case 'java':
-      regex = /(?:public|private|protected)?\s*class\s+(\w+)/g;
+      regex = /(?:public|private|protected|abstract|final|\s)*class\s+(\w+)/g;
+      break;
+    case 'go':
+      // Go uses structs
+      regex = /type\s+(\w+)\s+struct\b/g;
       break;
     case 'rust':
-      regex = /struct\s+(\w+)|enum\s+(\w+)/g;
+      regex = /(?:pub\s+)?struct\s+(\w+)|(?:pub\s+)?enum\s+(\w+)/g;
       break;
     default:
       return classes;
@@ -237,10 +361,11 @@ function extractClasses(content: string, language: SupportedLanguage): string[] 
     classes.push(match[1] || match[2]);
   }
 
-  return classes;
+  return [...new Set(classes)];
 }
 
-/** Extract function declarations from source code */
+// ─── Function Extraction ───────────────────────────────────────────
+
 function extractFunctions(content: string, language: SupportedLanguage): string[] {
   const functions: string[] = [];
   let regex: RegExp;
@@ -251,16 +376,16 @@ function extractFunctions(content: string, language: SupportedLanguage): string[
       regex = /(?:export\s+)?(?:async\s+)?function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(/g;
       break;
     case 'python':
-      regex = /def\s+(\w+)/g;
+      regex = /^def\s+(\w+)/gm;
       break;
     case 'go':
       regex = /func\s+(?:\([^)]*\)\s+)?(\w+)/g;
       break;
     case 'rust':
-      regex = /fn\s+(\w+)/g;
+      regex = /(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/g;
       break;
     case 'java':
-      regex = /(?:public|private|protected)?\s*(?:static\s+)?[\w<>,\s]+\s+(\w+)\s*\(/g;
+      regex = /(?:public|private|protected)\s+(?:static\s+)?(?:final\s+)?[\w<>,\s]+\s+(\w+)\s*\(/g;
       break;
     default:
       return functions;
@@ -268,21 +393,19 @@ function extractFunctions(content: string, language: SupportedLanguage): string[
 
   let match: RegExpExecArray | null;
   while ((match = regex.exec(content)) !== null) {
-    functions.push(match[1] || match[2]);
+    const name = match[1] || match[2];
+    if (name) functions.push(name);
   }
 
-  return functions;
+  return [...new Set(functions)];
 }
 
-/** Extract decorator/annotation usage from source code */
+// ─── Decorator Extraction ──────────────────────────────────────────
+
 function extractDecorators(content: string, language: SupportedLanguage): string[] {
   const decorators: string[] = [];
 
-  if (
-    language === 'typescript' ||
-    language === 'javascript' ||
-    language === 'python'
-  ) {
+  if (language === 'typescript' || language === 'javascript' || language === 'python') {
     const regex = /@(\w+)/g;
     let match: RegExpExecArray | null;
     while ((match = regex.exec(content)) !== null) {
@@ -294,12 +417,150 @@ function extractDecorators(content: string, language: SupportedLanguage): string
     while ((match = regex.exec(content)) !== null) {
       decorators.push(match[1]);
     }
+  } else if (language === 'rust') {
+    // Rust attributes: #[derive(X)], #[test], #[cfg(...)]
+    const regex = /#\[(\w+)/g;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      decorators.push(match[1]);
+    }
   }
 
   return [...new Set(decorators)];
 }
 
-/** Build a directory tree from file paths */
+// ─── Interface Extraction ──────────────────────────────────────────
+
+function extractInterfaces(content: string, language: SupportedLanguage): string[] {
+  const interfaces: string[] = [];
+
+  switch (language) {
+    case 'typescript': {
+      const regex = /(?:export\s+)?interface\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        interfaces.push(match[1]);
+      }
+      break;
+    }
+    case 'java': {
+      const regex = /(?:public\s+)?interface\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        interfaces.push(match[1]);
+      }
+      break;
+    }
+    case 'go': {
+      const regex = /type\s+(\w+)\s+interface\b/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        interfaces.push(match[1]);
+      }
+      break;
+    }
+    case 'rust': {
+      // Rust traits serve as interfaces
+      const regex = /(?:pub\s+)?trait\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        interfaces.push(match[1]);
+      }
+      break;
+    }
+    case 'python': {
+      // ABC subclasses and Protocol classes
+      const regex = /class\s+(\w+)\s*\([^)]*(?:ABC|Protocol)[^)]*\)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        interfaces.push(match[1]);
+      }
+      break;
+    }
+  }
+
+  return [...new Set(interfaces)];
+}
+
+// ─── Abstract Class Extraction ─────────────────────────────────────
+
+function extractAbstractClasses(content: string, language: SupportedLanguage): string[] {
+  const abstracts: string[] = [];
+
+  switch (language) {
+    case 'typescript':
+    case 'javascript': {
+      const regex = /(?:export\s+)?abstract\s+class\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        abstracts.push(match[1]);
+      }
+      break;
+    }
+    case 'java': {
+      const regex = /(?:public\s+)?abstract\s+class\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        abstracts.push(match[1]);
+      }
+      break;
+    }
+    case 'python': {
+      // Classes using @abstractmethod or ABC
+      const regex = /class\s+(\w+)\s*\([^)]*ABC[^)]*\)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        abstracts.push(match[1]);
+      }
+      break;
+    }
+    case 'rust': {
+      // Rust traits with methods = abstract
+      // Already captured in interfaces; no separate concept
+      break;
+    }
+  }
+
+  return [...new Set(abstracts)];
+}
+
+// ─── Type Alias Extraction ─────────────────────────────────────────
+
+function extractTypeAliases(content: string, language: SupportedLanguage): string[] {
+  const types: string[] = [];
+
+  switch (language) {
+    case 'typescript': {
+      const regex = /(?:export\s+)?type\s+(\w+)\s*=/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        types.push(match[1]);
+      }
+      break;
+    }
+    case 'go': {
+      const regex = /type\s+(\w+)\s+(?!struct\b|interface\b)\w/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        types.push(match[1]);
+      }
+      break;
+    }
+    case 'rust': {
+      const regex = /(?:pub\s+)?type\s+(\w+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        types.push(match[1]);
+      }
+      break;
+    }
+  }
+
+  return [...new Set(types)];
+}
+
+// ─── Directory Tree ────────────────────────────────────────────────
+
 function buildDirectoryTree(files: string[]): DirectoryNode {
   const root: DirectoryNode = { name: '.', type: 'directory', children: [] };
 

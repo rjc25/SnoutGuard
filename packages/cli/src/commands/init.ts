@@ -1,7 +1,9 @@
 /**
  * `archguard init` command.
+ *
  * Interactive setup that detects languages, asks configuration preferences,
- * writes .archguard.yml, and initializes the local SQLite database.
+ * writes .archguard.yml, validates the Anthropic API key, and initializes
+ * the local SQLite database.
  */
 
 import { Command } from 'commander';
@@ -48,7 +50,7 @@ function detectProjectLanguages(projectDir: string): SupportedLanguage[] {
   ]);
 
   function walkDir(dir: string, depth: number): void {
-    if (depth > 5) return; // Don't recurse too deep
+    if (depth > 5) return;
     let entries: fs.Dirent[];
     try {
       entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -102,7 +104,22 @@ export function registerInitCommand(program: Command): void {
         }
       }
 
-      // Step 1: Detect languages
+      // Step 1: Validate API key
+      console.log(chalk.bold('  Step 1: API Key\n'));
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (apiKey && apiKey.startsWith('sk-ant-')) {
+        console.log(chalk.green('  ✓ ANTHROPIC_API_KEY is set\n'));
+      } else {
+        console.log(chalk.yellow('  ⚠ ANTHROPIC_API_KEY is not set or invalid.\n'));
+        console.log(chalk.white('  ArchGuard requires an Anthropic API key to function.'));
+        console.log(chalk.white('  Get one at: https://console.anthropic.com/settings/keys\n'));
+        console.log(chalk.white('  Then set it:\n'));
+        console.log(chalk.cyan('    export ANTHROPIC_API_KEY=sk-ant-...\n'));
+        console.log(chalk.gray('  You can continue setup — the key is needed when running analyze/review/summary.\n'));
+      }
+
+      // Step 2: Detect languages
+      console.log(chalk.bold('  Step 2: Languages\n'));
       const spinner = ora('Detecting project languages...').start();
       const detectedLanguages = detectProjectLanguages(projectDir);
       spinner.succeed(
@@ -124,12 +141,12 @@ export function registerInitCommand(program: Command): void {
         }
       }
 
-      // Step 2: Ask context file formats
+      // Step 3: Ask context file formats
+      console.log(chalk.bold('\n  Step 3: AI Agent Context Files\n'));
       const defaultFormats: SyncFormat[] = ['claude', 'cursorrules'];
       let selectedFormats = defaultFormats;
       if (!options.nonInteractive) {
-        console.log(chalk.cyan('\n  Available context file formats:'));
-        console.log(chalk.gray('    cursorrules, claude, copilot, windsurf, kiro, agents'));
+        console.log(chalk.gray('  Available: cursorrules, claude, copilot, windsurf, kiro, agents'));
         const formatInput = await prompt(
           chalk.cyan(`  Formats to generate [${defaultFormats.join(', ')}]: `)
         );
@@ -141,25 +158,13 @@ export function registerInitCommand(program: Command): void {
         }
       }
 
-      // Step 3: Ask about LLM analysis
-      let enableLlm = true;
-      if (!options.nonInteractive) {
-        const llmInput = await prompt(
-          chalk.cyan('  Enable LLM-powered analysis? (Y/n): ')
-        );
-        enableLlm = llmInput.toLowerCase() !== 'n';
-      }
-
       // Step 4: Write config
+      console.log(chalk.bold('\n  Step 4: Configuration\n'));
       const writeSpinner = ora('Writing .archguard.yml...').start();
       const writtenPath = writeDefaultConfig(projectDir);
 
-      // Patch the config with user selections if they differ from defaults
-      if (
-        selectedLanguages.length > 0 ||
-        selectedFormats !== defaultFormats ||
-        !enableLlm
-      ) {
+      // Patch the config with user selections
+      if (selectedLanguages.length > 0 || selectedFormats !== defaultFormats) {
         let configContent = fs.readFileSync(writtenPath, 'utf-8');
 
         if (selectedLanguages.length > 0) {
@@ -182,13 +187,6 @@ export function registerInitCommand(program: Command): void {
           );
         }
 
-        if (!enableLlm) {
-          configContent = configContent.replace(
-            'llm_analysis: true',
-            'llm_analysis: false'
-          );
-        }
-
         fs.writeFileSync(writtenPath, configContent, 'utf-8');
       }
 
@@ -207,6 +205,18 @@ export function registerInitCommand(program: Command): void {
       console.log(
         chalk.green('\n  ArchGuard initialized successfully!')
       );
-      console.log(chalk.gray('  Run `archguard analyze` to scan your codebase.\n'));
+      console.log('');
+      console.log(chalk.bold('  Model defaults:'));
+      console.log(chalk.gray('    analyze:  claude-opus-4-6 (deep analysis)'));
+      console.log(chalk.gray('    review:   claude-sonnet-4-6 (PR reviews)'));
+      console.log(chalk.gray('    summary:  claude-sonnet-4-6 (work summaries)'));
+      console.log(chalk.gray('    mcp:      claude-sonnet-4-6 (real-time queries)'));
+      console.log(chalk.gray('  Customize in .archguard.yml under llm.models.*'));
+      console.log('');
+      console.log(chalk.white('  Next steps:'));
+      console.log(chalk.cyan('    archguard analyze   ') + chalk.gray('# Scan your codebase'));
+      console.log(chalk.cyan('    archguard sync      ') + chalk.gray('# Generate AI context files'));
+      console.log(chalk.cyan('    archguard review    ') + chalk.gray('# Review code changes'));
+      console.log('');
     });
 }
