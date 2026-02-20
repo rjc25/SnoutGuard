@@ -96,7 +96,7 @@ const configSchema = z.object({
           sync: z.string().default('claude-opus-4-6'),
         })
         .default({}),
-      maxTokensPerAnalysis: z.number().default(16384),
+      maxTokensPerAnalysis: z.number().default(32768),
       cacheTtlHours: z.number().default(24),
       maxRetries: z.number().default(3),
       retryBaseDelayMs: z.number().default(1000),
@@ -284,7 +284,7 @@ llm:
     summary: claude-sonnet-4-6
     # Opus for context file generation (intelligent compression of decisions)
     sync: claude-opus-4-6
-  max_tokens_per_analysis: 16384
+  max_tokens_per_analysis: 32768
   cache_ttl_hours: 24
   max_retries: 3
   retry_base_delay_ms: 1000

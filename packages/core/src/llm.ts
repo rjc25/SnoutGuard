@@ -593,5 +593,57 @@ export function extractJson(text: string): string | null {
     }
   }
 
+  // Last resort: try to repair truncated JSON by closing open braces/brackets
+  // This handles responses cut off by max_tokens
+  const repaired = repairTruncatedJson(trimmed);
+  if (repaired) {
+    try {
+      JSON.parse(repaired);
+      return repaired;
+    } catch {
+      // Repair wasn't enough
+    }
+  }
+
   return null;
+}
+
+/**
+ * Attempt to repair truncated JSON by closing unclosed structures.
+ * Handles responses cut off mid-stream by max_tokens limits.
+ */
+function repairTruncatedJson(text: string): string | null {
+  // Find the start of JSON
+  const startIdx = text.search(/[{\[]/);
+  if (startIdx === -1) return null;
+
+  let json = text.slice(startIdx);
+
+  // Remove any trailing incomplete string value (cut off mid-string)
+  // Look for an unclosed string at the end
+  json = json.replace(/,\s*"[^"]*$/s, '');  // trailing key without value
+  json = json.replace(/:\s*"[^"]*$/s, ': ""'); // trailing string value cut off
+  json = json.replace(/,\s*$/s, '');  // trailing comma
+
+  // Count unclosed braces and brackets
+  let inString = false;
+  let escape = false;
+  const stack: string[] = [];
+
+  for (let i = 0; i < json.length; i++) {
+    const ch = json[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
+  }
+
+  if (stack.length === 0) return null; // Not actually truncated
+
+  // Close all open structures
+  json += stack.reverse().join('');
+  return json;
 }

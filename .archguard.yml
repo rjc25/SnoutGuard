@@ -42,12 +42,12 @@ llm:
     mcp: claude-sonnet-4-6
     # Sonnet for work summaries (summarization)
     summary: claude-sonnet-4-6
-  max_tokens_per_analysis: 16384
+  max_tokens_per_analysis: 32768
   cache_ttl_hours: 24
   max_retries: 3
   retry_base_delay_ms: 1000
   request_timeout_ms: 300000
-  max_cost_per_run: 5.00
+  max_cost_per_run: 15.00
 
 # Context file sync (no LLM needed — pure templating)
 sync:
