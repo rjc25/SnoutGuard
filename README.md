@@ -246,7 +246,8 @@ llm:
 
 | Operation | Typical Cost | Frequency |
 |-----------|-------------|-----------|
-| Full analysis (Opus) | $0.50 - $3.00 | Weekly or on-demand |
+| Full analysis (Opus) | $10 - $16 | Weekly or on-demand |
+| Full analysis (Sonnet) | $2 - $3 | Weekly or on-demand |
 | Context sync (Opus) | $0.10 - $0.50 | After analysis or major refactors |
 | PR review (Sonnet) | $0.01 - $0.10 | Per PR |
 | Work summary (Sonnet) | $0.02 - $0.05 | Daily/weekly |
