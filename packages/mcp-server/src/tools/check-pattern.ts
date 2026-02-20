@@ -151,23 +151,20 @@ export async function executeCheckPattern(
     confirmedBy: row.confirmedBy ?? undefined,
   }));
 
-  // Filter to relevant decisions
-  const relevantDecisions = findRelevantDecisions(decisions, filePath, code, intent);
+  // Send all non-deprecated decisions to the LLM and let it determine relevance.
+  // At small-to-medium decision counts (<100) this is simpler and more accurate
+  // than pre-filtering, which can miss cross-cutting violations.
+  const activeDecisions = decisions.filter((d) => d.status !== 'deprecated');
 
-  // If no relevant decisions, return compliant with suggestions
-  if (relevantDecisions.length === 0) {
-    const suggestions: string[] = [];
-    if (intent) {
-      suggestions.push(
-        'No specific architectural decisions found for this area. Consider documenting the architectural intent.'
-      );
-    }
+  if (activeDecisions.length === 0) {
     return {
       compliant: true,
       violations: [],
-      suggestions,
+      suggestions: ['No architectural decisions found. Run `archguard analyze` first.'],
     };
   }
+
+  const relevantDecisions = activeDecisions;
 
   // Build the prompt for LLM analysis
   const userPrompt = buildCompliancePrompt(
@@ -279,88 +276,8 @@ Return your analysis as JSON matching the schema in the system prompt.
   return sections.join('\n\n');
 }
 
-/**
- * Find decisions relevant to the given file and code.
- *
- * Uses a scoring approach: each decision gets relevance points from
- * multiple signals. Decisions above a threshold are included.
- * High-confidence cross-cutting decisions (data, deployment, security)
- * get a baseline score so they're always considered.
- */
-function findRelevantDecisions(
-  decisions: ArchDecision[],
-  filePath: string,
-  code: string,
-  intent?: string
-): ArchDecision[] {
-  const filePathLower = filePath.toLowerCase();
-  const codeLower = code.toLowerCase();
-  const intentLower = intent?.toLowerCase() ?? '';
-
-  // Tokenize the code into meaningful words for constraint matching
-  const codeTokens = new Set(
-    codeLower.match(/[a-z_][a-z0-9_]{2,}/g) ?? []
-  );
-
-  const scored = decisions
-    .filter((d) => d.status !== 'deprecated')
-    .map((decision) => {
-      let score = 0;
-
-      // 1. High-confidence cross-cutting decisions always get baseline relevance.
-      //    Data, deployment, and security decisions can be violated from anywhere.
-      const crossCutting = ['data', 'deployment', 'security'].includes(decision.category);
-      if (crossCutting && decision.confidence >= 0.8) {
-        score += 2;
-      }
-
-      // 2. Evidence file path overlap
-      const evidenceMatch = decision.evidence.some((ev) => {
-        const evDir = ev.filePath.split('/').slice(0, -1).join('/').toLowerCase();
-        const fileDir = filePath.split('/').slice(0, -1).join('/').toLowerCase();
-        return evDir === fileDir || filePathLower.includes(evDir) || evDir.includes(fileDir);
-      });
-      if (evidenceMatch) score += 3;
-
-      // 3. Tags match file path or code content
-      const tagMatch = decision.tags.some(
-        (tag: string) =>
-          filePathLower.includes(tag.toLowerCase()) ||
-          codeLower.includes(tag.toLowerCase())
-      );
-      if (tagMatch) score += 3;
-
-      // 4. Intent matches decision title or description
-      if (
-        intentLower &&
-        (decision.title.toLowerCase().includes(intentLower) ||
-          decision.description.toLowerCase().includes(intentLower) ||
-          intentLower.includes(decision.title.toLowerCase()))
-      ) {
-        score += 2;
-      }
-
-      // 5. Constraint text contains keywords found in the code.
-      //    e.g. constraint says "no local databases" → code has "database"
-      //    or constraint says "environment variables" → code has "os.environ"
-      const constraintMatch = decision.constraints.some((constraint: string) => {
-        const constraintWords = constraint.toLowerCase().match(/[a-z_][a-z0-9_]{2,}/g) ?? [];
-        const overlap = constraintWords.filter((w: string) => codeTokens.has(w));
-        return overlap.length >= 2; // At least 2 overlapping tokens
-      });
-      if (constraintMatch) score += 1;
-
-      // 6. Description keywords match code tokens
-      const descWords = decision.description.toLowerCase().match(/[a-z_][a-z0-9_]{3,}/g) ?? [];
-      const descOverlap = descWords.filter((w: string) => codeTokens.has(w)).length;
-      if (descOverlap >= 3) score += 1;
-
-      return { decision, score };
-    });
-
-  // Include any decision with score >= 2 (cross-cutting alone qualifies)
-  return scored
-    .filter((s) => s.score >= 2)
-    .sort((a, b) => b.score - a.score)
-    .map((s) => s.decision);
-}
+// NOTE: Previously used a scoring-based findRelevantDecisions() filter here,
+// but it was too aggressive and missed cross-cutting violations. At current
+// scale (<100 decisions), sending all decisions to the LLM is simpler and
+// more accurate. Re-introduce filtering if decision count grows large enough
+// to cause token/latency issues.
