@@ -20,6 +20,9 @@ importers:
 
   packages/analyzer:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.39.0
+        version: 0.39.0
       '@archguard/core':
         specifier: workspace:*
         version: link:../core
@@ -211,6 +214,9 @@ importers:
       '@slack/bolt':
         specifier: ^4.1.0
         version: 4.6.0(@types/express@5.0.6)
+      '@slack/web-api':
+        specifier: ^7.8.0
+        version: 7.14.1
     devDependencies:
       typescript:
         specifier: ^5.7.0
@@ -230,6 +236,12 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.26.0(zod@3.25.76)
+      drizzle-orm:
+        specifier: ^0.38.0
+        version: 0.38.4(@types/better-sqlite3@7.6.13)(@types/react@18.3.28)(better-sqlite3@11.10.0)(postgres@3.4.8)(react@18.3.1)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -283,6 +295,9 @@ importers:
       bullmq:
         specifier: ^5.0.0
         version: 5.69.3
+      drizzle-orm:
+        specifier: ^0.38.0
+        version: 0.38.4(@types/better-sqlite3@7.6.13)(@types/react@18.3.28)(better-sqlite3@11.10.0)(postgres@3.4.8)(react@18.3.1)
       hono:
         specifier: ^4.6.0
         version: 4.12.0
@@ -3868,14 +3883,14 @@ snapshots:
 
   '@slack/logger@4.0.0':
     dependencies:
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@slack/oauth@3.0.4':
     dependencies:
       '@slack/logger': 4.0.0
       '@slack/web-api': 7.14.1
       '@types/jsonwebtoken': 9.0.10
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
       jsonwebtoken: 9.0.3
     transitivePeerDependencies:
       - debug
@@ -3884,7 +3899,7 @@ snapshots:
     dependencies:
       '@slack/logger': 4.0.0
       '@slack/web-api': 7.14.1
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
       '@types/ws': 8.18.1
       eventemitter3: 5.0.4
       ws: 8.19.0
@@ -3899,7 +3914,7 @@ snapshots:
     dependencies:
       '@slack/logger': 4.0.0
       '@slack/types': 2.20.0
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
       '@types/retry': 0.12.0
       axios: 1.13.5
       eventemitter3: 5.0.4
@@ -3928,11 +3943,11 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@types/cron@2.4.3':
     dependencies:
@@ -3966,7 +3981,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -3984,7 +3999,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@types/luxon@3.4.2': {}
 
@@ -3992,7 +4007,7 @@ snapshots:
 
   '@types/node-fetch@2.6.13':
     dependencies:
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
       form-data: 4.0.5
 
   '@types/node@18.19.130':
@@ -4026,16 +4041,16 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 20.19.33
+      '@types/node': 22.19.11
 
   '@vitest/expect@2.1.9':
     dependencies:
@@ -4043,14 +4058,6 @@ snapshots:
       '@vitest/utils': 2.1.9
       chai: 5.3.3
       tinyrainbow: 1.2.0
-
-  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@20.19.33))':
-    dependencies:
-      '@vitest/spy': 2.1.9
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 5.4.21(@types/node@20.19.33)
 
   '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@22.19.11))':
     dependencies:
@@ -5769,7 +5776,7 @@ snapshots:
   vitest@2.1.9(@types/node@20.19.33):
     dependencies:
       '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@20.19.33))
+      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@22.19.11))
       '@vitest/pretty-format': 2.1.9
       '@vitest/runner': 2.1.9
       '@vitest/snapshot': 2.1.9

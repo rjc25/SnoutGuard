@@ -19,7 +19,8 @@
     "@archguard/work-summary": "workspace:*",
     "@octokit/app": "^15.0.0",
     "@octokit/rest": "^21.0.0",
-    "@slack/bolt": "^4.1.0"
+    "@slack/bolt": "^4.1.0",
+    "@slack/web-api": "^7.8.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

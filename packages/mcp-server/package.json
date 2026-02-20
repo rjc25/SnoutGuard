@@ -19,7 +19,9 @@
   "dependencies": {
     "@archguard/core": "workspace:*",
     "@archguard/analyzer": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "drizzle-orm": "^0.38.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

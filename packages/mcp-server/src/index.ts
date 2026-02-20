@@ -10,6 +10,7 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
 import {
   loadConfig,
   initializeDatabase,
@@ -21,22 +22,18 @@ import {
 // Tools
 import {
   executeGetDecisions,
-  getDecisionsInputSchema,
   type GetDecisionsInput,
 } from './tools/get-decisions.js';
 import {
   executeCheckPattern,
-  checkPatternInputSchema,
   type CheckPatternInput,
 } from './tools/check-pattern.js';
 import {
   executeSuggestApproach,
-  suggestApproachInputSchema,
   type SuggestApproachInput,
 } from './tools/suggest-approach.js';
 import {
   executeGetDependencies,
-  getDependenciesInputSchema,
   type GetDependenciesInput,
 } from './tools/get-dependencies.js';
 
@@ -109,7 +106,10 @@ function registerTools(
     'get_architectural_decisions',
     'Retrieve architectural decisions filtered by query and optional category. ' +
     'Searches across file paths, titles, tags, and descriptions.',
-    getDecisionsInputSchema,
+    {
+      query: z.string().describe('Search query to filter decisions. Matches against file paths, titles, tags, and descriptions.'),
+      category: z.enum(['structural', 'behavioral', 'deployment', 'data', 'api', 'testing', 'security']).optional().describe('Optional category filter.'),
+    },
     async (input: GetDecisionsInput) => {
       try {
         const decisions = await executeGetDecisions(db, input);
@@ -157,7 +157,11 @@ function registerTools(
     'check_architectural_compliance',
     'Check code against architectural decisions and constraints. ' +
     'Returns compliance result with any violations found.',
-    checkPatternInputSchema,
+    {
+      code: z.string().describe('The code to check for architectural compliance.'),
+      filePath: z.string().describe('The file path of the code being checked.'),
+      intent: z.string().optional().describe('Optional description of what the code is intended to do.'),
+    },
     async (input: CheckPatternInput) => {
       try {
         const result = await executeCheckPattern(db, input, config.rules);
@@ -205,7 +209,10 @@ function registerTools(
     'get_architectural_guidance',
     'Get architectural guidance for a task. Returns relevant decisions, ' +
     'constraints, and code examples to follow.',
-    suggestApproachInputSchema,
+    {
+      task: z.string().describe('Description of the task or feature being implemented.'),
+      constraints: z.array(z.string()).optional().describe('Optional additional constraints to consider.'),
+    },
     async (input: SuggestApproachInput) => {
       try {
         const guidance = await executeSuggestApproach(db, input);
@@ -251,7 +258,10 @@ function registerTools(
     'get_dependency_graph',
     'Get the dependency subgraph for a module or file. ' +
     'Shows imports, importedBy, and circular dependencies.',
-    getDependenciesInputSchema,
+    {
+      target: z.string().describe('The module or file path to get the dependency graph for.'),
+      depth: z.number().default(2).describe('Maximum depth of dependencies to traverse. Defaults to 2.'),
+    },
     async (input: GetDependenciesInput) => {
       try {
         const result = await executeGetDependencies(db, input);

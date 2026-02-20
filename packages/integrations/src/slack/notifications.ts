@@ -164,11 +164,13 @@ async function sendMessage(
     const response = await client.chat.postMessage({
       channel,
       text: message.text,
-      blocks: message.blocks as Record<string, unknown>[],
-      attachments: message.attachments?.map((a) => ({
-        color: a.color,
-        blocks: a.blocks as Record<string, unknown>[],
-      })),
+      blocks: message.blocks as unknown as Record<string, unknown>[],
+      ...(message.attachments && {
+        attachments: message.attachments.map((a) => ({
+          color: a.color,
+          blocks: a.blocks as unknown as Record<string, unknown>[],
+        })),
+      }),
     });
 
     return {
@@ -205,11 +207,13 @@ export async function sendThreadedReply(
       channel,
       thread_ts: threadTs,
       text: message.text,
-      blocks: message.blocks as Record<string, unknown>[],
-      attachments: message.attachments?.map((a) => ({
-        color: a.color,
-        blocks: a.blocks as Record<string, unknown>[],
-      })),
+      blocks: message.blocks as unknown as Record<string, unknown>[],
+      ...(message.attachments && {
+        attachments: message.attachments.map((a) => ({
+          color: a.color,
+          blocks: a.blocks as unknown as Record<string, unknown>[],
+        })),
+      }),
     });
 
     return {
@@ -246,11 +250,13 @@ export async function updateMessage(
       channel,
       ts,
       text: message.text,
-      blocks: message.blocks as Record<string, unknown>[],
-      attachments: message.attachments?.map((a) => ({
-        color: a.color,
-        blocks: a.blocks as Record<string, unknown>[],
-      })),
+      blocks: message.blocks as unknown as Record<string, unknown>[],
+      ...(message.attachments && {
+        attachments: message.attachments.map((a) => ({
+          color: a.color,
+          blocks: a.blocks as unknown as Record<string, unknown>[],
+        })),
+      }),
     });
 
     return {

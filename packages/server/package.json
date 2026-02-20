@@ -21,6 +21,7 @@
     "@archguard/velocity": "workspace:*",
     "@archguard/work-summary": "workspace:*",
     "@archguard/integrations": "workspace:*",
+    "drizzle-orm": "^0.38.0",
     "hono": "^4.6.0",
     "@hono/node-server": "^1.13.0",
     "bullmq": "^5.0.0",
