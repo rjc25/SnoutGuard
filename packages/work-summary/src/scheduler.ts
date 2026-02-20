@@ -35,8 +35,6 @@ export interface SchedulerConfig {
   teamId: string;
   /** Pre-loaded ArchGuard config (loaded from projectDir if not provided) */
   config?: ArchGuardConfig;
-  /** Skip LLM calls and use fallback summaries */
-  noLlm?: boolean;
   /** Callback when a summary is successfully generated */
   onSummary?: SummaryCallback;
   /** Callback when an error occurs during generation */
@@ -238,7 +236,6 @@ export class SummaryScheduler {
         developerName: this.schedulerConfig.developerName,
         period: periodLabel,
         teamId: this.schedulerConfig.teamId,
-        noLlm: this.schedulerConfig.noLlm,
         config: this.config,
       };
 

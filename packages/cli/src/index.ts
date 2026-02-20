@@ -19,6 +19,7 @@ import { registerVelocityCommand } from './commands/velocity.js';
 import { registerSummaryCommand } from './commands/summary.js';
 import { registerLoginCommand } from './commands/login.js';
 import { registerServerCommand } from './commands/server.js';
+import { registerCostsCommand } from './commands/costs.js';
 
 const program = new Command();
 
@@ -41,6 +42,7 @@ registerVelocityCommand(program);
 registerSummaryCommand(program);
 registerLoginCommand(program);
 registerServerCommand(program);
+registerCostsCommand(program);
 
 // Global error handler
 program.exitOverride();

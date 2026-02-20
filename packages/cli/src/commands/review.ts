@@ -1,7 +1,8 @@
 /**
  * `archguard review` command.
- * Performs architectural review of code changes (diffs or commits)
- * and reports violations in various formats.
+ *
+ * Performs architectural review of code changes using Claude (Sonnet by default).
+ * Requires an Anthropic API key.
  */
 
 import { Command } from 'commander';
@@ -11,10 +12,12 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
   loadConfig,
-  findProjectRoot,
+  requireApiKey,
+  getModelForOperation,
   createGitClient,
   getDiff,
   getCommitDiff,
+  LlmAuthError,
   type Violation,
   type ReviewResult,
 } from '@archguard/core';
@@ -140,6 +143,17 @@ export function registerReviewCommand(program: Command): void {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
 
+        // Validate API key upfront
+        try {
+          requireApiKey(config);
+        } catch (error) {
+          if (error instanceof LlmAuthError) {
+            console.error(chalk.red(error.message));
+            process.exit(1);
+          }
+          throw error;
+        }
+
         if (!options.diff && !options.commit) {
           console.log(
             chalk.yellow(
@@ -157,9 +171,11 @@ export function registerReviewCommand(program: Command): void {
           return;
         }
 
+        const model = getModelForOperation(config, 'review');
         console.log(
-          chalk.bold('\n  ArchGuard Architectural Review\n')
+          chalk.bold('\n  ArchGuard Architectural Review')
         );
+        console.log(chalk.gray(`  Model: ${model}\n`));
 
         const spinner = ora('Analyzing code changes...').start();
 
@@ -186,9 +202,7 @@ export function registerReviewCommand(program: Command): void {
           // Run the review
           const { reviewChanges } = await import('@archguard/reviewer');
           const diffRef = options.commit ?? options.diff!;
-          const result = await reviewChanges(projectDir, config, diffRef, {
-            skipLlm: !config.analysis.llmAnalysis,
-          });
+          const result = await reviewChanges(projectDir, config, diffRef, {});
 
           spinner.succeed(
             `Review complete: ${result.totalViolations} violation(s) found`
@@ -231,7 +245,6 @@ export function registerReviewCommand(program: Command): void {
                 console.log('');
               }
 
-              // In CI mode, also fall through to check exit code
               if (options.ci && result.errors > 0) {
                 process.exit(1);
               }

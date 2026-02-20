@@ -40,6 +40,7 @@ export interface ArchDecision {
   detectedAt: string;
   confirmedBy?: string;
   tags: string[];
+  reasoning?: string;
 }
 
 // ─── Drift Types ───────────────────────────────────────────────────
@@ -55,6 +56,8 @@ export interface ArchSnapshot {
     totalModules: number;
     circularDeps: number;
     avgCoupling: number;
+    avgInstability?: number;
+    avgDistance?: number;
   };
   createdAt: string;
 }
@@ -65,7 +68,8 @@ export type DriftEventType =
   | 'decision_weakened'
   | 'new_violation_trend'
   | 'circular_dep_introduced'
-  | 'decision_emerged';
+  | 'decision_emerged'
+  | 'layer_violation_introduced';
 
 /** An event indicating architectural drift */
 export interface DriftEvent {
@@ -92,17 +96,41 @@ export interface Dependency {
   detectedAt: string;
 }
 
-/** Dependency graph node */
+/** Dependency graph node with coupling metrics */
 export interface DependencyNode {
   filePath: string;
   imports: string[];
   importedBy: string[];
 }
 
+/** Robert C. Martin coupling metrics for a module */
+export interface CouplingMetrics {
+  /** Afferent coupling: number of modules that depend on this module */
+  afferentCoupling: number;
+  /** Efferent coupling: number of modules this module depends on */
+  efferentCoupling: number;
+  /** Instability: Ce / (Ca + Ce). 0 = maximally stable, 1 = maximally unstable */
+  instability: number;
+  /** Abstractness: ratio of abstract types to total types (0-1) */
+  abstractness: number;
+  /** Distance from main sequence: |A + I - 1|. 0 = ideal balance */
+  distanceFromMainSequence: number;
+}
+
 /** Circular dependency group */
 export interface CircularDependency {
   files: string[];
   cycle: string[];
+}
+
+/** Layer violation in the dependency graph */
+export interface LayerViolation {
+  sourceFile: string;
+  targetFile: string;
+  sourceLayer: string;
+  targetLayer: string;
+  importStatement: string;
+  message: string;
 }
 
 // ─── Review Types ──────────────────────────────────────────────────
@@ -336,6 +364,13 @@ export interface SummarySchedule {
   slackChannel?: string;
 }
 
+/** Layer definition for layer violation detection */
+export interface LayerDefinition {
+  name: string;
+  patterns: string[];
+  allowedDependencies: string[];
+}
+
 /** Full .archguard.yml config */
 export interface ArchGuardConfig {
   version: number;
@@ -348,15 +383,28 @@ export interface ArchGuardConfig {
     exclude: string[];
     languages: SupportedLanguage[];
     maxFileSizeKb: number;
-    llmAnalysis: boolean;
     analysisPeriodMonths: number;
   };
   llm: {
     provider: string;
-    model: string;
     apiKeyEnv: string;
+    /** Per-operation model configuration with smart defaults */
+    models: {
+      /** Model for `archguard analyze` — deep analysis, runs infrequently. Default: opus */
+      analyze: string;
+      /** Model for `archguard review` — PR diffs against decisions. Default: sonnet */
+      review: string;
+      /** Model for MCP server queries — fast responses. Default: sonnet */
+      mcp: string;
+      /** Model for work summaries — summarization. Default: sonnet */
+      summary: string;
+    };
     maxTokensPerAnalysis: number;
     cacheTtlHours: number;
+    maxRetries: number;
+    retryBaseDelayMs: number;
+    requestTimeoutMs: number;
+    maxCostPerRun: number;
   };
   sync: {
     formats: SyncFormat[];
@@ -367,7 +415,6 @@ export interface ArchGuardConfig {
   };
   mcp: {
     transport: McpTransport;
-    llmEnhanced: boolean;
   };
   review: {
     severityThreshold: ViolationSeverity;
@@ -389,6 +436,7 @@ export interface ArchGuardConfig {
     enabled: boolean;
     schedules: SummarySchedule[];
   };
+  layers: LayerDefinition[];
   slack?: {
     botTokenEnv: string;
     signingSecretEnv: string;
@@ -399,6 +447,33 @@ export interface ArchGuardConfig {
     };
   };
   rules: CustomRule[];
+}
+
+// ─── LLM Types ─────────────────────────────────────────────────────
+
+/** Record of an LLM API call for cost tracking */
+export interface LlmCallRecord {
+  id: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCost: number;
+  latencyMs: number;
+  operation: string;
+  cacheHit: boolean;
+  timestamp: string;
+}
+
+/** Cost summary for a time period */
+export interface CostSummary {
+  totalCalls: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCost: number;
+  byOperation: Record<string, { calls: number; cost: number }>;
+  byModel: Record<string, { calls: number; cost: number }>;
+  periodStart: string;
+  periodEnd: string;
 }
 
 // ─── Analysis Types ────────────────────────────────────────────────
@@ -412,6 +487,9 @@ export interface ParsedFile {
   classes: string[];
   functions: string[];
   decorators: string[];
+  interfaces: string[];
+  abstractClasses: string[];
+  typeAliases: string[];
   lineCount: number;
   contentHash: string;
 }

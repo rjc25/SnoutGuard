@@ -1,7 +1,8 @@
 /**
  * `archguard summary` command.
- * Generates work summaries for standups, one-on-ones, sprint reviews,
- * and progress reports.
+ *
+ * Generates work summaries using Claude (Sonnet by default).
+ * Requires an Anthropic API key.
  */
 
 import { Command } from 'commander';
@@ -11,7 +12,9 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
   loadConfig,
-  findProjectRoot,
+  requireApiKey,
+  getModelForOperation,
+  LlmAuthError,
   type SummaryType,
   type WorkSummary,
 } from '@archguard/core';
@@ -106,6 +109,17 @@ export function registerSummaryCommand(program: Command): void {
         const config = loadConfig(projectDir);
         const summaryType = options.type as SummaryType;
 
+        // Validate API key upfront
+        try {
+          requireApiKey(config);
+        } catch (error) {
+          if (error instanceof LlmAuthError) {
+            console.error(chalk.red(error.message));
+            process.exit(1);
+          }
+          throw error;
+        }
+
         if (!config.summaries.enabled) {
           console.log(
             chalk.yellow(
@@ -126,6 +140,9 @@ export function registerSummaryCommand(program: Command): void {
           process.exit(1);
         }
 
+        const model = getModelForOperation(config, 'summary');
+        console.log(chalk.gray(`  Model: ${model}`));
+
         const spinner = ora(
           `Generating ${summaryType.replace(/_/g, ' ')} summary...`
         ).start();
@@ -134,12 +151,12 @@ export function registerSummaryCommand(program: Command): void {
           const { generateSummary, collectData } = await import('@archguard/work-summary');
 
           // Calculate period dates based on the selected period
-          const now = new Date();
-          const periodEnd = now.toISOString().slice(0, 10);
+          const nowDate = new Date();
+          const periodEnd = nowDate.toISOString().slice(0, 10);
           const periodStart =
             options.period === 'sprint'
-              ? new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-              : new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+              ? new Date(nowDate.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+              : new Date(nowDate.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
           const developerName = options.dev ?? 'team';
 
@@ -157,7 +174,6 @@ export function registerSummaryCommand(program: Command): void {
             developerName,
             period: options.period,
             teamId: 'default',
-            noLlm: !config.analysis.llmAnalysis,
             projectDir,
             config,
           });

@@ -1,8 +1,9 @@
 /**
  * Markdown report generator for analysis results.
+ * Includes layer violations and Robert C. Martin coupling metrics.
  */
 
-import type { ArchDecision } from '@archguard/core';
+import type { ArchDecision, LayerViolation } from '@archguard/core';
 import type { ScanResult } from '../scanner.js';
 import type { DependencyGraph } from '../dependency-mapper.js';
 import type { DriftResult } from '../drift-detector.js';
@@ -12,7 +13,8 @@ export function generateMarkdownReport(
   scanResult: ScanResult,
   decisions: ArchDecision[],
   graph: DependencyGraph,
-  drift?: DriftResult
+  drift?: DriftResult,
+  layerViolations?: LayerViolation[]
 ): string {
   const lines: string[] = [];
 
@@ -54,6 +56,12 @@ export function generateMarkdownReport(
       lines.push(decision.description);
       lines.push('');
 
+      if (decision.reasoning) {
+        lines.push('**Reasoning:**');
+        lines.push(decision.reasoning);
+        lines.push('');
+      }
+
       if (decision.constraints.length > 0) {
         lines.push('**Constraints:**');
         for (const c of decision.constraints) {
@@ -80,6 +88,8 @@ export function generateMarkdownReport(
   lines.push(`- **Total modules:** ${graph.totalModules}`);
   lines.push(`- **Circular dependencies:** ${graph.circularDeps.length}`);
   lines.push(`- **Average coupling:** ${graph.avgCoupling.toFixed(3)}`);
+  lines.push(`- **Average instability:** ${graph.avgInstability.toFixed(3)}`);
+  lines.push(`- **Average distance from main sequence:** ${graph.avgDistance.toFixed(3)}`);
   lines.push('');
 
   if (graph.circularDeps.length > 0) {
@@ -94,7 +104,7 @@ export function generateMarkdownReport(
     lines.push('');
   }
 
-  // Coupling hotspots
+  // Coupling hotspots (backward-compat simple scores)
   const hotspots = Array.from(graph.couplingScores.entries())
     .sort(([, a], [, b]) => b - a)
     .slice(0, 10);
@@ -106,6 +116,46 @@ export function generateMarkdownReport(
     lines.push('|------|---------------:|');
     for (const [file, score] of hotspots) {
       lines.push(`| \`${file}\` | ${score.toFixed(3)} |`);
+    }
+    lines.push('');
+  }
+
+  // Robert C. Martin metrics for top modules
+  const metricsEntries = Array.from(graph.couplingMetrics.entries())
+    .sort(([, a], [, b]) => b.distanceFromMainSequence - a.distanceFromMainSequence)
+    .slice(0, 15);
+
+  if (metricsEntries.length > 0) {
+    lines.push('### Module Stability Metrics (Robert C. Martin)');
+    lines.push('');
+    lines.push('| Module | Ca | Ce | Instability | Abstractness | Distance |');
+    lines.push('|--------|---:|---:|------------:|-------------:|---------:|');
+    for (const [file, m] of metricsEntries) {
+      lines.push(
+        `| \`${file}\` | ${m.afferentCoupling} | ${m.efferentCoupling} | ${m.instability.toFixed(2)} | ${m.abstractness.toFixed(2)} | ${m.distanceFromMainSequence.toFixed(2)} |`
+      );
+    }
+    lines.push('');
+    lines.push('> Ca = Afferent (dependents), Ce = Efferent (dependencies), ');
+    lines.push('> Instability = Ce/(Ca+Ce), Distance = |Abstractness + Instability - 1|');
+    lines.push('');
+  }
+
+  // Layer violations
+  if (layerViolations && layerViolations.length > 0) {
+    lines.push('## Layer Violations');
+    lines.push('');
+    lines.push(`**${layerViolations.length} violation(s) found**`);
+    lines.push('');
+    lines.push('| Source | Target | Violation |');
+    lines.push('|--------|--------|-----------|');
+    for (const v of layerViolations.slice(0, 20)) {
+      lines.push(
+        `| \`${v.sourceFile}\` (${v.sourceLayer}) | \`${v.targetFile}\` (${v.targetLayer}) | ${v.message} |`
+      );
+    }
+    if (layerViolations.length > 20) {
+      lines.push(`| ... | ... | ${layerViolations.length - 20} more violations |`);
     }
     lines.push('');
   }
