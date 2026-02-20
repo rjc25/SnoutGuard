@@ -1,16 +1,16 @@
 /**
  * Cron-based auto-generation scheduler for work summaries.
  * Uses the cron library to manage scheduled summary generation
- * based on configuration from the .archguard.yml summaries section.
+ * based on configuration from the .snoutguard.yml summaries section.
  */
 
 import { CronJob } from 'cron';
 import {
   loadConfig,
-  type ArchGuardConfig,
+  type SnoutGuardConfig,
   type SummaryType,
   type SummarySchedule,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 import { collectData, type CollectorOptions, type PullRequestInfo } from './collector.js';
 import { generateSummary, type SummaryOptions } from './summarizer.js';
@@ -33,8 +33,8 @@ export interface SchedulerConfig {
   developerName: string;
   /** Team ID for generated summaries */
   teamId: string;
-  /** Pre-loaded ArchGuard config (loaded from projectDir if not provided) */
-  config?: ArchGuardConfig;
+  /** Pre-loaded SnoutGuard config (loaded from projectDir if not provided) */
+  config?: SnoutGuardConfig;
   /** Callback when a summary is successfully generated */
   onSummary?: SummaryCallback;
   /** Callback when an error occurs during generation */
@@ -55,12 +55,12 @@ interface ManagedJob {
 
 /**
  * Manages multiple cron jobs for scheduled summary generation.
- * Reads schedule configuration from .archguard.yml and creates
+ * Reads schedule configuration from .snoutguard.yml and creates
  * a cron job for each configured summary schedule.
  */
 export class SummaryScheduler {
   private readonly jobs: Map<string, ManagedJob> = new Map();
-  private readonly config: ArchGuardConfig;
+  private readonly config: SnoutGuardConfig;
   private readonly schedulerConfig: SchedulerConfig;
   private running = false;
 

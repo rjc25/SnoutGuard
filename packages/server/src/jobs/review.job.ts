@@ -12,7 +12,7 @@ import {
   generateId,
   now,
   loadConfig,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   QUEUE_NAMES,
   registerWorker,
@@ -58,8 +58,8 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
     id: d.id,
     title: d.title,
     description: d.description,
-    category: d.category as import('@archguard/core').ArchCategory,
-    status: d.status as import('@archguard/core').DecisionStatus,
+    category: d.category as import('@snoutguard/core').ArchCategory,
+    status: d.status as import('@snoutguard/core').DecisionStatus,
     confidence: d.confidence,
     evidence: [],
     constraints: JSON.parse(d.constraints ?? '[]') as string[],
@@ -75,7 +75,7 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
   const config = loadConfig(process.cwd());
 
   // Dynamically import reviewer
-  const { checkRules } = await import('@archguard/reviewer');
+  const { checkRules } = await import('@snoutguard/reviewer');
 
   await job.updateProgress(40);
 
@@ -122,12 +122,12 @@ async function processReview(job: Job<ReviewJobData>): Promise<{ reviewId: strin
   // If this is a PR review triggered by webhook, post results back to GitHub
   if (prNumber && triggeredBy === 'webhook' && repo.provider === 'github') {
     try {
-      const { createGitHubClient, createGitHubComment } = await import('@archguard/integrations');
+      const { createGitHubClient, createGitHubComment } = await import('@snoutguard/integrations');
       const token = process.env.GITHUB_TOKEN;
       if (token) {
         const octokit = createGitHubClient({ token });
         const [owner, repoName] = repo.fullName.split('/');
-        const summary = `## ArchGuard Review\n\n` +
+        const summary = `## SnoutGuard Review\n\n` +
           `**${violations.length}** violations found: ` +
           `${errors} errors, ${warnings} warnings, ${infos} info\n`;
         await createGitHubComment(octokit, { owner, repo: repoName, pullNumber: prNumber }, summary);

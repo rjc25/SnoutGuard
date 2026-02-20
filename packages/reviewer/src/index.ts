@@ -1,5 +1,5 @@
 /**
- * @archguard/reviewer - Architectural Code Review Engine
+ * @snoutguard/reviewer - Architectural Code Review Engine
  * Performs architectural code reviews on git diffs by running both
  * deterministic rule-based checks and LLM-powered deep review passes.
  *
@@ -8,12 +8,12 @@
 
 import type {
   ArchDecision,
-  ArchGuardConfig,
+  SnoutGuardConfig,
   ReviewResult,
   Violation,
   ViolationSeverity,
-} from '@archguard/core';
-import { generateId, now, loadConfig } from '@archguard/core';
+} from '@snoutguard/core';
+import { generateId, now, loadConfig } from '@snoutguard/core';
 
 import { analyzeDiff, type DiffAnalysis } from './diff-analyzer.js';
 import { checkRules, type RuleEngineConfig } from './rule-engine.js';
@@ -130,14 +130,14 @@ export interface ReviewOptions {
  * 4. Combines results, deduplicates, and returns a ReviewResult
  *
  * @param projectDir - Path to the project root directory
- * @param config - ArchGuard configuration (from .archguard.yml)
+ * @param config - SnoutGuard configuration (from .snoutguard.yml)
  * @param diffRef - Git ref to diff against (e.g., "HEAD~1", "main", a commit SHA)
  * @param options - Additional review options
  * @returns A ReviewResult with all violations found
  */
 export async function reviewChanges(
   projectDir: string,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   diffRef: string,
   options: ReviewOptions = {}
 ): Promise<ReviewResult> {

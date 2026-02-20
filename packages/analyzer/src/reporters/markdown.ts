@@ -3,7 +3,7 @@
  * Includes layer violations and Robert C. Martin coupling metrics.
  */
 
-import type { ArchDecision, LayerViolation } from '@archguard/core';
+import type { ArchDecision, LayerViolation } from '@snoutguard/core';
 import type { ScanResult } from '../scanner.js';
 import type { DependencyGraph } from '../dependency-mapper.js';
 import type { DriftResult } from '../drift-detector.js';
@@ -18,7 +18,7 @@ export function generateMarkdownReport(
 ): string {
   const lines: string[] = [];
 
-  lines.push('# ArchGuard Analysis Report');
+  lines.push('# SnoutGuard Analysis Report');
   lines.push('');
   lines.push(`**Generated:** ${new Date().toISOString()}`);
   lines.push(`**Files analyzed:** ${scanResult.totalFiles}`);

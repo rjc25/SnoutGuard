@@ -16,7 +16,7 @@ import {
   type Evidence,
   type ArchCategory,
   type DecisionStatus,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   QUEUE_NAMES,
   registerWorker,
@@ -100,11 +100,11 @@ async function processSync(job: Job<SyncJobData>): Promise<{ syncedFormats: stri
 
   // Override formats if specified
   if (formats && formats.length > 0) {
-    config.sync.formats = formats as import('@archguard/core').SyncFormat[];
+    config.sync.formats = formats as import('@snoutguard/core').SyncFormat[];
   }
 
   // Dynamically import context-sync engine
-  const { SyncEngine } = await import('@archguard/context-sync');
+  const { SyncEngine } = await import('@snoutguard/context-sync');
 
   const engine = new SyncEngine({
     config,

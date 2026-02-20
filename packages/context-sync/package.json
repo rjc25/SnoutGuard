@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/context-sync",
+  "name": "@snoutguard/context-sync",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
+    "@snoutguard/core": "workspace:*",
     "handlebars": "^4.7.8",
     "chokidar": "^4.0.0"
   },

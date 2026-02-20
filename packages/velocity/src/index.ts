@@ -1,5 +1,5 @@
 /**
- * @archguard/velocity - Management Agent: Team Velocity Tracker
+ * @snoutguard/velocity - Management Agent: Team Velocity Tracker
  *
  * Orchestrates collection of git stats, complexity analysis, PR metrics,
  * and issue tracking data to produce per-developer and team velocity scores.
@@ -12,15 +12,15 @@ import {
   createGitClient,
   getDiff,
   loadConfig,
-  type ArchGuardConfig,
+  type SnoutGuardConfig,
   type ArchDecision,
   type Violation,
   type VelocityScore,
   type VelocityPeriod,
   type TeamVelocity,
   type Blocker,
-} from '@archguard/core';
-import type { DependencyGraph } from '@archguard/analyzer';
+} from '@snoutguard/core';
+import type { DependencyGraph } from '@snoutguard/analyzer';
 
 // Re-export types
 export * from './types.js';
@@ -110,8 +110,8 @@ export interface CalculateVelocityOptions {
   /** End of the measurement period (ISO date string) */
   periodEnd: string;
 
-  /** ArchGuard configuration (loaded from .archguard.yml if not provided) */
-  config?: ArchGuardConfig;
+  /** SnoutGuard configuration (loaded from .snoutguard.yml if not provided) */
+  config?: SnoutGuardConfig;
 
   /** Pre-fetched PR data (from integrations package) */
   prData?: PRData[];

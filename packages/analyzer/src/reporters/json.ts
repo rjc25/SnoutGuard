@@ -3,7 +3,7 @@
  * Includes layer violations and Robert C. Martin coupling metrics.
  */
 
-import type { ArchDecision, LayerViolation, CouplingMetrics } from '@archguard/core';
+import type { ArchDecision, LayerViolation, CouplingMetrics } from '@snoutguard/core';
 import type { ScanResult } from '../scanner.js';
 import type { DependencyGraph } from '../dependency-mapper.js';
 import type { DriftResult } from '../drift-detector.js';

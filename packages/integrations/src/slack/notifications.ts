@@ -1,5 +1,5 @@
 /**
- * Automated Slack notification functions for ArchGuard.
+ * Automated Slack notification functions for SnoutGuard.
  * Provides functions to send various types of notifications to Slack
  * channels, including violation alerts, drift alerts, velocity digests,
  * work summaries, and blocker alerts.
@@ -12,7 +12,7 @@ import type {
   TeamVelocity,
   WorkSummary,
   Blocker,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   buildViolationAlertBlocks,
   buildDriftAlertBlocks,
@@ -181,7 +181,7 @@ async function sendMessage(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(
-      `[ArchGuard Slack] Failed to send message to ${channel}: ${errorMessage}`
+      `[SnoutGuard Slack] Failed to send message to ${channel}: ${errorMessage}`
     );
 
     return {
@@ -224,7 +224,7 @@ export async function sendThreadedReply(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(
-      `[ArchGuard Slack] Failed to send threaded reply to ${channel}: ${errorMessage}`
+      `[SnoutGuard Slack] Failed to send threaded reply to ${channel}: ${errorMessage}`
     );
 
     return {
@@ -267,7 +267,7 @@ export async function updateMessage(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(
-      `[ArchGuard Slack] Failed to update message in ${channel}: ${errorMessage}`
+      `[SnoutGuard Slack] Failed to update message in ${channel}: ${errorMessage}`
     );
 
     return {

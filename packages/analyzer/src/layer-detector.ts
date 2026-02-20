@@ -5,12 +5,12 @@
  * layer definitions, then checks every import in the dependency graph
  * against the layer hierarchy to find violations.
  *
- * Default layer hierarchy (configurable in .archguard.yml):
+ * Default layer hierarchy (configurable in .snoutguard.yml):
  *   presentation -> application -> domain <- infrastructure
  */
 
 import { minimatch } from 'minimatch';
-import type { ParsedFile, LayerDefinition, LayerViolation } from '@archguard/core';
+import type { ParsedFile, LayerDefinition, LayerViolation } from '@snoutguard/core';
 import type { DependencyGraph } from './dependency-mapper.js';
 
 /**

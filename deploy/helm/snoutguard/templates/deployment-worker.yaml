@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "archguard.fullname" . }}-worker
+  name: {{ include "snoutguard.fullname" . }}-worker
   labels:
     app.kubernetes.io/component: worker
 spec:

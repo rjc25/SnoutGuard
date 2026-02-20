@@ -1,6 +1,6 @@
 /**
- * @archguard/integrations - External Service Integrations
- * GitHub App, Bitbucket, and Slack integrations for ArchGuard.
+ * @snoutguard/integrations - External Service Integrations
+ * GitHub App, Bitbucket, and Slack integrations for SnoutGuard.
  * This package provides webhook handlers, PR bots, and notification
  * integrations for GitHub, Bitbucket, and Slack.
  */
@@ -23,7 +23,7 @@ export {
 } from './github/pr-bot.js';
 
 export {
-  createArchGuardCheckRun,
+  createSnoutGuardCheckRun,
   createInProgressCheckRun,
   type CheckRunContext,
   type CheckRunResult,
@@ -102,7 +102,7 @@ export {
 } from './slack/app.js';
 
 export {
-  createArchGuardCommandHandler,
+  createSnoutGuardCommandHandler,
   type SlackCommandDataProvider,
 } from './slack/commands.js';
 

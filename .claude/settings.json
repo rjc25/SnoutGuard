@@ -8,7 +8,7 @@
       "Bash(pnpm *)",
       "Bash(npm *)",
       "Bash(node *)",
-      "Bash(archguard *)",
+      "Bash(snoutguard *)",
       "Bash(cat *)",
       "Bash(ls *)",
       "Bash(find *)",
@@ -19,8 +19,8 @@
     ]
   },
   "mcpServers": {
-    "archguard": {
-      "command": "archguard",
+    "snoutguard": {
+      "command": "snoutguard",
       "args": ["serve", "--transport", "stdio", "--path", "."],
       "env": {
         "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"

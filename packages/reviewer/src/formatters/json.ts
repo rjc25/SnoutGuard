@@ -4,7 +4,7 @@
  * suitable for parsing by CI pipelines, dashboards, and other tools.
  */
 
-import type { ReviewResult, Violation, ViolationSeverity } from '@archguard/core';
+import type { ReviewResult, Violation, ViolationSeverity } from '@snoutguard/core';
 import {
   countBySeverity,
   sortBySeverity,

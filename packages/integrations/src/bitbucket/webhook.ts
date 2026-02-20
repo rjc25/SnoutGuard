@@ -1,11 +1,11 @@
 /**
- * Bitbucket webhook handler for ArchGuard.
+ * Bitbucket webhook handler for SnoutGuard.
  * Handles incoming Bitbucket webhook payloads for pull request events
  * (pullrequest:created, pullrequest:updated) and routes them to the
  * Bitbucket PR bot for architectural review.
  */
 
-import type { ReviewResult, ViolationSeverity } from '@archguard/core';
+import type { ReviewResult, ViolationSeverity } from '@snoutguard/core';
 import {
   createBitbucketClient,
   type BitbucketClient,
@@ -170,7 +170,7 @@ export function createBitbucketWebhookHandler(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(
-        `[ArchGuard Bitbucket Webhook] Error handling ${eventType}: ${message}`
+        `[SnoutGuard Bitbucket Webhook] Error handling ${eventType}: ${message}`
       );
 
       return {

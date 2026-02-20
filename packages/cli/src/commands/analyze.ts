@@ -1,5 +1,5 @@
 /**
- * `archguard analyze` command.
+ * `snoutguard analyze` command.
  *
  * Runs a full codebase analysis using Claude (Opus by default).
  * Requires an Anthropic API key — the LLM IS the product.
@@ -8,7 +8,7 @@
  * - Tapir-themed spinner animation during analysis
  * - Real-time step progress updates
  * - --verbose flag for detailed console output
- * - Automatic debug log file in .archguard/logs/
+ * - Automatic debug log file in .snoutguard/logs/
  * - Specific failure reasons on error
  */
 
@@ -29,8 +29,8 @@ import {
   LlmAuthError,
   LlmValidationError,
   type LogEntry,
-} from '@archguard/core';
-import { runAnalysis } from '@archguard/analyzer';
+} from '@snoutguard/core';
+import { runAnalysis } from '@snoutguard/analyzer';
 import { createTapirSpinner, TAPIR_ASCII, randomTapirPhrase } from '../tapir-spinner.js';
 
 export function registerAnalyzeCommand(program: Command): void {
@@ -55,7 +55,7 @@ export function registerAnalyzeCommand(program: Command): void {
         const repoId = generateId();
         const verbose = options.verbose ?? false;
 
-        // Initialise logger — always writes to .archguard/logs/
+        // Initialise logger — always writes to .snoutguard/logs/
         const logger = initLogger({
           projectDir,
           verbose,
@@ -207,7 +207,7 @@ export function registerAnalyzeCommand(program: Command): void {
             }
           }
 
-          // Persist decisions to local database so `archguard sync` can use them
+          // Persist decisions to local database so `snoutguard sync` can use them
           try {
             const db = initializeDatabase();
             const now = new Date().toISOString();

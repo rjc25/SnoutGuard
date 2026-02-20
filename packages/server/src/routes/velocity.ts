@@ -1,12 +1,12 @@
 /**
- * Velocity routes for the ArchGuard server.
+ * Velocity routes for the SnoutGuard server.
  * Provides endpoints for viewing team velocity, developer velocity,
  * and current blockers.
  */
 
 import { Hono } from 'hono';
 import { eq, and, desc } from 'drizzle-orm';
-import { schema, type DbClient } from '@archguard/core';
+import { schema, type DbClient } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 

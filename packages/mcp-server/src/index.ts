@@ -1,5 +1,5 @@
 /**
- * @archguard/mcp-server - MCP server entrypoint
+ * @snoutguard/mcp-server - MCP server entrypoint
  *
  * Creates an MCP server that exposes architectural decisions, compliance
  * checking, guidance, and dependency information to AI coding agents.
@@ -22,9 +22,9 @@ import {
   loadConfig,
   initializeDatabase,
   findProjectRoot,
-  type ArchGuardConfig,
+  type SnoutGuardConfig,
   type DbClient,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 // Tools
 import {
@@ -58,7 +58,7 @@ import {
 export type TransportType = 'stdio' | 'sse' | 'streamable-http';
 
 /**
- * Start the ArchGuard MCP server.
+ * Start the SnoutGuard MCP server.
  *
  * @param options.projectDir - Root directory of the project to analyze (defaults to cwd)
  * @param options.dbPath - Path to the SQLite database
@@ -94,7 +94,7 @@ export async function startMcpServer(options: {
 
 // ─── stdio transport ─────────────────────────────────────────────
 
-async function startStdioServer(db: DbClient, config: ArchGuardConfig): Promise<void> {
+async function startStdioServer(db: DbClient, config: SnoutGuardConfig): Promise<void> {
   const server = createMcpServer(db, config);
   const transport = new StdioServerTransport();
   await server.connect(transport);
@@ -104,7 +104,7 @@ async function startStdioServer(db: DbClient, config: ArchGuardConfig): Promise<
 
 async function startSseServer(
   db: DbClient,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   port: number,
   host: string,
 ): Promise<void> {
@@ -158,7 +158,7 @@ async function startSseServer(
 
   return new Promise((resolve) => {
     app.listen(port, () => {
-      console.log(`ArchGuard MCP Server (SSE) listening on http://${host}:${port}`);
+      console.log(`SnoutGuard MCP Server (SSE) listening on http://${host}:${port}`);
       console.log(`  SSE endpoint:      GET  http://${host}:${port}/sse`);
       console.log(`  Messages endpoint: POST http://${host}:${port}/messages`);
       resolve();
@@ -182,7 +182,7 @@ async function startSseServer(
 
 async function startStreamableHttpServer(
   db: DbClient,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   port: number,
   host: string,
 ): Promise<void> {
@@ -270,7 +270,7 @@ async function startStreamableHttpServer(
 
   return new Promise((resolve) => {
     app.listen(port, () => {
-      console.log(`ArchGuard MCP Server (Streamable HTTP) listening on http://${host}:${port}`);
+      console.log(`SnoutGuard MCP Server (Streamable HTTP) listening on http://${host}:${port}`);
       console.log(`  MCP endpoint: http://${host}:${port}/mcp`);
       console.log(`  Supports: POST (requests), GET (SSE stream), DELETE (session end)`);
       resolve();
@@ -296,9 +296,9 @@ async function startStreamableHttpServer(
  * Create and configure the MCP server instance.
  * Registers all tools and resources.
  */
-function createMcpServer(db: DbClient, config: ArchGuardConfig): McpServer {
+function createMcpServer(db: DbClient, config: SnoutGuardConfig): McpServer {
   const server = new McpServer({
-    name: 'archguard',
+    name: 'snoutguard',
     version: '0.1.0',
   });
 
@@ -314,7 +314,7 @@ function createMcpServer(db: DbClient, config: ArchGuardConfig): McpServer {
 function registerTools(
   server: McpServer,
   db: DbClient,
-  config: ArchGuardConfig
+  config: SnoutGuardConfig
 ): void {
   server.tool(
     'get_architectural_decisions',
@@ -498,16 +498,16 @@ function registerTools(
 function registerResources(server: McpServer, db: DbClient): void {
   server.resource(
     'decisions-list',
-    'archguard://decisions',
+    'snoutguard://decisions',
     { description: 'Full list of all architectural decisions.', mimeType: 'application/json' },
     async () => ({
-      contents: [{ uri: 'archguard://decisions', text: await getDecisionsResource(db), mimeType: 'application/json' }],
+      contents: [{ uri: 'snoutguard://decisions', text: await getDecisionsResource(db), mimeType: 'application/json' }],
     })
   );
 
   server.resource(
     'decision-by-id',
-    new ResourceTemplate('archguard://decisions/{id}', { list: undefined }),
+    new ResourceTemplate('snoutguard://decisions/{id}', { list: undefined }),
     { description: 'Individual architectural decision by ID.', mimeType: 'application/json' },
     async (uri: any, params: any) => {
       const id = String(params.id);
@@ -519,25 +519,25 @@ function registerResources(server: McpServer, db: DbClient): void {
 
   server.resource(
     'constraints-list',
-    'archguard://constraints',
+    'snoutguard://constraints',
     { description: 'All architectural constraints from all decisions.', mimeType: 'application/json' },
     async () => ({
-      contents: [{ uri: 'archguard://constraints', text: await getConstraintsResource(db), mimeType: 'application/json' }],
+      contents: [{ uri: 'snoutguard://constraints', text: await getConstraintsResource(db), mimeType: 'application/json' }],
     })
   );
 
   server.resource(
     'patterns-summary',
-    'archguard://patterns',
+    'snoutguard://patterns',
     { description: 'Summary of all detected architectural patterns.', mimeType: 'application/json' },
     async () => ({
-      contents: [{ uri: 'archguard://patterns', text: await getPatternsResource(db), mimeType: 'application/json' }],
+      contents: [{ uri: 'snoutguard://patterns', text: await getPatternsResource(db), mimeType: 'application/json' }],
     })
   );
 
   server.resource(
     'module-dependencies',
-    new ResourceTemplate('archguard://dependencies/{module}', { list: undefined }),
+    new ResourceTemplate('snoutguard://dependencies/{module}', { list: undefined }),
     { description: 'Dependency information for a specific module.', mimeType: 'application/json' },
     async (uri: any, params: any) => {
       const module = String(params.module);

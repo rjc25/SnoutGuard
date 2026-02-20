@@ -1,5 +1,5 @@
 /**
- * `archguard velocity` command.
+ * `snoutguard velocity` command.
  * Shows engineering velocity metrics for teams and individual developers.
  */
 
@@ -13,7 +13,7 @@ import {
   type VelocityScore,
   type TeamVelocity,
   type VelocityPeriod,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Format a velocity score for terminal display */
 function formatVelocityScore(score: VelocityScore): string {
@@ -126,7 +126,7 @@ export function registerVelocityCommand(program: Command): void {
         if (!config.velocity.enabled) {
           console.log(
             chalk.yellow(
-              '\n  Velocity tracking is disabled in .archguard.yml.\n' +
+              '\n  Velocity tracking is disabled in .snoutguard.yml.\n' +
                 '  Set velocity.enabled to true to enable it.\n'
             )
           );
@@ -137,7 +137,7 @@ export function registerVelocityCommand(program: Command): void {
 
         try {
           const { calculateVelocity } = await import(
-            '@archguard/velocity'
+            '@snoutguard/velocity'
           );
 
           // Calculate period dates

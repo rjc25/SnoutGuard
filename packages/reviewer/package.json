@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/reviewer",
+  "name": "@snoutguard/reviewer",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,8 +16,8 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
-    "@archguard/analyzer": "workspace:*",
+    "@snoutguard/core": "workspace:*",
+    "@snoutguard/analyzer": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

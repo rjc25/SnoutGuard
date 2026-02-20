@@ -5,7 +5,7 @@
  * - Generates all configured format files (cursorrules, claude, copilot, etc.)
  * - Uses LLM-powered intelligent compression for all standard formats
  * - Falls back to Handlebars templates only for the 'custom' format
- * - Preserves user sections between archguard comment markers
+ * - Preserves user sections between snoutguard comment markers
  * - Supports watch mode with chokidar (debounced at 5 seconds)
  * - Returns SyncRecord[] for each sync operation
  */
@@ -17,11 +17,11 @@ import * as path from 'node:path';
 import type { FSWatcher } from 'chokidar';
 import type {
   ArchDecision,
-  ArchGuardConfig,
+  SnoutGuardConfig,
   SyncFormat,
   SyncRecord,
-} from '@archguard/core';
-import { generateId, now } from '@archguard/core';
+} from '@snoutguard/core';
+import { generateId, now } from '@snoutguard/core';
 
 import { generateCustom, type CustomTemplateOptions } from './generators/custom.js';
 import { generateWithLlm } from './llm-sync.js';
@@ -32,7 +32,7 @@ import { extractUserSections, insertUserSections } from './templates.js';
 /** Options for creating a SyncEngine */
 export interface SyncEngineOptions {
   /** The project configuration */
-  config: ArchGuardConfig;
+  config: SnoutGuardConfig;
   /** The architectural decisions to generate from */
   decisions: ArchDecision[];
   /** The repository ID (used in SyncRecord) */
@@ -67,16 +67,16 @@ function getOutputPath(format: SyncFormat, outputDir: string): string {
     case 'kiro':
       return path.join(outputDir, '.kiro', 'steering.md');
     case 'custom':
-      return path.join(outputDir, '.archguard-context');
+      return path.join(outputDir, '.snoutguard-context');
     default:
-      return path.join(outputDir, `.archguard-${format}`);
+      return path.join(outputDir, `.snoutguard-${format}`);
   }
 }
 
 // ─── SyncEngine Class ─────────────────────────────────────────────
 
 export class SyncEngine {
-  private config: ArchGuardConfig;
+  private config: SnoutGuardConfig;
   private decisions: ArchDecision[];
   private repoId: string;
   private projectRoot: string;
@@ -102,7 +102,7 @@ export class SyncEngine {
   /**
    * Update the configuration.
    */
-  updateConfig(config: ArchGuardConfig): void {
+  updateConfig(config: SnoutGuardConfig): void {
     this.config = config;
   }
 

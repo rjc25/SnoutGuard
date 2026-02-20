@@ -2,7 +2,7 @@
  * Deterministic rule matching engine for architectural code review.
  * Takes ArchDecision[] and CustomRule[] from config and checks diffs
  * against import violations, file placement violations, naming convention
- * violations, and custom pattern violations defined in .archguard.yml.
+ * violations, and custom pattern violations defined in .snoutguard.yml.
  */
 
 import type {
@@ -11,8 +11,8 @@ import type {
   Violation,
   ViolationSeverity,
   FileDiff,
-} from '@archguard/core';
-import { generateId, now } from '@archguard/core';
+} from '@snoutguard/core';
+import { generateId, now } from '@snoutguard/core';
 import type { ChangeContext, DiffAnalysis } from './diff-analyzer.js';
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@ import type { ChangeContext, DiffAnalysis } from './diff-analyzer.js';
 export interface RuleEngineConfig {
   /** Architectural decisions to enforce */
   decisions: ArchDecision[];
-  /** Custom rules from .archguard.yml */
+  /** Custom rules from .snoutguard.yml */
   customRules: CustomRule[];
 }
 
@@ -546,7 +546,7 @@ function generateNamingExamples(convention: string): string[] {
 // ─── Custom Rule Violation Checks ─────────────────────────────────
 
 /**
- * Check for violations of custom rules defined in .archguard.yml.
+ * Check for violations of custom rules defined in .snoutguard.yml.
  * Custom rules use pattern matching with allowedIn/notAllowedIn directory constraints.
  */
 function checkCustomRuleViolations(

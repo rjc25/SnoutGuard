@@ -10,7 +10,7 @@ import {
   schema,
   hash,
   type DbClient,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import { enqueueReview, enqueueAnalysis, enqueueSync } from '../jobs/queue.js';
 
 /**

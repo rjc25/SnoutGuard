@@ -1,6 +1,6 @@
 /**
  * Type definitions for the velocity package.
- * Re-exports relevant types from @archguard/core and defines internal types
+ * Re-exports relevant types from @snoutguard/core and defines internal types
  * used across collectors, scoring, and blocker modules.
  */
 
@@ -12,15 +12,15 @@ export type {
   TeamVelocity,
   Blocker,
   BlockerType,
-  ArchGuardConfig,
+  SnoutGuardConfig,
   Violation,
   ViolationSeverity,
   ArchDecision,
   Developer,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 // Re-export git types used by collectors
-export type { DevGitStats, FileDiff, DiffHunk } from '@archguard/core';
+export type { DevGitStats, FileDiff, DiffHunk } from '@snoutguard/core';
 
 // ─── Internal Collector Types ─────────────────────────────────────
 

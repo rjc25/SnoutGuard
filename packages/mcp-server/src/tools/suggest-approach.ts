@@ -10,8 +10,8 @@ import type {
   ArchitecturalGuidance,
   DbClient,
   Evidence,
-} from '@archguard/core';
-import { schema, parseJsonSafe } from '@archguard/core';
+} from '@snoutguard/core';
+import { schema, parseJsonSafe } from '@snoutguard/core';
 
 /** Input schema for get_architectural_guidance tool */
 export interface SuggestApproachInput {

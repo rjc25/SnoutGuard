@@ -12,7 +12,7 @@ import {
   type VelocityScore,
   type Blocker,
   type SummaryDataPoints,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Git client type inferred from the core createGitClient factory */
 type GitClient = ReturnType<typeof createGitClient>;

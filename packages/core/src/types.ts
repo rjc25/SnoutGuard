@@ -1,5 +1,5 @@
 /**
- * Shared type definitions for the ArchGuard platform.
+ * Shared type definitions for the SnoutGuard platform.
  * All interfaces and types used across packages are defined here.
  */
 
@@ -371,8 +371,8 @@ export interface LayerDefinition {
   allowedDependencies: string[];
 }
 
-/** Full .archguard.yml config */
-export interface ArchGuardConfig {
+/** Full .snoutguard.yml config */
+export interface SnoutGuardConfig {
   version: number;
   server?: {
     url: string;
@@ -390,9 +390,9 @@ export interface ArchGuardConfig {
     apiKeyEnv: string;
     /** Per-operation model configuration with smart defaults */
     models: {
-      /** Model for `archguard analyze` — deep analysis, runs infrequently. Default: opus */
+      /** Model for `snoutguard analyze` — deep analysis, runs infrequently. Default: opus */
       analyze: string;
-      /** Model for `archguard review` — PR diffs against decisions. Default: sonnet */
+      /** Model for `snoutguard review` — PR diffs against decisions. Default: sonnet */
       review: string;
       /** Model for MCP server queries — fast responses. Default: sonnet */
       mcp: string;

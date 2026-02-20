@@ -1,11 +1,11 @@
 /**
  * Git statistics collector.
  * Collects per-developer git metrics for a given time window using
- * getDevStats and getLog from @archguard/core.
+ * getDevStats and getLog from @snoutguard/core.
  */
 
 import type { SimpleGit, DefaultLogFields, ListLogLine } from 'simple-git';
-import { getDevStats, getLog } from '@archguard/core';
+import { getDevStats, getLog } from '@snoutguard/core';
 import type { GitMetrics } from '../types.js';
 
 /**

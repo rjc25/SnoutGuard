@@ -14,10 +14,10 @@ import { glob } from 'glob';
 import {
   detectLanguage,
   hash,
-  type ArchGuardConfig,
+  type SnoutGuardConfig,
   type ParsedFile,
   type SupportedLanguage,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Results from a codebase scan */
 export interface ScanResult {
@@ -42,7 +42,7 @@ export interface DirectoryNode {
  */
 export async function scanCodebase(
   projectDir: string,
-  config: ArchGuardConfig
+  config: SnoutGuardConfig
 ): Promise<ScanResult> {
   const includePatterns = config.analysis.include;
   const excludePatterns = config.analysis.exclude;

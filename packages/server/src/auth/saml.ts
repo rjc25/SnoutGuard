@@ -1,5 +1,5 @@
 /**
- * SAML 2.0 SSO configuration and handlers for ArchGuard enterprise.
+ * SAML 2.0 SSO configuration and handlers for SnoutGuard enterprise.
  * Provides SP-initiated SSO flow with IdP metadata management.
  *
  * Supports:
@@ -11,8 +11,8 @@
 
 import type { Context } from 'hono';
 import { eq } from 'drizzle-orm';
-import { schema, generateId, now, type DbClient } from '@archguard/core';
-import type { Role } from '@archguard/core';
+import { schema, generateId, now, type DbClient } from '@snoutguard/core';
+import type { Role } from '@snoutguard/core';
 import { createSession } from './index.js';
 
 // ─── Types ───────────────────────────────────────────────────────

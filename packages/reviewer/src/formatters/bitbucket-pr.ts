@@ -4,7 +4,7 @@
  * including report data and inline annotations.
  */
 
-import type { ReviewResult, Violation, ViolationSeverity } from '@archguard/core';
+import type { ReviewResult, Violation, ViolationSeverity } from '@snoutguard/core';
 import {
   getSeverityIcon,
   getSeverityLabel,
@@ -104,7 +104,7 @@ function buildPrComment(result: ReviewResult): string {
   const lines: string[] = [];
 
   // Header
-  lines.push('## ArchGuard Architectural Review');
+  lines.push('## SnoutGuard Architectural Review');
   lines.push('');
 
   // Status
@@ -231,9 +231,9 @@ function buildCodeInsightsReport(result: ReviewResult): BitbucketReport {
   }
 
   return {
-    external_id: `archguard-review-${result.id}`,
-    title: 'ArchGuard Architectural Review',
-    reporter: 'ArchGuard',
+    external_id: `snoutguard-review-${result.id}`,
+    title: 'SnoutGuard Architectural Review',
+    reporter: 'SnoutGuard',
     report_type: 'CODE_SMELL',
     result: result.errors > 0 ? 'FAILED' : 'PASSED',
     data,
@@ -259,7 +259,7 @@ function buildCodeInsightsAnnotations(violations: Violation[]): BitbucketAnnotat
     }
 
     annotations.push({
-      external_id: `archguard-${v.id}`,
+      external_id: `snoutguard-${v.id}`,
       path: v.filePath,
       line: v.lineStart,
       message,

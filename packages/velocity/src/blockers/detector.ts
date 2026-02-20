@@ -6,14 +6,14 @@
  *   - Review bottlenecks (devs with >3 PRs awaiting review)
  *   - High violation rates
  *
- * Returns Blocker[] with types from @archguard/core.
+ * Returns Blocker[] with types from @snoutguard/core.
  */
 
 import type {
   Blocker,
   BlockerType,
-  ArchGuardConfig,
-} from '@archguard/core';
+  SnoutGuardConfig,
+} from '@snoutguard/core';
 import type { PRData, DeveloperPRMetrics } from '../types.js';
 
 // ─── Configuration Defaults ─────────────────────────────────────────
@@ -50,13 +50,13 @@ export interface BlockerDetectionConfig {
  *
  * @param openPrs - Currently open PRs
  * @param prMetrics - Aggregated developer PR metrics
- * @param config - ArchGuard configuration (optional, for thresholds)
+ * @param config - SnoutGuard configuration (optional, for thresholds)
  * @returns Array of detected Blocker objects
  */
 export function detectBlockers(
   openPrs: PRData[],
   prMetrics: DeveloperPRMetrics[],
-  config?: ArchGuardConfig
+  config?: SnoutGuardConfig
 ): Blocker[] {
   const thresholds = extractThresholds(config);
   const now = Date.now();
@@ -275,7 +275,7 @@ export function detectHighViolationRates(
  * Extract blocker detection thresholds from config.
  */
 function extractThresholds(
-  config?: ArchGuardConfig
+  config?: SnoutGuardConfig
 ): BlockerDetectionConfig {
   if (!config?.velocity) {
     return {

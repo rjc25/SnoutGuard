@@ -16,7 +16,7 @@ import {
   requireApiKey,
   createLlmClient,
   analyzeWithLlm,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   QUEUE_NAMES,
   registerWorker,

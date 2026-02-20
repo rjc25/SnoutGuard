@@ -1,5 +1,5 @@
 /**
- * `archguard serve` command.
+ * `snoutguard serve` command.
  * Starts the MCP (Model Context Protocol) server for integration
  * with AI coding assistants.
  *
@@ -12,7 +12,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import * as path from 'node:path';
-import { loadConfig, findProjectRoot } from '@archguard/core';
+import { loadConfig, findProjectRoot } from '@snoutguard/core';
 
 const VALID_TRANSPORTS = ['stdio', 'sse', 'streamable-http'] as const;
 type TransportType = typeof VALID_TRANSPORTS[number];
@@ -20,7 +20,7 @@ type TransportType = typeof VALID_TRANSPORTS[number];
 export function registerServeCommand(program: Command): void {
   program
     .command('serve')
-    .description('Start the ArchGuard MCP server')
+    .description('Start the SnoutGuard MCP server')
     .option(
       '--transport <transport>',
       'Transport method: stdio, sse, or streamable-http',
@@ -53,10 +53,10 @@ export function registerServeCommand(program: Command): void {
         }
 
         try {
-          const { startMcpServer } = await import('@archguard/mcp-server');
+          const { startMcpServer } = await import('@snoutguard/mcp-server');
 
           if (transport !== 'stdio') {
-            console.log(chalk.bold('\n  🏗  ArchGuard MCP Server\n'));
+            console.log(chalk.bold('\n  🏗  SnoutGuard MCP Server\n'));
             console.log(chalk.gray(`  Transport: ${transport}`));
             console.log(chalk.gray(`  Host:      ${host}`));
             console.log(chalk.gray(`  Port:      ${port}`));

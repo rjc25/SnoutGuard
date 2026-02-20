@@ -4,7 +4,7 @@
  * change over configurable time periods.
  */
 
-import type { ArchSnapshot, DriftEvent } from '@archguard/core';
+import type { ArchSnapshot, DriftEvent } from '@snoutguard/core';
 
 /** A trend data point for charting */
 export interface TrendDataPoint {

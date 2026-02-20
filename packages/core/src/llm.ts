@@ -16,7 +16,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import * as crypto from 'node:crypto';
 import { z, type ZodSchema } from 'zod';
-import type { ArchGuardConfig, LlmCallRecord } from './types.js';
+import type { SnoutGuardConfig, LlmCallRecord } from './types.js';
 import { generateId, now, sleep } from './utils.js';
 import { getLogger } from './logger.js';
 
@@ -33,7 +33,7 @@ export class LlmAuthError extends LlmError {
   constructor(apiKeyEnv: string) {
     super(
       `\nAnthopic API key required.\n\n` +
-      `ArchGuard uses Claude to analyze your codebase architecture.\n` +
+      `SnoutGuard uses Claude to analyze your codebase architecture.\n` +
       `Set your API key as an environment variable:\n\n` +
       `  export ${apiKeyEnv}=sk-ant-...\n\n` +
       `Get an API key at: https://console.anthropic.com/settings/keys\n`,
@@ -87,7 +87,7 @@ export class LlmCostLimitError extends LlmError {
   constructor(currentCost: number, limit: number) {
     super(
       `Cost limit exceeded: $${currentCost.toFixed(4)} spent this run (limit: $${limit.toFixed(2)}). ` +
-      `Increase llm.max_cost_per_run in .archguard.yml or set to 0 to disable.`,
+      `Increase llm.max_cost_per_run in .snoutguard.yml or set to 0 to disable.`,
       'COST_LIMIT'
     );
     this.name = 'LlmCostLimitError';
@@ -171,7 +171,7 @@ export type LlmOperation = 'analyze' | 'review' | 'mcp' | 'summary' | 'sync';
  * Validate that the API key is configured.
  * Throws LlmAuthError with setup instructions if missing.
  */
-export function requireApiKey(config: ArchGuardConfig): string {
+export function requireApiKey(config: SnoutGuardConfig): string {
   const apiKey = process.env[config.llm.apiKeyEnv];
   if (!apiKey) {
     throw new LlmAuthError(config.llm.apiKeyEnv);
@@ -187,7 +187,7 @@ export function requireApiKey(config: ArchGuardConfig): string {
 }
 
 /** Create an Anthropic client from config. Throws LlmAuthError if no API key. */
-export function createLlmClient(config: ArchGuardConfig): Anthropic {
+export function createLlmClient(config: SnoutGuardConfig): Anthropic {
   const apiKey = requireApiKey(config);
   return new Anthropic({
     apiKey,
@@ -196,7 +196,7 @@ export function createLlmClient(config: ArchGuardConfig): Anthropic {
 }
 
 /** Get the model to use for a specific operation */
-export function getModelForOperation(config: ArchGuardConfig, operation: LlmOperation): string {
+export function getModelForOperation(config: SnoutGuardConfig, operation: LlmOperation): string {
   return config.llm.models[operation];
 }
 
@@ -216,14 +216,14 @@ export interface AnalysisOptions {
  * Run an LLM analysis with retry, caching, cost tracking, and validation.
  *
  * @param client - Anthropic client
- * @param config - ArchGuard config
+ * @param config - SnoutGuard config
  * @param options - Prompt options
  * @param operation - Which operation this is for (determines model)
  * @returns Raw text response from Claude
  */
 export async function analyzeWithLlm(
   client: Anthropic,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   options: AnalysisOptions,
   operation: LlmOperation = 'analyze'
 ): Promise<string> {
@@ -404,7 +404,7 @@ export async function analyzeWithLlm(
  */
 export async function analyzeWithLlmValidated<T>(
   client: Anthropic,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   options: AnalysisOptions,
   schema: ZodSchema<T>,
   operation: LlmOperation = 'analyze'
@@ -470,7 +470,7 @@ export async function analyzeWithLlmValidated<T>(
  */
 export async function* streamAnalysis(
   client: Anthropic,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   options: AnalysisOptions,
   operation: LlmOperation = 'analyze'
 ): AsyncGenerator<string> {

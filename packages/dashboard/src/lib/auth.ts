@@ -29,7 +29,7 @@ export interface SignupData {
   orgName?: string;
 }
 
-const SESSION_KEY = 'archguard_session';
+const SESSION_KEY = 'snoutguard_session';
 
 /**
  * Retrieve the current session from local storage.

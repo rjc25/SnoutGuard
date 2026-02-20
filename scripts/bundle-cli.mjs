@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Bundle the ArchGuard CLI into a single file for npm distribution.
+ * Bundle the SnoutGuard CLI into a single file for npm distribution.
  *
  * Native/binary dependencies are kept external:
  * - better-sqlite3 (C++ addon, compiled per platform)
  * - chokidar (optional, used for watch mode)
  *
- * Everything else (all @archguard/* packages, commander, chalk, etc.)
+ * Everything else (all @snoutguard/* packages, commander, chalk, etc.)
  * is bundled into a single ESM file.
  */
 
@@ -15,7 +15,7 @@ import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-const outfile = 'packages/cli/dist/archguard.cjs';
+const outfile = 'packages/cli/dist/snoutguard.cjs';
 
 // Get the git version for the banner
 let version = '0.1.0';
@@ -48,8 +48,8 @@ const result = await esbuild.build({
 
   banner: {
     js: [
-      `// ArchGuard CLI v${version}`,
-      '// https://github.com/rjc25/ArchGuard',
+      `// SnoutGuard CLI v${version}`,
+      '// https://github.com/rjc25/SnoutGuard',
       `// Bundled: ${new Date().toISOString()}`,
     ].join('\n'),
   },

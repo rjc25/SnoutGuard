@@ -13,7 +13,7 @@ import {
   type DbClient,
   type ArchCategory,
   type DecisionStatus,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 

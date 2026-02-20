@@ -1,12 +1,12 @@
 /**
- * Team management routes for the ArchGuard server.
+ * Team management routes for the SnoutGuard server.
  * Provides endpoints for listing members, inviting, removing,
  * and changing roles within an organization.
  */
 
 import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
-import { schema, generateId, now, type DbClient, type Role } from '@archguard/core';
+import { schema, generateId, now, type DbClient, type Role } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 import { isRoleAtLeast, getValidRoles } from '../auth/roles.js';

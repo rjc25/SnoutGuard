@@ -1,5 +1,5 @@
 /**
- * BullMQ queue setup for the ArchGuard server.
+ * BullMQ queue setup for the SnoutGuard server.
  * Creates and manages named queues for asynchronous job processing:
  * analysis, review, velocity, summary, and sync.
  */
@@ -32,11 +32,11 @@ export function getRedisConnection(): IORedis {
 // ─── Queue Names ──────────────────────────────────────────────────
 
 export const QUEUE_NAMES = {
-  ANALYSIS: 'archguard:analysis',
-  REVIEW: 'archguard:review',
-  VELOCITY: 'archguard:velocity',
-  SUMMARY: 'archguard:summary',
-  SYNC: 'archguard:sync',
+  ANALYSIS: 'snoutguard:analysis',
+  REVIEW: 'snoutguard:review',
+  VELOCITY: 'snoutguard:velocity',
+  SUMMARY: 'snoutguard:summary',
+  SYNC: 'snoutguard:sync',
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

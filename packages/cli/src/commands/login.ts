@@ -1,6 +1,6 @@
 /**
- * `archguard login` command.
- * Authenticates the CLI with an ArchGuard server instance.
+ * `snoutguard login` command.
+ * Authenticates the CLI with an SnoutGuard server instance.
  * Stores credentials securely for subsequent commands.
  */
 
@@ -10,12 +10,12 @@ import ora from 'ora';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as readline from 'node:readline';
-import { loadConfig, findProjectRoot } from '@archguard/core';
+import { loadConfig, findProjectRoot } from '@snoutguard/core';
 
 /** Path to the credentials file */
 function getCredentialsPath(): string {
   const homeDir = process.env.HOME ?? process.env.USERPROFILE ?? '/tmp';
-  return path.join(homeDir, '.archguard', 'credentials.json');
+  return path.join(homeDir, '.snoutguard', 'credentials.json');
 }
 
 /** Prompt the user for a line of input */
@@ -123,7 +123,7 @@ function loadCredentials(): {
 export function registerLoginCommand(program: Command): void {
   program
     .command('login')
-    .description('Authenticate with an ArchGuard server')
+    .description('Authenticate with an SnoutGuard server')
     .option('--server <url>', 'Server URL')
     .option('--token <token>', 'API token (alternative to interactive login)')
     .option('--status', 'Show current authentication status')
@@ -146,7 +146,7 @@ export function registerLoginCommand(program: Command): void {
             console.log('');
           } else {
             console.log(
-              chalk.yellow('\n  Not logged in. Run `archguard login` to authenticate.\n')
+              chalk.yellow('\n  Not logged in. Run `snoutguard login` to authenticate.\n')
             );
           }
           return;
@@ -165,7 +165,7 @@ export function registerLoginCommand(program: Command): void {
         }
 
         // ── Login flow ─────────────────────────────────────────────────
-        console.log(chalk.bold('\n  ArchGuard Login\n'));
+        console.log(chalk.bold('\n  SnoutGuard Login\n'));
 
         // Get server URL
         let serverUrl = options.server;

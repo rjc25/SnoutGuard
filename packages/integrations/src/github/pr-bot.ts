@@ -10,7 +10,7 @@ import type {
   ReviewResult,
   Violation,
   ViolationSeverity,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   getDiff,
   getPR,
@@ -21,7 +21,7 @@ import {
   type ReviewComment,
   type GitHubFileDiff,
 } from './api.js';
-import { createArchGuardCheckRun, type CheckRunContext } from './check-run.js';
+import { createSnoutGuardCheckRun, type CheckRunContext } from './check-run.js';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -154,7 +154,7 @@ export async function handlePREvent(
         violations: reviewResult.violations,
         severityThreshold: opts.severityThreshold,
       };
-      result.checkRunId = await createArchGuardCheckRun(checkCtx);
+      result.checkRunId = await createSnoutGuardCheckRun(checkCtx);
     }
 
     // Step 5: Post summary comment
@@ -167,7 +167,7 @@ export async function handlePREvent(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(
-      `[ArchGuard PR Bot] Error reviewing ${ctx.repo.owner}/${ctx.repo.repo}#${ctx.prRef.pullNumber}: ${message}`
+      `[SnoutGuard PR Bot] Error reviewing ${ctx.repo.owner}/${ctx.repo.repo}#${ctx.prRef.pullNumber}: ${message}`
     );
 
     // Attempt to post an error comment so the PR author knows something went wrong
@@ -175,7 +175,7 @@ export async function handlePREvent(
       await createComment(
         ctx.octokit,
         ctx.prRef,
-        `## ArchGuard Review Error\n\nAn error occurred while running the architectural review:\n\n\`\`\`\n${message}\n\`\`\`\n\nPlease check the ArchGuard configuration and try again.`
+        `## SnoutGuard Review Error\n\nAn error occurred while running the architectural review:\n\n\`\`\`\n${message}\n\`\`\`\n\nPlease check the SnoutGuard configuration and try again.`
       );
     } catch {
       // Swallow comment posting error
@@ -249,7 +249,7 @@ async function postReviewWithAnnotations(
 function formatViolationComment(violation: Violation): string {
   const severityIcon = getSeverityIcon(violation.severity);
   const parts: string[] = [
-    `${severityIcon} **ArchGuard: ${violation.rule}** [${violation.severity}]`,
+    `${severityIcon} **SnoutGuard: ${violation.rule}** [${violation.severity}]`,
     '',
     violation.message,
   ];
@@ -273,7 +273,7 @@ function buildReviewBody(
   actionableViolations: Violation[]
 ): string {
   const parts: string[] = [
-    '## ArchGuard Architectural Review',
+    '## SnoutGuard Architectural Review',
     '',
     `Found **${reviewResult.totalViolations}** total violation(s): ` +
       `${reviewResult.errors} error(s), ${reviewResult.warnings} warning(s), ` +
@@ -300,7 +300,7 @@ function buildSummaryComment(reviewResult: ReviewResult, passed: boolean): strin
   const statusText = passed ? 'Passed' : 'Changes Requested';
 
   const parts: string[] = [
-    `## ${statusIcon} ArchGuard Architectural Review: ${statusText}`,
+    `## ${statusIcon} SnoutGuard Architectural Review: ${statusText}`,
     '',
     '| Severity | Count |',
     '|----------|-------|',
@@ -347,7 +347,7 @@ function buildSummaryComment(reviewResult: ReviewResult, passed: boolean): strin
   parts.push(
     '',
     '---',
-    '_Review by [ArchGuard](https://github.com/archguard) | Architectural code review bot_'
+    '_Review by [SnoutGuard](https://github.com/snoutguard) | Architectural code review bot_'
   );
 
   return parts.join('\n');

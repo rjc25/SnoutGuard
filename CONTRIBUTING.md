@@ -1,12 +1,12 @@
-# Contributing to ArchGuard
+# Contributing to SnoutGuard
 
 Thanks for your interest in contributing!
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard
+git clone https://github.com/rjc25/SnoutGuard
+cd SnoutGuard
 pnpm install
 pnpm build
 pnpm test
@@ -46,7 +46,7 @@ Open an issue on GitHub with:
 - What you expected to happen
 - What actually happened
 - Steps to reproduce
-- ArchGuard version (`archguard --version`)
+- SnoutGuard version (`snoutguard --version`)
 
 ## License
 

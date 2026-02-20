@@ -17,7 +17,7 @@ export class ApiError extends Error {
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = localStorage.getItem('archguard_session');
+    const raw = localStorage.getItem('snoutguard_session');
     if (!raw) return null;
     const session = JSON.parse(raw);
     return session?.accessToken ?? null;

@@ -1,5 +1,5 @@
 /**
- * `archguard costs` command.
+ * `snoutguard costs` command.
  *
  * Displays LLM usage cost history: total spend, spend per analysis,
  * spend per review, and model-level breakdowns.
@@ -11,7 +11,7 @@ import * as path from 'node:path';
 import {
   loadConfig,
   getModelForOperation,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Model pricing per million tokens */
 const MODEL_PRICING: Record<string, { input: number; output: number; label: string }> = {
@@ -30,7 +30,7 @@ export function registerCostsCommand(program: Command): void {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
 
-        console.log(chalk.bold('\n  ArchGuard LLM Cost Configuration\n'));
+        console.log(chalk.bold('\n  SnoutGuard LLM Cost Configuration\n'));
 
         // Show current model assignments
         console.log(chalk.bold('  Model Assignments:'));
@@ -101,14 +101,14 @@ export function registerCostsCommand(program: Command): void {
           console.log(chalk.bold('\n  Cost Limit:'));
           console.log(
             `    $${config.llm.maxCostPerRun.toFixed(2)} per run ` +
-            chalk.gray('(set llm.max_cost_per_run in .archguard.yml)')
+            chalk.gray('(set llm.max_cost_per_run in .snoutguard.yml)')
           );
         }
 
         // Tips
         console.log(chalk.bold('\n  Cost Optimization Tips:'));
         console.log(chalk.gray('    • Use Haiku for cost-sensitive environments:'));
-        console.log(chalk.gray('      Set all models to claude-haiku-4-5-20251001 in .archguard.yml'));
+        console.log(chalk.gray('      Set all models to claude-haiku-4-5-20251001 in .snoutguard.yml'));
         console.log(chalk.gray('    • Caching reduces repeated calls (TTL: ' + config.llm.cacheTtlHours + 'h)'));
         console.log(chalk.gray('    • Set max_cost_per_run to prevent surprise bills'));
         console.log('');

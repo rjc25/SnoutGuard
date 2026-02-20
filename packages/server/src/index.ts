@@ -1,6 +1,6 @@
 /**
- * @archguard/server - Hono API Server
- * Main entrypoint for the ArchGuard API server with auth, routes, and job queue.
+ * @snoutguard/server - Hono API Server
+ * Main entrypoint for the SnoutGuard API server with auth, routes, and job queue.
  *
  * Architecture:
  * - Hono for HTTP routing and middleware
@@ -14,7 +14,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { serve } from '@hono/node-server';
-import { initializeDatabase } from '@archguard/core';
+import { initializeDatabase } from '@snoutguard/core';
 
 // Middleware
 import { authMiddleware } from './middleware/auth.js';
@@ -184,7 +184,7 @@ const server = serve(
     port,
   },
   (info) => {
-    console.log(`ArchGuard server running on http://localhost:${info.port}`);
+    console.log(`SnoutGuard server running on http://localhost:${info.port}`);
     console.log(`  - API:      http://localhost:${info.port}/api`);
     console.log(`  - Health:   http://localhost:${info.port}/api/health`);
     console.log(`  - Events:   http://localhost:${info.port}/api/events`);

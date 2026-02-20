@@ -6,7 +6,7 @@
 
 import type { Context, Next } from 'hono';
 import { eq } from 'drizzle-orm';
-import { schema, type DbClient } from '@archguard/core';
+import { schema, type DbClient } from '@snoutguard/core';
 import type { AuthUser } from '../auth/rbac.js';
 
 // ─── Types ────────────────────────────────────────────────────────

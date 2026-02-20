@@ -17,9 +17,9 @@ import {
   estimateTokens,
   getLogger,
   type ArchDecision,
-  type ArchGuardConfig,
+  type SnoutGuardConfig,
   type ParsedFile,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import type Anthropic from '@anthropic-ai/sdk';
 import { formatDirectoryTree, type DirectoryNode } from './scanner.js';
 import type { DependencyGraph } from './dependency-mapper.js';
@@ -195,7 +195,7 @@ Decorators found: @Controller, @Injectable, @InjectRepository
  */
 export async function extractDecisions(
   client: Anthropic,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   files: ParsedFile[],
   directoryTree: DirectoryNode,
   dependencyGraph?: DependencyGraph,

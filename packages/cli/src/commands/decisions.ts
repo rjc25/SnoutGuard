@@ -1,5 +1,5 @@
 /**
- * `archguard decisions` subcommand.
+ * `snoutguard decisions` subcommand.
  * Manage architectural decisions: list, add, confirm, deprecate, remove, export.
  */
 
@@ -19,7 +19,7 @@ import {
   type ArchDecision,
   type ArchCategory,
   type DecisionStatus,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Prompt the user for a line of input */
 function prompt(question: string): Promise<string> {
@@ -85,7 +85,7 @@ export function registerDecisionsCommand(program: Command): void {
 
         try {
           const db = initializeDatabase();
-          const { schema } = await import('@archguard/core');
+          const { schema } = await import('@snoutguard/core');
           const rows = await db.select().from(schema.decisions);
 
           let filtered = rows;
@@ -106,7 +106,7 @@ export function registerDecisionsCommand(program: Command): void {
           if (filtered.length === 0) {
             console.log(chalk.yellow('\n  No decisions found.'));
             console.log(
-              chalk.gray('  Run `archguard analyze` to detect decisions, or `archguard decisions add` to add one manually.\n')
+              chalk.gray('  Run `snoutguard analyze` to detect decisions, or `snoutguard decisions add` to add one manually.\n')
             );
             return;
           }
@@ -187,7 +187,7 @@ export function registerDecisionsCommand(program: Command): void {
 
       try {
         const db = initializeDatabase();
-        const { schema } = await import('@archguard/core');
+        const { schema } = await import('@snoutguard/core');
         const id = generateId();
         const timestamp = now();
 
@@ -225,8 +225,8 @@ export function registerDecisionsCommand(program: Command): void {
 
       try {
         const db = initializeDatabase();
-        const { schema } = await import('@archguard/core');
-        // eq is imported from @archguard/core at the top of this file
+        const { schema } = await import('@snoutguard/core');
+        // eq is imported from @snoutguard/core at the top of this file
 
         const rows = await db
           .select()
@@ -272,8 +272,8 @@ export function registerDecisionsCommand(program: Command): void {
 
       try {
         const db = initializeDatabase();
-        const { schema } = await import('@archguard/core');
-        // eq is imported from @archguard/core at the top of this file
+        const { schema } = await import('@snoutguard/core');
+        // eq is imported from @snoutguard/core at the top of this file
 
         const rows = await db
           .select()
@@ -318,8 +318,8 @@ export function registerDecisionsCommand(program: Command): void {
 
       try {
         const db = initializeDatabase();
-        const { schema } = await import('@archguard/core');
-        // eq is imported from @archguard/core at the top of this file
+        const { schema } = await import('@snoutguard/core');
+        // eq is imported from @snoutguard/core at the top of this file
 
         const rows = await db
           .select()
@@ -371,7 +371,7 @@ export function registerDecisionsCommand(program: Command): void {
 
         try {
           const db = initializeDatabase();
-          const { schema } = await import('@archguard/core');
+          const { schema } = await import('@snoutguard/core');
 
           const rows = await db.select().from(schema.decisions);
           const allEvidence = await db.select().from(schema.evidence);

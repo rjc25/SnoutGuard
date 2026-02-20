@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "archguard.fullname" . }}
+  name: {{ include "snoutguard.fullname" . }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -31,7 +31,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "archguard.fullname" $ }}-{{ .service }}
+                name: {{ include "snoutguard.fullname" $ }}-{{ .service }}
                 port:
                   number: {{ if eq .service "server" }}{{ $.Values.server.port }}{{ else }}{{ $.Values.dashboard.port }}{{ end }}
           {{- end }}

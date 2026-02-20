@@ -2,8 +2,8 @@
  * MCP Resources for detected patterns and dependency information.
  *
  * Exposes:
- *   archguard://patterns               - Detected patterns summary
- *   archguard://dependencies/{module}   - Dependency info for a module
+ *   snoutguard://patterns               - Detected patterns summary
+ *   snoutguard://dependencies/{module}   - Dependency info for a module
  */
 
 import type {
@@ -12,11 +12,11 @@ import type {
   DbClient,
   DependencyNode,
   Evidence,
-} from '@archguard/core';
-import { schema, parseJsonSafe } from '@archguard/core';
+} from '@snoutguard/core';
+import { schema, parseJsonSafe } from '@snoutguard/core';
 
 /**
- * Get the resource content for archguard://patterns
+ * Get the resource content for snoutguard://patterns
  * Summarizes detected architectural patterns from the decisions table.
  */
 export async function getPatternsResource(db: DbClient): Promise<string> {
@@ -25,7 +25,7 @@ export async function getPatternsResource(db: DbClient): Promise<string> {
 
   if (allDecisions.length === 0) {
     return JSON.stringify({
-      message: 'No patterns detected yet. Run `archguard analyze` to scan the codebase.',
+      message: 'No patterns detected yet. Run `snoutguard analyze` to scan the codebase.',
       patterns: [],
     }, null, 2);
   }
@@ -95,7 +95,7 @@ export async function getPatternsResource(db: DbClient): Promise<string> {
 }
 
 /**
- * Get the resource content for archguard://dependencies/{module}
+ * Get the resource content for snoutguard://dependencies/{module}
  * Returns dependency information for a specific module/file.
  */
 export async function getDependenciesResource(
@@ -106,7 +106,7 @@ export async function getDependenciesResource(
 
   if (allDeps.length === 0) {
     return JSON.stringify({
-      message: 'No dependency data available. Run `archguard analyze` to map dependencies.',
+      message: 'No dependency data available. Run `snoutguard analyze` to map dependencies.',
       module,
       dependencies: null,
     }, null, 2);

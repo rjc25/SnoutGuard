@@ -1,5 +1,5 @@
 /**
- * Custom tapir spinner for ArchGuard CLI.
+ * Custom tapir spinner for SnoutGuard CLI.
  *
  * Features a cute running tapir ASCII animation in the terminal,
  * inspired by the Claude Code loading experience.

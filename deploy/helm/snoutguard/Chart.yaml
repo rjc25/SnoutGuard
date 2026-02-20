@@ -1,6 +1,6 @@
 apiVersion: v2
-name: archguard
-description: ArchGuard - Architectural Guardrails & Engineering Intelligence Platform
+name: snoutguard
+description: SnoutGuard - Architectural Guardrails & Engineering Intelligence Platform
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
@@ -9,7 +9,7 @@ keywords:
   - code-review
   - engineering-intelligence
   - developer-tools
-home: https://github.com/archguard/archguard
+home: https://github.com/snoutguard/snoutguard
 dependencies:
   - name: postgresql
     version: "15.x.x"

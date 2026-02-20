@@ -1,5 +1,5 @@
 /**
- * Slack Block Kit message builders for ArchGuard.
+ * Slack Block Kit message builders for SnoutGuard.
  * Constructs rich formatted messages using Slack's Block Kit format
  * with sections, action buttons, and color-coded severity indicators.
  * Each builder function returns an array of blocks and optional attachments.
@@ -15,7 +15,7 @@ import type {
   WorkSummary,
   Blocker,
   ArchDecision,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -100,7 +100,7 @@ export function buildViolationAlertBlocks(
       type: 'header',
       text: {
         type: 'plain_text',
-        text: `${statusIcon} ArchGuard Review: ${statusText}`,
+        text: `${statusIcon} SnoutGuard Review: ${statusText}`,
         emoji: true,
       },
     },
@@ -177,7 +177,7 @@ export function buildViolationAlertBlocks(
   });
 
   return {
-    text: `ArchGuard Review: ${statusText} - ${reviewResult.totalViolations} violation(s)`,
+    text: `SnoutGuard Review: ${statusText} - ${reviewResult.totalViolations} violation(s)`,
     blocks,
     attachments: [{ color, blocks: [] }],
   };
@@ -553,7 +553,7 @@ export function buildStatusBlocks(
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':bar_chart: ArchGuard Status',
+        text: ':bar_chart: SnoutGuard Status',
         emoji: true,
       },
     },
@@ -571,7 +571,7 @@ export function buildStatusBlocks(
   ];
 
   return {
-    text: `ArchGuard Status: Health ${healthScore}/100`,
+    text: `SnoutGuard Status: Health ${healthScore}/100`,
     blocks,
     attachments: [{ color: healthColor, blocks: [] }],
   };

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "archguard.fullname" . }}-dashboard
+  name: {{ include "snoutguard.fullname" . }}-dashboard
   labels:
     app.kubernetes.io/component: dashboard
 spec:

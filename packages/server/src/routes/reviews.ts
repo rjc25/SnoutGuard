@@ -1,12 +1,12 @@
 /**
- * Review routes for the ArchGuard server.
+ * Review routes for the SnoutGuard server.
  * Provides endpoints for viewing review history, details,
  * and triggering new code reviews.
  */
 
 import { Hono } from 'hono';
 import { eq, desc } from 'drizzle-orm';
-import { schema, type DbClient } from '@archguard/core';
+import { schema, type DbClient } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 import { enqueueReview, getJobStatus, QUEUE_NAMES } from '../jobs/queue.js';

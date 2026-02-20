@@ -2,9 +2,9 @@
  * MCP Resources for architectural decisions and constraints.
  *
  * Exposes:
- *   archguard://decisions       - Full list of all architectural decisions
- *   archguard://decisions/{id}  - Individual decision by ID
- *   archguard://constraints     - All constraints across all decisions
+ *   snoutguard://decisions       - Full list of all architectural decisions
+ *   snoutguard://decisions/{id}  - Individual decision by ID
+ *   snoutguard://constraints     - All constraints across all decisions
  */
 
 import type {
@@ -12,8 +12,8 @@ import type {
   ArchDecision,
   DbClient,
   Evidence,
-} from '@archguard/core';
-import { schema, parseJsonSafe } from '@archguard/core';
+} from '@snoutguard/core';
+import { schema, parseJsonSafe } from '@snoutguard/core';
 
 /**
  * Load all decisions from the database and return them as ArchDecision objects.
@@ -91,14 +91,14 @@ export async function loadAllConstraints(
 }
 
 /**
- * Get the resource content for archguard://decisions
+ * Get the resource content for snoutguard://decisions
  */
 export async function getDecisionsResource(db: DbClient): Promise<string> {
   const decisions = await loadAllDecisions(db);
 
   if (decisions.length === 0) {
     return JSON.stringify({
-      message: 'No architectural decisions found. Run `archguard analyze` to detect decisions.',
+      message: 'No architectural decisions found. Run `snoutguard analyze` to detect decisions.',
       decisions: [],
     }, null, 2);
   }
@@ -121,7 +121,7 @@ export async function getDecisionsResource(db: DbClient): Promise<string> {
 }
 
 /**
- * Get the resource content for archguard://decisions/{id}
+ * Get the resource content for snoutguard://decisions/{id}
  */
 export async function getDecisionByIdResource(
   db: DbClient,
@@ -139,14 +139,14 @@ export async function getDecisionByIdResource(
 }
 
 /**
- * Get the resource content for archguard://constraints
+ * Get the resource content for snoutguard://constraints
  */
 export async function getConstraintsResource(db: DbClient): Promise<string> {
   const constraints = await loadAllConstraints(db);
 
   if (constraints.length === 0) {
     return JSON.stringify({
-      message: 'No architectural constraints found. Run `archguard analyze` to detect decisions with constraints.',
+      message: 'No architectural constraints found. Run `snoutguard analyze` to detect decisions with constraints.',
       constraints: [],
     }, null, 2);
   }

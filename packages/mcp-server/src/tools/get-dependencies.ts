@@ -7,8 +7,8 @@
 import type {
   DbClient,
   DependencyNode,
-} from '@archguard/core';
-import { schema } from '@archguard/core';
+} from '@snoutguard/core';
+import { schema } from '@snoutguard/core';
 
 /** Input schema for get_dependency_graph tool */
 export interface GetDependenciesInput {

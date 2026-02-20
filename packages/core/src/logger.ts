@@ -1,7 +1,7 @@
 /**
- * Structured logger for ArchGuard.
+ * Structured logger for SnoutGuard.
  *
- * Writes debug logs to `.archguard/logs/` automatically so users can
+ * Writes debug logs to `.snoutguard/logs/` automatically so users can
  * share log files when filing issues.  Optionally echoes verbose output
  * to the console when `--verbose` is active.
  */
@@ -22,7 +22,7 @@ export interface LogEntry {
 }
 
 export interface LoggerOptions {
-  /** Project directory — logs go to `<projectDir>/.archguard/logs/` */
+  /** Project directory — logs go to `<projectDir>/.snoutguard/logs/` */
   projectDir: string;
   /** If true, also print verbose output to the console */
   verbose?: boolean;
@@ -53,7 +53,7 @@ export class Logger {
     this.onLog = opts.onLog;
 
     // Ensure log directory exists
-    const logDir = path.join(opts.projectDir, '.archguard', 'logs');
+    const logDir = path.join(opts.projectDir, '.snoutguard', 'logs');
     fs.mkdirSync(logDir, { recursive: true });
 
     const timestamp = new Date()

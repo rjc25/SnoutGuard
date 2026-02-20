@@ -1,12 +1,12 @@
 /**
- * GitHub Check Run integration for ArchGuard.
+ * GitHub Check Run integration for SnoutGuard.
  * Creates check runs on commits with pass/fail status based on
  * violation severity thresholds. Includes a summary of all violations
  * in the check output with annotations mapped to specific files and lines.
  */
 
 import type { Octokit } from '@octokit/rest';
-import type { Violation, ViolationSeverity } from '@archguard/core';
+import type { Violation, ViolationSeverity } from '@snoutguard/core';
 import {
   createCheckRun,
   type RepoRef,
@@ -17,7 +17,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────
 
-/** Context for creating an ArchGuard check run */
+/** Context for creating an SnoutGuard check run */
 export interface CheckRunContext {
   octokit: Octokit;
   repo: RepoRef;
@@ -40,8 +40,8 @@ export interface CheckRunResult {
 
 // ─── Constants ────────────────────────────────────────────────────
 
-/** Name used for the ArchGuard check run */
-const CHECK_RUN_NAME = 'ArchGuard Architectural Review';
+/** Name used for the SnoutGuard check run */
+const CHECK_RUN_NAME = 'SnoutGuard Architectural Review';
 
 /** Maximum length for the check run text field */
 const MAX_TEXT_LENGTH = 65535;
@@ -49,7 +49,7 @@ const MAX_TEXT_LENGTH = 65535;
 // ─── Main Function ────────────────────────────────────────────────
 
 /**
- * Create a GitHub Check Run for the ArchGuard architectural review.
+ * Create a GitHub Check Run for the SnoutGuard architectural review.
  *
  * The check run includes:
  * - A pass/fail conclusion based on the severity threshold
@@ -60,7 +60,7 @@ const MAX_TEXT_LENGTH = 65535;
  * @param ctx - Check run context with violations and threshold
  * @returns The ID of the created check run
  */
-export async function createArchGuardCheckRun(
+export async function createSnoutGuardCheckRun(
   ctx: CheckRunContext
 ): Promise<number> {
   const { octokit, repo, headSha, violations, severityThreshold } = ctx;
@@ -99,7 +99,7 @@ export async function createArchGuardCheckRun(
 
 /**
  * Create a check run that indicates the review is in progress.
- * Useful to show the user that ArchGuard is analyzing the code.
+ * Useful to show the user that SnoutGuard is analyzing the code.
  */
 export async function createInProgressCheckRun(
   octokit: Octokit,
@@ -110,7 +110,7 @@ export async function createInProgressCheckRun(
     name: CHECK_RUN_NAME,
     headSha,
     status: 'in_progress',
-    title: 'ArchGuard is reviewing...',
+    title: 'SnoutGuard is reviewing...',
     summary: 'Architectural review is in progress. Results will be posted shortly.',
   };
 
@@ -134,7 +134,7 @@ function buildCheckSummary(
     : 'Architectural violations were found that require attention.';
 
   const lines: string[] = [
-    `### ArchGuard Architectural Review`,
+    `### SnoutGuard Architectural Review`,
     '',
     statusLine,
     '',

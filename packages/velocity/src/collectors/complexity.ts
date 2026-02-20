@@ -5,7 +5,7 @@
  * refactoring ratios (complexity reduction vs addition).
  */
 
-import type { FileDiff } from '@archguard/core';
+import type { FileDiff } from '@snoutguard/core';
 import type { FunctionComplexity, FileComplexity, ComplexityDelta } from '../types.js';
 
 // ─── Decision Point Patterns ────────────────────────────────────────

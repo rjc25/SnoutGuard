@@ -5,7 +5,7 @@
  */
 
 import type { Context, Next } from 'hono';
-import type { DbClient } from '@archguard/core';
+import type { DbClient } from '@snoutguard/core';
 import {
   extractSessionToken,
   validateSession,
@@ -32,7 +32,7 @@ export function authMiddleware(
     const path = c.req.path;
 
     // In local/CLI mode, auth can be disabled entirely
-    if (process.env.ARCHGUARD_DISABLE_AUTH === 'true') {
+    if (process.env.SNOUTGUARD_DISABLE_AUTH === 'true') {
       await next();
       return;
     }

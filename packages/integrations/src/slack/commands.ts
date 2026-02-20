@@ -1,6 +1,6 @@
 /**
- * Slack slash commands for ArchGuard.
- * Implements the /archguard slash command with subcommands for
+ * Slack slash commands for SnoutGuard.
+ * Implements the /snoutguard slash command with subcommands for
  * checking architectural health, listing decisions, triggering reviews,
  * generating summaries, and listing blockers.
  */
@@ -16,7 +16,7 @@ import type {
   WorkSummary,
   Blocker,
   ViolationSeverity,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   buildStatusBlocks,
   buildDecisionListBlocks,
@@ -69,20 +69,20 @@ interface ParsedCommand {
 // ─── Command Registration ─────────────────────────────────────────
 
 /**
- * Create the /archguard slash command handler.
+ * Create the /snoutguard slash command handler.
  *
  * Subcommands:
- * - `/archguard status` - Show architectural health and velocity
- * - `/archguard decisions` - List top architectural decisions
- * - `/archguard review <pr-url>` - Trigger a review for a PR
- * - `/archguard summary <dev-name> <period>` - Generate a work summary
- * - `/archguard blockers` - List active blockers
- * - `/archguard help` - Show help text
+ * - `/snoutguard status` - Show architectural health and velocity
+ * - `/snoutguard decisions` - List top architectural decisions
+ * - `/snoutguard review <pr-url>` - Trigger a review for a PR
+ * - `/snoutguard summary <dev-name> <period>` - Generate a work summary
+ * - `/snoutguard blockers` - List active blockers
+ * - `/snoutguard help` - Show help text
  *
  * @param dataProvider - Functions to fetch data for each subcommand
  * @returns Slack command handler function
  */
-export function createArchGuardCommandHandler(
+export function createSnoutGuardCommandHandler(
   dataProvider: SlackCommandDataProvider
 ): (args: SlackCommandMiddlewareArgs & AllMiddlewareArgs) => Promise<void> {
   return async ({ command, ack, respond }) => {
@@ -121,13 +121,13 @@ export function createArchGuardCommandHandler(
         default:
           await respond({
             response_type: 'ephemeral',
-            text: `Unknown subcommand: \`${parsed.subcommand}\`. Use \`/archguard help\` to see available commands.`,
+            text: `Unknown subcommand: \`${parsed.subcommand}\`. Use \`/snoutguard help\` to see available commands.`,
           });
           break;
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(`[ArchGuard Slack Command] Error handling /${command.command} ${command.text}: ${message}`);
+      console.error(`[SnoutGuard Slack Command] Error handling /${command.command} ${command.text}: ${message}`);
 
       await respond({
         response_type: 'ephemeral',
@@ -140,7 +140,7 @@ export function createArchGuardCommandHandler(
 // ─── Subcommand Handlers ──────────────────────────────────────────
 
 /**
- * Handle /archguard status - Show architectural health and velocity.
+ * Handle /snoutguard status - Show architectural health and velocity.
  */
 async function handleStatusCommand(
   dataProvider: SlackCommandDataProvider,
@@ -185,7 +185,7 @@ async function handleStatusCommand(
 }
 
 /**
- * Handle /archguard decisions - List top architectural decisions.
+ * Handle /snoutguard decisions - List top architectural decisions.
  */
 async function handleDecisionsCommand(
   dataProvider: SlackCommandDataProvider,
@@ -206,7 +206,7 @@ async function handleDecisionsCommand(
 }
 
 /**
- * Handle /archguard review <pr-url> - Trigger a review for a PR.
+ * Handle /snoutguard review <pr-url> - Trigger a review for a PR.
  */
 async function handleReviewCommand(
   dataProvider: SlackCommandDataProvider,
@@ -219,7 +219,7 @@ async function handleReviewCommand(
   if (!prUrl) {
     await respond({
       response_type: 'ephemeral',
-      text: ':warning: Please provide a PR URL. Usage: `/archguard review <pr-url>`',
+      text: ':warning: Please provide a PR URL. Usage: `/snoutguard review <pr-url>`',
     });
     return;
   }
@@ -255,7 +255,7 @@ async function handleReviewCommand(
 }
 
 /**
- * Handle /archguard summary <dev-name> <period> - Generate a work summary.
+ * Handle /snoutguard summary <dev-name> <period> - Generate a work summary.
  */
 async function handleSummaryCommand(
   dataProvider: SlackCommandDataProvider,
@@ -269,7 +269,7 @@ async function handleSummaryCommand(
   if (!developerName) {
     await respond({
       response_type: 'ephemeral',
-      text: ':warning: Please provide a developer name. Usage: `/archguard summary <dev-name> <period>`\n' +
+      text: ':warning: Please provide a developer name. Usage: `/snoutguard summary <dev-name> <period>`\n' +
         'Period can be: `daily`, `weekly`, `sprint`, `monthly`, or a date range like `2024-01-01 2024-01-15`',
     });
     return;
@@ -296,7 +296,7 @@ async function handleSummaryCommand(
 }
 
 /**
- * Handle /archguard blockers - List active blockers.
+ * Handle /snoutguard blockers - List active blockers.
  */
 async function handleBlockersCommand(
   dataProvider: SlackCommandDataProvider,
@@ -329,18 +329,18 @@ async function handleBlockersCommand(
 }
 
 /**
- * Handle /archguard help - Show help text.
+ * Handle /snoutguard help - Show help text.
  */
 async function handleHelpCommand(respond: RespondFn): Promise<void> {
   await respond({
     response_type: 'ephemeral',
-    text: 'ArchGuard Slash Commands',
+    text: 'SnoutGuard Slash Commands',
     blocks: [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: ':classical_building: ArchGuard Commands',
+          text: ':classical_building: SnoutGuard Commands',
           emoji: true,
         },
       },
@@ -351,12 +351,12 @@ async function handleHelpCommand(respond: RespondFn): Promise<void> {
           text: [
             '*Available commands:*',
             '',
-            '`/archguard status [repo]` - Show architectural health and velocity metrics',
-            '`/archguard decisions [limit]` - List top architectural decisions',
-            '`/archguard review <pr-url>` - Trigger an architectural review for a PR',
-            '`/archguard summary <dev-name> <period>` - Generate a work summary',
-            '`/archguard blockers [team]` - List active blockers',
-            '`/archguard help` - Show this help message',
+            '`/snoutguard status [repo]` - Show architectural health and velocity metrics',
+            '`/snoutguard decisions [limit]` - List top architectural decisions',
+            '`/snoutguard review <pr-url>` - Trigger an architectural review for a PR',
+            '`/snoutguard summary <dev-name> <period>` - Generate a work summary',
+            '`/snoutguard blockers [team]` - List active blockers',
+            '`/snoutguard help` - Show this help message',
             '',
             '*Period formats:*',
             '`daily`, `weekly`, `sprint`, `monthly`, or date range like `2024-01-01 2024-01-15`',

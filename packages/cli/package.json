@@ -1,11 +1,11 @@
 {
-  "name": "@archguard/cli",
+  "name": "@snoutguard/cli",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "CLI entry point for ArchGuard - architectural guardrails & engineering intelligence",
+  "description": "CLI entry point for SnoutGuard - architectural guardrails & engineering intelligence",
   "bin": {
-    "archguard": "./dist/index.js"
+    "snoutguard": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -21,14 +21,14 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
-    "@archguard/analyzer": "workspace:*",
-    "@archguard/context-sync": "workspace:*",
-    "@archguard/mcp-server": "workspace:*",
-    "@archguard/server": "workspace:*",
-    "@archguard/reviewer": "workspace:*",
-    "@archguard/velocity": "workspace:*",
-    "@archguard/work-summary": "workspace:*",
+    "@snoutguard/core": "workspace:*",
+    "@snoutguard/analyzer": "workspace:*",
+    "@snoutguard/context-sync": "workspace:*",
+    "@snoutguard/mcp-server": "workspace:*",
+    "@snoutguard/server": "workspace:*",
+    "@snoutguard/reviewer": "workspace:*",
+    "@snoutguard/velocity": "workspace:*",
+    "@snoutguard/work-summary": "workspace:*",
     "commander": "^12.1.0",
     "chalk": "^5.3.0",
     "drizzle-orm": "^0.38.0",

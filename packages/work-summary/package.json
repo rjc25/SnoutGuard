@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/work-summary",
+  "name": "@snoutguard/work-summary",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
+    "@snoutguard/core": "workspace:*",
     "cron": "^3.2.0"
   },
   "devDependencies": {

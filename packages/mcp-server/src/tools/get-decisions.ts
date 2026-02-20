@@ -10,8 +10,8 @@ import type {
   ArchDecision,
   Evidence,
   DbClient,
-} from '@archguard/core';
-import { schema } from '@archguard/core';
+} from '@snoutguard/core';
+import { schema } from '@snoutguard/core';
 
 /** Input schema for get_architectural_decisions tool */
 export interface GetDecisionsInput {

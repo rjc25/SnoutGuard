@@ -4,7 +4,7 @@
  * directory conventions, and import/export patterns.
  */
 
-import type { ParsedFile, DetectedPattern, Evidence } from '@archguard/core';
+import type { ParsedFile, DetectedPattern, Evidence } from '@snoutguard/core';
 import type { DirectoryNode } from './scanner.js';
 
 /** Detect architectural patterns using heuristics */

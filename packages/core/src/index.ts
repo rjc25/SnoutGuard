@@ -1,6 +1,6 @@
 /**
- * @archguard/core - Shared types, utilities, database, LLM client, and git helpers.
- * This is the foundation package that all other ArchGuard packages depend on.
+ * @snoutguard/core - Shared types, utilities, database, LLM client, and git helpers.
+ * This is the foundation package that all other SnoutGuard packages depend on.
  */
 
 // Types

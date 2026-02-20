@@ -3,7 +3,7 @@
  * Generates blocker alerts in different formats: plain text, Slack blocks, and JSON.
  */
 
-import type { Blocker, BlockerType } from '@archguard/core';
+import type { Blocker, BlockerType } from '@snoutguard/core';
 import type { AlertFormat, SlackBlock } from '../types.js';
 
 // ─── Severity Indicators ────────────────────────────────────────────

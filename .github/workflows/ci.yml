@@ -29,9 +29,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: archguard_test
-          POSTGRES_USER: archguard
-          POSTGRES_PASSWORD: archguard
+          POSTGRES_DB: snoutguard_test
+          POSTGRES_USER: snoutguard
+          POSTGRES_PASSWORD: snoutguard
         ports:
           - 5432:5432
         options: >-
@@ -64,7 +64,7 @@ jobs:
       - run: pnpm build
       - run: pnpm test
         env:
-          DATABASE_URL: postgresql://archguard:archguard@localhost:5432/archguard_test
+          DATABASE_URL: postgresql://snoutguard:snoutguard@localhost:5432/snoutguard_test
           REDIS_URL: redis://localhost:6379
 
   build:
@@ -97,6 +97,6 @@ jobs:
           context: .
           push: false
           target: server
-          tags: archguard/server:latest
+          tags: snoutguard/server:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max

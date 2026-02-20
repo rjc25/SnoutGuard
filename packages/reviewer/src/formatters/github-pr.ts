@@ -4,7 +4,7 @@
  * Also formats output for the GitHub Check Run API.
  */
 
-import type { ReviewResult, Violation, ViolationSeverity } from '@archguard/core';
+import type { ReviewResult, Violation, ViolationSeverity } from '@snoutguard/core';
 import {
   getSeverityIcon,
   getSeverityLabel,
@@ -92,7 +92,7 @@ function buildSummaryComment(result: ReviewResult): string {
   const lines: string[] = [];
 
   // Header
-  lines.push('## ArchGuard Architectural Review');
+  lines.push('## SnoutGuard Architectural Review');
   lines.push('');
 
   // Status badge

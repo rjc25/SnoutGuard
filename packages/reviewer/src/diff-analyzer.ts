@@ -1,6 +1,6 @@
 /**
  * Parse and analyze git diffs for architectural review.
- * Uses getDiff from @archguard/core to retrieve FileDiff[] objects,
+ * Uses getDiff from @snoutguard/core to retrieve FileDiff[] objects,
  * then categorizes and enriches them with context for downstream
  * rule matching and LLM review.
  */
@@ -10,7 +10,7 @@ import {
   getDiff,
   type FileDiff,
   type DiffHunk,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 // ─── Types ────────────────────────────────────────────────────────
 

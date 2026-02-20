@@ -1,12 +1,12 @@
 /**
- * Slack Bolt app setup for ArchGuard.
+ * Slack Bolt app setup for SnoutGuard.
  * Creates and configures a Slack Bolt application with slash commands
  * and event handlers for architectural review notifications.
  */
 
 import { App, type AppOptions } from '@slack/bolt';
 import {
-  createArchGuardCommandHandler,
+  createSnoutGuardCommandHandler,
   type SlackCommandDataProvider,
 } from './commands.js';
 
@@ -64,10 +64,10 @@ export interface AppHomeEvent {
 // ─── App Creation ─────────────────────────────────────────────────
 
 /**
- * Create and configure a Slack Bolt app for ArchGuard.
+ * Create and configure a Slack Bolt app for SnoutGuard.
  *
  * The app includes:
- * - `/archguard` slash command with subcommands (status, decisions, review, summary, blockers)
+ * - `/snoutguard` slash command with subcommands (status, decisions, review, summary, blockers)
  * - Optional event handlers for mentions, reactions, and app home
  * - Error handling and logging
  *
@@ -91,8 +91,8 @@ export function createSlackApp(
   });
 
   // ── Register Slash Command ──────────────────────────────────────
-  const commandHandler = createArchGuardCommandHandler(dataProvider);
-  app.command('/archguard', commandHandler);
+  const commandHandler = createSnoutGuardCommandHandler(dataProvider);
+  app.command('/snoutguard', commandHandler);
 
   // ── Register Event Handlers ─────────────────────────────────────
 
@@ -109,7 +109,7 @@ export function createSlackApp(
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`[ArchGuard Slack] Error handling mention: ${message}`);
+        console.error(`[SnoutGuard Slack] Error handling mention: ${message}`);
         await say({
           text: `:x: An error occurred while processing your request: ${message}`,
           thread_ts: event.ts,
@@ -120,7 +120,7 @@ export function createSlackApp(
     // Default mention handler
     app.event('app_mention', async ({ event, say }) => {
       await say({
-        text: `Hi <@${event.user}>! Use \`/archguard help\` to see available commands.`,
+        text: `Hi <@${event.user}>! Use \`/snoutguard help\` to see available commands.`,
         thread_ts: event.ts,
       });
     });
@@ -144,7 +144,7 @@ export function createSlackApp(
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`[ArchGuard Slack] Error handling reaction: ${message}`);
+        console.error(`[SnoutGuard Slack] Error handling reaction: ${message}`);
       }
     });
   }
@@ -160,14 +160,14 @@ export function createSlackApp(
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`[ArchGuard Slack] Error handling app home opened: ${message}`);
+        console.error(`[SnoutGuard Slack] Error handling app home opened: ${message}`);
       }
     });
   }
 
   // ── Register Action Handlers ────────────────────────────────────
 
-  // Handle button clicks from ArchGuard messages
+  // Handle button clicks from SnoutGuard messages
   app.action('view_pr', async ({ ack }) => {
     // URL buttons are handled by Slack natively, just acknowledge
     await ack();
@@ -186,7 +186,7 @@ export function createSlackApp(
 
   // ── Global Error Handler ────────────────────────────────────────
   app.error(async (error) => {
-    console.error(`[ArchGuard Slack] Unhandled error: ${error.message}`);
+    console.error(`[SnoutGuard Slack] Unhandled error: ${error.message}`);
   });
 
   return app;
@@ -205,7 +205,7 @@ export async function startSlackApp(
   const listenPort = port ?? 3000;
 
   await app.start(listenPort);
-  console.log(`[ArchGuard Slack] App is running on port ${listenPort}`);
+  console.log(`[SnoutGuard Slack] App is running on port ${listenPort}`);
 }
 
 /**
@@ -215,5 +215,5 @@ export async function startSlackApp(
  */
 export async function stopSlackApp(app: App): Promise<void> {
   await app.stop();
-  console.log('[ArchGuard Slack] App stopped');
+  console.log('[SnoutGuard Slack] App stopped');
 }

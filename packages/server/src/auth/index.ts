@@ -1,12 +1,12 @@
 /**
- * Auth setup for the ArchGuard server.
+ * Auth setup for the SnoutGuard server.
  * Provides session-based authentication with login/signup handlers,
  * session management, and auth middleware for Hono.
  */
 
 import type { Context } from 'hono';
-import { generateId, now, hash, schema, type DbClient } from '@archguard/core';
-import type { Role } from '@archguard/core';
+import { generateId, now, hash, schema, type DbClient } from '@snoutguard/core';
+import type { Role } from '@snoutguard/core';
 import { eq, and } from 'drizzle-orm';
 import type { AuthUser } from './rbac.js';
 
@@ -73,7 +73,7 @@ export function extractSessionToken(c: Context): string | null {
   // Check cookie
   const cookie = c.req.header('Cookie');
   if (cookie) {
-    const match = cookie.match(/archguard_session=([^;]+)/);
+    const match = cookie.match(/snoutguard_session=([^;]+)/);
     if (match) return match[1];
   }
 
@@ -170,7 +170,7 @@ export async function handleLogin(c: Context, db: DbClient): Promise<Response> {
   // Set cookie
   c.header(
     'Set-Cookie',
-    `archguard_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1000}`
+    `snoutguard_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1000}`
   );
 
   return c.json({
@@ -254,7 +254,7 @@ export async function handleSignup(c: Context, db: DbClient): Promise<Response> 
 
   c.header(
     'Set-Cookie',
-    `archguard_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1000}`
+    `snoutguard_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1000}`
   );
 
   return c.json(
@@ -285,7 +285,7 @@ export async function handleLogout(c: Context): Promise<Response> {
 
   c.header(
     'Set-Cookie',
-    'archguard_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0'
+    'snoutguard_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0'
   );
 
   return c.json({ message: 'Logged out successfully' });

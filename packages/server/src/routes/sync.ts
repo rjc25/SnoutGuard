@@ -1,12 +1,12 @@
 /**
- * Context file sync routes for the ArchGuard server.
+ * Context file sync routes for the SnoutGuard server.
  * Provides endpoints for triggering, viewing status, and
  * browsing history of context file synchronization.
  */
 
 import { Hono } from 'hono';
 import { eq, desc } from 'drizzle-orm';
-import { schema, generateId, now, type DbClient } from '@archguard/core';
+import { schema, generateId, now, type DbClient } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 
 /**

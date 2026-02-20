@@ -1,8 +1,8 @@
 /**
- * `archguard server` subcommand.
- * Manage the local ArchGuard API server and database.
+ * `snoutguard server` subcommand.
+ * Manage the local SnoutGuard API server and database.
  *
- * Starts the full Hono API server from @archguard/server with:
+ * Starts the full Hono API server from @snoutguard/server with:
  * - REST API endpoints for decisions, reviews, velocity, summaries
  * - SSE for real-time dashboard events
  * - Optional BullMQ workers (requires Redis, disabled by default locally)
@@ -12,17 +12,17 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as path from 'node:path';
-import { loadConfig, initializeDatabase, findProjectRoot } from '@archguard/core';
+import { loadConfig, initializeDatabase, findProjectRoot } from '@snoutguard/core';
 
 export function registerServerCommand(program: Command): void {
   const server = program
     .command('server')
-    .description('Manage the ArchGuard API server');
+    .description('Manage the SnoutGuard API server');
 
   // ── start ─────────────────────────────────────────────────────────
   server
     .command('start')
-    .description('Start the ArchGuard API server locally')
+    .description('Start the SnoutGuard API server locally')
     .option('--port <number>', 'Port to listen on', '3200')
     .option('--host <host>', 'Host to bind to', '127.0.0.1')
     .option('--path <dir>', 'Project directory', '.')
@@ -41,7 +41,7 @@ export function registerServerCommand(program: Command): void {
         const port = parseInt(options.port, 10) || 3200;
         const host = options.host;
 
-        console.log(chalk.bold('\n  🏗  ArchGuard API Server\n'));
+        console.log(chalk.bold('\n  🏗  SnoutGuard API Server\n'));
         console.log(chalk.gray(`  Host:    ${host}`));
         console.log(chalk.gray(`  Port:    ${port}`));
         console.log(chalk.gray(`  Project: ${projectDir}`));
@@ -55,7 +55,7 @@ export function registerServerCommand(program: Command): void {
           // Set environment variables for the server
           process.env.PORT = String(port);
           process.env.HOST = host;
-          process.env.ARCHGUARD_PROJECT_DIR = projectDir;
+          process.env.SNOUTGUARD_PROJECT_DIR = projectDir;
 
           // Disable workers by default for local usage (requires Redis)
           if (!options.workers) {
@@ -64,7 +64,7 @@ export function registerServerCommand(program: Command): void {
 
           // Disable auth for local development
           if (!options.auth) {
-            process.env.ARCHGUARD_DISABLE_AUTH = 'true';
+            process.env.SNOUTGUARD_DISABLE_AUTH = 'true';
           }
 
           // Ensure database is initialized
@@ -74,7 +74,7 @@ export function registerServerCommand(program: Command): void {
           spinner.text = 'Starting API server...';
 
           // Import and start the full Hono API server
-          await import('@archguard/server');
+          await import('@snoutguard/server');
 
           spinner.succeed(
             `Server running at ${chalk.bold(`http://${host}:${port}`)}`
@@ -146,7 +146,7 @@ export function registerServerCommand(program: Command): void {
 
           console.log(
             chalk.gray(
-              `  Database: ${options.db ?? '~/.archguard/archguard.db'}\n`
+              `  Database: ${options.db ?? '~/.snoutguard/snoutguard.db'}\n`
             )
           );
         } catch (error: unknown) {

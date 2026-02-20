@@ -1,5 +1,5 @@
 /**
- * `archguard sync` command.
+ * `snoutguard sync` command.
  * Generates context files for AI coding assistants by synchronizing
  * architectural decisions into tool-specific formats via LLM compression.
  */
@@ -16,7 +16,7 @@ import {
   type SyncFormat,
   type ArchDecision,
   type ArchCategory,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Valid sync format names */
 const VALID_FORMATS: SyncFormat[] = [
@@ -79,7 +79,7 @@ export function registerSyncCommand(program: Command): void {
         try {
           // Load decisions from database
           const db = initializeDatabase();
-          const { schema } = await import('@archguard/core');
+          const { schema } = await import('@snoutguard/core');
           const rows = await db.select().from(schema.decisions);
 
           const decisions: ArchDecision[] = rows.map((row) => ({
@@ -100,14 +100,14 @@ export function registerSyncCommand(program: Command): void {
           spinner.text = `Loaded ${decisions.length} decisions`;
 
           if (decisions.length === 0) {
-            spinner.warn('No decisions found. Run `archguard analyze` first.');
+            spinner.warn('No decisions found. Run `snoutguard analyze` first.');
             console.log('');
             return;
           }
 
           if (options.dryRun) {
             // Preview without LLM calls or file writes
-            const { SyncEngine } = await import('@archguard/context-sync');
+            const { SyncEngine } = await import('@snoutguard/context-sync');
             const syncConfig = { ...config, sync: { ...config.sync, formats } };
             const engine = new SyncEngine({
               config: syncConfig,
@@ -127,7 +127,7 @@ export function registerSyncCommand(program: Command): void {
             spinner.succeed('Dry run complete (no LLM calls made)');
           } else {
             // Create a SyncEngine with the determined formats
-            const { SyncEngine } = await import('@archguard/context-sync');
+            const { SyncEngine } = await import('@snoutguard/context-sync');
 
             const syncConfig = {
               ...config,

@@ -8,7 +8,7 @@
 import { App } from '@octokit/app';
 import type { Octokit } from '@octokit/rest';
 import { handlePREvent, type PREventContext } from './pr-bot.js';
-import { createArchGuardCheckRun, type CheckRunContext } from './check-run.js';
+import { createSnoutGuardCheckRun, type CheckRunContext } from './check-run.js';
 import {
   createGitHubClient,
   getDiff,
@@ -65,7 +65,7 @@ export interface PushCommit {
 // ─── App Creation ─────────────────────────────────────────────────
 
 /**
- * Create and configure a GitHub App with ArchGuard webhook handlers.
+ * Create and configure a GitHub App with SnoutGuard webhook handlers.
  *
  * The app listens for:
  * - `pull_request.opened` - triggers architectural review on new PRs
@@ -121,7 +121,7 @@ export function createGitHubApp(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(
-        `[ArchGuard] Error handling PR opened for ${repo.owner}/${repo.repo}#${prRef.pullNumber}: ${message}`
+        `[SnoutGuard] Error handling PR opened for ${repo.owner}/${repo.repo}#${prRef.pullNumber}: ${message}`
       );
     }
   });
@@ -158,7 +158,7 @@ export function createGitHubApp(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(
-        `[ArchGuard] Error handling PR synchronize for ${repo.owner}/${repo.repo}#${prRef.pullNumber}: ${message}`
+        `[SnoutGuard] Error handling PR synchronize for ${repo.owner}/${repo.repo}#${prRef.pullNumber}: ${message}`
       );
     }
   });
@@ -213,19 +213,19 @@ export function createGitHubApp(
           violations: [],
           severityThreshold: 'warning',
         };
-        await createArchGuardCheckRun(checkCtx);
+        await createSnoutGuardCheckRun(checkCtx);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(
-        `[ArchGuard] Error handling push to ${repo.owner}/${repo.repo} ref=${ref}: ${message}`
+        `[SnoutGuard] Error handling push to ${repo.owner}/${repo.repo} ref=${ref}: ${message}`
       );
     }
   });
 
   // ── Error Handler ─────────────────────────────────────────────
   app.webhooks.onError((error) => {
-    console.error(`[ArchGuard] Webhook error: ${error.message}`);
+    console.error(`[SnoutGuard] Webhook error: ${error.message}`);
   });
 
   return app;

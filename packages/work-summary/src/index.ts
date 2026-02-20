@@ -1,5 +1,5 @@
 /**
- * @archguard/work-summary - AI-powered work summaries for developers and teams.
+ * @snoutguard/work-summary - AI-powered work summaries for developers and teams.
  * Generates standup updates, 1:1 meeting prep, sprint reviews, and progress reports
  * from git activity data, optionally enhanced with LLM analysis via Claude.
  */

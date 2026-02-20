@@ -9,7 +9,7 @@ dist/
 coverage/
 *.log
 .DS_Store
-.archguard/cache.json
+.snoutguard/cache.json
 
 # Claude Code local settings (contains API keys)
 .claude/settings.local.json

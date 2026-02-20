@@ -244,9 +244,9 @@ export function initializeDatabase(dbPath?: string): DbClient {
 /** Get the default path for the local SQLite database */
 function getDefaultDbPath(): string {
   const dataDir =
-    process.env.ARCHGUARD_DATA_DIR ??
-    path.join(process.env.HOME ?? '/tmp', '.archguard');
-  return path.join(dataDir, 'archguard.db');
+    process.env.SNOUTGUARD_DATA_DIR ??
+    path.join(process.env.HOME ?? '/tmp', '.snoutguard');
+  return path.join(dataDir, 'snoutguard.db');
 }
 
 export { schema };

@@ -1,5 +1,5 @@
 /**
- * Shared utility functions used across the ArchGuard platform.
+ * Shared utility functions used across the SnoutGuard platform.
  */
 
 import * as crypto from 'node:crypto';
@@ -122,13 +122,13 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Get the root directory of the project (walks up to find .archguard.yml or .git).
+ * Get the root directory of the project (walks up to find .snoutguard.yml or .git).
  */
 export function findProjectRoot(startDir: string): string {
   let dir = path.resolve(startDir);
   while (dir !== path.dirname(dir)) {
     if (
-      fs.existsSync(path.join(dir, '.archguard.yml')) ||
+      fs.existsSync(path.join(dir, '.snoutguard.yml')) ||
       fs.existsSync(path.join(dir, '.git'))
     ) {
       return dir;

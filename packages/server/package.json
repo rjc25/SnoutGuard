@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/server",
+  "name": "@snoutguard/server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,13 +18,13 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
-    "@archguard/analyzer": "workspace:*",
-    "@archguard/reviewer": "workspace:*",
-    "@archguard/velocity": "workspace:*",
-    "@archguard/work-summary": "workspace:*",
-    "@archguard/integrations": "workspace:*",
-    "@archguard/context-sync": "workspace:*",
+    "@snoutguard/core": "workspace:*",
+    "@snoutguard/analyzer": "workspace:*",
+    "@snoutguard/reviewer": "workspace:*",
+    "@snoutguard/velocity": "workspace:*",
+    "@snoutguard/work-summary": "workspace:*",
+    "@snoutguard/integrations": "workspace:*",
+    "@snoutguard/context-sync": "workspace:*",
     "drizzle-orm": "^0.38.0",
     "hono": "^4.6.0",
     "@hono/node-server": "^1.13.0",

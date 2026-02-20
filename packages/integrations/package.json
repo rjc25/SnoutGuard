@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/integrations",
+  "name": "@snoutguard/integrations",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,10 +16,10 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
-    "@archguard/reviewer": "workspace:*",
-    "@archguard/velocity": "workspace:*",
-    "@archguard/work-summary": "workspace:*",
+    "@snoutguard/core": "workspace:*",
+    "@snoutguard/reviewer": "workspace:*",
+    "@snoutguard/velocity": "workspace:*",
+    "@snoutguard/work-summary": "workspace:*",
     "@octokit/app": "^15.0.0",
     "@octokit/rest": "^21.0.0",
     "@slack/bolt": "^4.1.0",

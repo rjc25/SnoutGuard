@@ -8,8 +8,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import type { ArchDecision, ParsedFile } from '@archguard/core';
-import { getLogger } from '@archguard/core';
+import type { ArchDecision, ParsedFile } from '@snoutguard/core';
+import { getLogger } from '@snoutguard/core';
 
 /** Cache entry structure */
 export interface AnalysisCache {
@@ -105,8 +105,8 @@ export function identifyChangedFiles(
  * Get the cache file path for a project.
  */
 export function getCacheFilePath(projectDir: string): string {
-  const archguardDir = path.join(projectDir, '.archguard');
-  return path.join(archguardDir, 'cache.json');
+  const snoutguardDir = path.join(projectDir, '.snoutguard');
+  return path.join(snoutguardDir, 'cache.json');
 }
 
 /**
@@ -162,10 +162,10 @@ export function saveCache(
   const cacheFile = getCacheFilePath(projectDir);
   const log = getLogger();
 
-  // Ensure .archguard directory exists
-  const archguardDir = path.dirname(cacheFile);
-  if (!fs.existsSync(archguardDir)) {
-    fs.mkdirSync(archguardDir, { recursive: true });
+  // Ensure .snoutguard directory exists
+  const snoutguardDir = path.dirname(cacheFile);
+  if (!fs.existsSync(snoutguardDir)) {
+    fs.mkdirSync(snoutguardDir, { recursive: true });
   }
 
   const cache: AnalysisCache = {

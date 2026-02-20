@@ -3,12 +3,12 @@
  * Combines weighted effort, architectural impact, review contribution,
  * and refactoring ratio into per-developer and team velocity scores.
  *
- * Uses configurable weights from ArchGuardConfig.velocity.
+ * Uses configurable weights from SnoutGuardConfig.velocity.
  */
 
-import { clamp } from '@archguard/core';
+import { clamp } from '@snoutguard/core';
 import type {
-  ArchGuardConfig,
+  SnoutGuardConfig,
   VelocityScore,
   VelocityPeriod,
   VelocityTrend,
@@ -55,12 +55,12 @@ export interface VelocityInput {
  * Calculate velocity scores for all developers in the period.
  *
  * @param input - All collected metrics and scores
- * @param config - ArchGuard configuration with velocity weights
+ * @param config - SnoutGuard configuration with velocity weights
  * @returns Array of VelocityScore, one per developer
  */
 export function calculateDeveloperVelocityScores(
   input: VelocityInput,
-  config?: ArchGuardConfig
+  config?: SnoutGuardConfig
 ): VelocityScore[] {
   const weights = extractWeights(config);
   const scores: VelocityScore[] = [];
@@ -230,7 +230,7 @@ export function determineTrend(
 /**
  * Extract velocity weights from config, falling back to defaults.
  */
-function extractWeights(config?: ArchGuardConfig): {
+function extractWeights(config?: SnoutGuardConfig): {
   complexityWeight: number;
   archImpactWeight: number;
   reviewWeight: number;

@@ -1,11 +1,11 @@
 /**
- * Settings routes for the ArchGuard server.
+ * Settings routes for the SnoutGuard server.
  * Provides endpoints for reading and updating organization settings.
  */
 
 import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
-import { schema, now, type DbClient } from '@archguard/core';
+import { schema, now, type DbClient } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 

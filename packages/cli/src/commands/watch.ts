@@ -1,5 +1,5 @@
 /**
- * `archguard watch` command.
+ * `snoutguard watch` command.
  * Runs the sync engine in watch mode, automatically regenerating context files
  * when source code or decisions change.
  */
@@ -15,7 +15,7 @@ import {
   type ArchDecision,
   type ArchCategory,
   type SyncFormat,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 export function registerWatchCommand(program: Command): void {
   program
@@ -39,7 +39,7 @@ export function registerWatchCommand(program: Command): void {
         const debounceMs = parseInt(options.debounce, 10) || 1000;
 
         console.log(
-          chalk.bold('\n  ArchGuard Watch Mode\n')
+          chalk.bold('\n  SnoutGuard Watch Mode\n')
         );
         console.log(chalk.gray(`  Watching: ${projectDir}`));
         console.log(chalk.gray(`  Formats:  ${options.format}`));
@@ -49,7 +49,7 @@ export function registerWatchCommand(program: Command): void {
         const spinner = ora('Starting file watcher...').start();
 
         try {
-          const { SyncEngine } = await import('@archguard/context-sync');
+          const { SyncEngine } = await import('@snoutguard/context-sync');
 
           // Determine which formats to use
           const formats: SyncFormat[] =
@@ -59,7 +59,7 @@ export function registerWatchCommand(program: Command): void {
 
           // Load decisions from database
           const db = initializeDatabase();
-          const { schema } = await import('@archguard/core');
+          const { schema } = await import('@snoutguard/core');
           const rows = await db.select().from(schema.decisions);
 
           const decisions: ArchDecision[] = rows.map((row) => ({

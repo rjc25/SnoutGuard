@@ -1,5 +1,5 @@
 /**
- * `archguard review` command.
+ * `snoutguard review` command.
  *
  * Performs architectural review of code changes using Claude (Sonnet by default).
  * Requires an Anthropic API key.
@@ -20,7 +20,7 @@ import {
   LlmAuthError,
   type Violation,
   type ReviewResult,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Format a violation for terminal display */
 function formatViolation(violation: Violation): string {
@@ -55,7 +55,7 @@ function formatViolation(violation: Violation): string {
 /** Format review results for GitHub PR comments */
 function formatGitHub(result: ReviewResult): string {
   const lines: string[] = [
-    '## ArchGuard Architectural Review',
+    '## SnoutGuard Architectural Review',
     '',
     `| Metric | Count |`,
     `|--------|-------|`,
@@ -96,7 +96,7 @@ function formatGitHub(result: ReviewResult): string {
 /** Format review results for Bitbucket PR comments */
 function formatBitbucket(result: ReviewResult): string {
   const lines: string[] = [
-    '## ArchGuard Architectural Review',
+    '## SnoutGuard Architectural Review',
     '',
     `Errors: ${result.errors} | Warnings: ${result.warnings} | Info: ${result.infos}`,
     '',
@@ -163,9 +163,9 @@ export function registerReviewCommand(program: Command): void {
           console.log(
             chalk.gray(
               '  Examples:\n' +
-                '    archguard review --diff main\n' +
-                '    archguard review --commit HEAD~1\n' +
-                '    archguard review --diff HEAD~3 --format github\n'
+                '    snoutguard review --diff main\n' +
+                '    snoutguard review --commit HEAD~1\n' +
+                '    snoutguard review --diff HEAD~3 --format github\n'
             )
           );
           return;
@@ -173,7 +173,7 @@ export function registerReviewCommand(program: Command): void {
 
         const model = getModelForOperation(config, 'review');
         console.log(
-          chalk.bold('\n  ArchGuard Architectural Review')
+          chalk.bold('\n  SnoutGuard Architectural Review')
         );
         console.log(chalk.gray(`  Model: ${model}\n`));
 
@@ -200,7 +200,7 @@ export function registerReviewCommand(program: Command): void {
           spinner.text = `Reviewing ${fileDiffs.length} changed file(s)...`;
 
           // Run the review
-          const { reviewChanges } = await import('@archguard/reviewer');
+          const { reviewChanges } = await import('@snoutguard/reviewer');
           const diffRef = options.commit ?? options.diff!;
           const result = await reviewChanges(projectDir, config, diffRef, {});
 

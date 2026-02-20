@@ -1,4 +1,4 @@
-# Integrating ArchGuard with OpenClaw
+# Integrating SnoutGuard with OpenClaw
 
 **Keep your autonomous AI agents architecturally aligned — automatically.**
 
@@ -14,15 +14,15 @@ So it writes code that works, passes tests, and quietly violates every architect
 
 ```bash
 # 1. Analyze your codebase (finds architectural decisions automatically)
-archguard analyze
+snoutguard analyze
 
 # 2. Generate context files (Opus compresses decisions into dense agent context)
-archguard sync
+snoutguard sync
 
 # 3. Done. Your agents now have architectural awareness.
 ```
 
-That's it. `archguard analyze` uses Claude Opus to scan your codebase and extract architectural decisions — patterns, constraints, layer boundaries, technology choices. `archguard sync` takes those decisions and compresses them into an optimally dense context file (CLAUDE.md, .cursorrules, etc.) that fits within a configurable token budget.
+That's it. `snoutguard analyze` uses Claude Opus to scan your codebase and extract architectural decisions — patterns, constraints, layer boundaries, technology choices. `snoutguard sync` takes those decisions and compresses them into an optimally dense context file (CLAUDE.md, .cursorrules, etc.) that fits within a configurable token budget.
 
 Every agent that touches your code now knows your architecture.
 
@@ -30,7 +30,7 @@ Every agent that touches your code now knows your architecture.
 
 ### Automatic Context for Every Session
 
-OpenClaw reads `CLAUDE.md` from your project root and includes it in every agent session. After running `archguard sync`, your main session and every sub-agent you spawn automatically gets your architectural decisions as context.
+OpenClaw reads `CLAUDE.md` from your project root and includes it in every agent session. After running `snoutguard sync`, your main session and every sub-agent you spawn automatically gets your architectural decisions as context.
 
 No configuration needed. No prompt engineering. Just run sync and your agents are aligned.
 
@@ -39,8 +39,8 @@ No configuration needed. No prompt engineering. Just run sync and your agents ar
 The generated context files include a **Workflow** section that instructs agents to:
 
 1. **Before coding** — call `get_architectural_guidance` (if MCP is configured) or review relevant constraints in the context file
-2. **After changes** — run `archguard review --diff <branch>` to catch violations
-3. **After significant refactors** — re-run `archguard analyze` then `archguard sync` to keep context files current
+2. **After changes** — run `snoutguard review --diff <branch>` to catch violations
+3. **After significant refactors** — re-run `snoutguard analyze` then `snoutguard sync` to keep context files current
 
 This means enforcement is baked into the context file itself — every agent session that loads CLAUDE.md gets the workflow rules automatically. You don't need to remember to tell your agent to check architecture; it's already in its instructions.
 
@@ -52,19 +52,19 @@ This is where it gets powerful. When you spawn sub-agents for parallel work:
 Spawn a sub-agent to refactor the authentication module.
 ```
 
-With native MCP tools configured (see below), that sub-agent has `archguard_get_architectural_guidance` in its own tool palette. It can query the architectural constraints relevant to its specific task — without you needing to paste CLAUDE.md into every task prompt.
+With native MCP tools configured (see below), that sub-agent has `snoutguard_get_architectural_guidance` in its own tool palette. It can query the architectural constraints relevant to its specific task — without you needing to paste CLAUDE.md into every task prompt.
 
-The sub-agent calls `archguard_get_architectural_guidance("refactor the authentication module")` and gets back exactly the decisions that matter: which patterns to follow, which layers to respect, what constraints are non-negotiable. Targeted guidance, not a wall of context.
+The sub-agent calls `snoutguard_get_architectural_guidance("refactor the authentication module")` and gets back exactly the decisions that matter: which patterns to follow, which layers to respect, what constraints are non-negotiable. Targeted guidance, not a wall of context.
 
 **Key config:** Add the MCP tools to `tools.subagents.tools.alsoAllow` (not just `tools.alsoAllow`) to give sub-agents access. Without this, only the main agent gets the tools.
 
-Without ArchGuard, that sub-agent would make reasonable but uninformed decisions. With it, the sub-agent follows your architecture from the first line of code.
+Without SnoutGuard, that sub-agent would make reasonable but uninformed decisions. With it, the sub-agent follows your architecture from the first line of code.
 
 ### Native MCP Tools (Recommended)
 
-The most powerful integration is wiring ArchGuard's MCP server directly into OpenClaw's tool system. This gives your agent native `archguard_get_architectural_guidance` alongside `web_search`, `exec`, and every other built-in tool — no shell commands, no wrapper scripts.
+The most powerful integration is wiring SnoutGuard's MCP server directly into OpenClaw's tool system. This gives your agent native `snoutguard_get_architectural_guidance` alongside `web_search`, `exec`, and every other built-in tool — no shell commands, no wrapper scripts.
 
-**How it works:** An MCP client plugin spawns the ArchGuard MCP server as a child process over stdio, discovers its tools via JSON-RPC, and registers each one as a native OpenClaw agent tool. The agent calls them like any other tool and gets structured results back.
+**How it works:** An MCP client plugin spawns the SnoutGuard MCP server as a child process over stdio, discovers its tools via JSON-RPC, and registers each one as a native OpenClaw agent tool. The agent calls them like any other tool and gets structured results back.
 
 **Step 1: Install the MCP client plugin**
 
@@ -82,11 +82,11 @@ Apply via `gateway config.patch` or edit `~/.openclaw/openclaw.json` directly:
         "enabled": true,
         "config": {
           "servers": {
-            "archguard": {
-              "command": "archguard",
+            "snoutguard": {
+              "command": "snoutguard",
               "args": ["serve", "--transport", "stdio", "--path", "/path/to/your/project"],
               "env": { "ANTHROPIC_API_KEY": "sk-ant-..." },
-              "toolPrefix": "archguard_",
+              "toolPrefix": "snoutguard_",
               "timeoutMs": 60000
             }
           }
@@ -96,18 +96,18 @@ Apply via `gateway config.patch` or edit `~/.openclaw/openclaw.json` directly:
   },
   "tools": {
     "alsoAllow": [
-      "archguard_get_architectural_decisions",
-      "archguard_check_architectural_compliance",
-      "archguard_get_architectural_guidance",
-      "archguard_get_dependency_graph"
+      "snoutguard_get_architectural_decisions",
+      "snoutguard_check_architectural_compliance",
+      "snoutguard_get_architectural_guidance",
+      "snoutguard_get_dependency_graph"
     ],
     "subagents": {
       "tools": {
         "alsoAllow": [
-          "archguard_get_architectural_decisions",
-          "archguard_check_architectural_compliance",
-          "archguard_get_architectural_guidance",
-          "archguard_get_dependency_graph"
+          "snoutguard_get_architectural_decisions",
+          "snoutguard_check_architectural_compliance",
+          "snoutguard_get_architectural_guidance",
+          "snoutguard_get_dependency_graph"
         ]
       }
     }
@@ -115,20 +115,20 @@ Apply via `gateway config.patch` or edit `~/.openclaw/openclaw.json` directly:
 }
 ```
 
-The `tools.subagents.tools.alsoAllow` key is critical — without it, only the main agent gets the MCP tools. With it, every sub-agent you spawn also gets native access. Sub-agents can call `archguard_get_architectural_guidance` before writing code instead of relying on CLAUDE.md being pasted into their task prompt.
+The `tools.subagents.tools.alsoAllow` key is critical — without it, only the main agent gets the MCP tools. With it, every sub-agent you spawn also gets native access. Sub-agents can call `snoutguard_get_architectural_guidance` before writing code instead of relying on CLAUDE.md being pasted into their task prompt.
 
 **Step 3: Restart OpenClaw**
 
-After restart, you'll see `[MCP: archguard]` tools in both the main agent's and sub-agents' tool palettes:
+After restart, you'll see `[MCP: snoutguard]` tools in both the main agent's and sub-agents' tool palettes:
 
 | Native Tool | What It Does |
 |------------|-------------|
-| `archguard_get_architectural_guidance` | Describe a task → get all relevant decisions and constraints |
-| `archguard_get_architectural_decisions` | Search decisions by keyword, category, or file path |
-| `archguard_check_architectural_compliance` | Validate a code snippet against architectural constraints |
-| `archguard_get_dependency_graph` | Query the dependency graph for coupling metrics |
+| `snoutguard_get_architectural_guidance` | Describe a task → get all relevant decisions and constraints |
+| `snoutguard_get_architectural_decisions` | Search decisions by keyword, category, or file path |
+| `snoutguard_check_architectural_compliance` | Validate a code snippet against architectural constraints |
+| `snoutguard_get_dependency_graph` | Query the dependency graph for coupling metrics |
 
-`archguard_get_architectural_guidance` is the killer feature — it takes a plain-English task description and returns only the decisions relevant to that task. The agent calls it before writing code, naturally, because it's right there in the tool palette.
+`snoutguard_get_architectural_guidance` is the killer feature — it takes a plain-English task description and returns only the decisions relevant to that task. The agent calls it before writing code, naturally, because it's right there in the tool palette.
 
 **Multiple projects:** You can configure multiple servers in the plugin config, each pointing to a different project path. Use different `toolPrefix` values to namespace them (e.g. `"frontend_"`, `"backend_"`).
 
@@ -139,7 +139,7 @@ For agents without native MCP integration, the CLI provides the same capabilitie
 **Before coding:**
 ```bash
 # Start MCP server (configure in .claude/settings.json or equivalent)
-archguard serve --transport stdio
+snoutguard serve --transport stdio
 ```
 
 The MCP server exposes four tools:
@@ -154,12 +154,12 @@ The MCP server exposes four tools:
 **After coding:**
 ```bash
 # Review changes against architectural decisions
-archguard review --diff main
+snoutguard review --diff main
 ```
 
 This catches violations before they're merged. The review uses Claude Sonnet to check your diff against every known architectural decision and flags violations with severity levels.
 
-> ArchGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
+> SnoutGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
 
 ### Sprint Reviews
 
@@ -167,21 +167,21 @@ Track what your agents (and humans) are actually building:
 
 ```bash
 # Team sprint review with velocity metrics
-archguard summary --type sprint_review
+snoutguard summary --type sprint_review
 
 # Individual developer standup
-archguard summary --type standup --dev alice
+snoutguard summary --type standup --dev alice
 ```
 
 Sprint reviews include velocity trends, architectural impact analysis, code quality metrics, and a sprint score. Useful for understanding what a week of AI-assisted development actually produced.
 
 ## Setup Guide
 
-### 1. Install ArchGuard
+### 1. Install SnoutGuard
 
 ```bash
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard
+git clone https://github.com/rjc25/SnoutGuard
+cd SnoutGuard
 pnpm install
 pnpm build
 npm link packages/cli
@@ -193,14 +193,14 @@ npm link packages/cli
 cd ~/your-project
 export ANTHROPIC_API_KEY=sk-ant-...
 
-archguard init      # Creates .archguard.yml
-archguard analyze   # Extracts decisions (Opus ~$10-16, Sonnet ~$2-3)
-archguard sync      # Generates CLAUDE.md (Opus ~$0.10-0.50)
+snoutguard init      # Creates .snoutguard.yml
+snoutguard analyze   # Extracts decisions (Opus ~$10-16, Sonnet ~$2-3)
+snoutguard sync      # Generates CLAUDE.md (Opus ~$0.10-0.50)
 ```
 
 ### 3. Configure (Optional)
 
-Edit `.archguard.yml` to customize. See the full [Configuration Reference](../configuration.md) for all options.
+Edit `.snoutguard.yml` to customize. See the full [Configuration Reference](../configuration.md) for all options.
 
 ```yaml
 llm:
@@ -227,8 +227,8 @@ For real-time architectural guidance during agent sessions:
 // .claude/settings.json or equivalent
 {
   "mcpServers": {
-    "archguard": {
-      "command": "archguard",
+    "snoutguard": {
+      "command": "snoutguard",
       "args": ["serve", "--transport", "stdio"]
     }
   }
@@ -250,17 +250,17 @@ The new approach sends your decisions to Opus, which intelligently compresses th
 
 A single Opus sync call costs ~$0.30. That compressed context file then saves tokens across every agent session that loads it — potentially hundreds per day. The ROI is immediate.
 
-Use `archguard sync --no-llm` if you want free, deterministic output.
+Use `snoutguard sync --no-llm` if you want free, deterministic output.
 
 ## Cost Breakdown
 
 | What | Cost | When |
 |------|------|------|
-| `archguard analyze` (Opus) | $10 – $16 | After major changes, weekly |
-| `archguard analyze` (Sonnet) | $2 – $3 | After major changes, weekly |
-| `archguard sync` | $0.10 – $0.50 | After analyze |
-| `archguard review` | $0.01 – $0.10 | Per PR or branch |
-| `archguard summary` | $0.02 – $0.05 | Daily/weekly |
+| `snoutguard analyze` (Opus) | $10 – $16 | After major changes, weekly |
+| `snoutguard analyze` (Sonnet) | $2 – $3 | After major changes, weekly |
+| `snoutguard sync` | $0.10 – $0.50 | After analyze |
+| `snoutguard review` | $0.01 – $0.10 | Per PR or branch |
+| `snoutguard summary` | $0.02 – $0.05 | Daily/weekly |
 | MCP queries | $0.005 – $0.02 | Per agent query |
 
 Typical monthly cost for an active team: **$15-40/month**. That's less than one hour of architectural cleanup after a week of unguided agent coding.
@@ -270,29 +270,29 @@ Typical monthly cost for an active team: **$15-40/month**. That's less than one 
 Paste this into your OpenClaw session to get started:
 
 ```
-Install ArchGuard from source (https://github.com/rjc25/ArchGuard). Clone the repo,
+Install SnoutGuard from source (https://github.com/rjc25/SnoutGuard). Clone the repo,
 install dependencies with pnpm, build all packages, and link the CLI globally. Then in
-my current project: run "archguard init", "archguard analyze", and "archguard sync" to
+my current project: run "snoutguard init", "snoutguard analyze", and "snoutguard sync" to
 generate CLAUDE.md.
 
 CLAUDE CODE SETUP:
-- Create .claude/settings.json with an "archguard" MCP server entry
-  (command: "archguard", args: ["serve", "--transport", "stdio"],
+- Create .claude/settings.json with an "snoutguard" MCP server entry
+  (command: "snoutguard", args: ["serve", "--transport", "stdio"],
   env: { "ANTHROPIC_API_KEY": "<key>" })
 - Create .claude/settings.local.json with the actual API key (gitignore it)
 - Add ".claude/settings.local.json" to .gitignore
 
 OPENCLAW NATIVE MCP SETUP:
 1. Create the MCP client plugin at ~/.openclaw/extensions/mcp-client/ (manifest + index.ts
-   from the ArchGuard OpenClaw integration guide)
-2. Apply a gateway config.patch to enable the mcp-client plugin with an archguard server
-   entry (command: "archguard", args: ["serve", "--transport", "stdio", "--path", "<project>"],
-   toolPrefix: "archguard_", timeoutMs: 60000) and add the 4 archguard_ tools to BOTH
+   from the SnoutGuard OpenClaw integration guide)
+2. Apply a gateway config.patch to enable the mcp-client plugin with an snoutguard server
+   entry (command: "snoutguard", args: ["serve", "--transport", "stdio", "--path", "<project>"],
+   toolPrefix: "snoutguard_", timeoutMs: 60000) and add the 4 snoutguard_ tools to BOTH
    tools.alsoAllow (main agent) AND tools.subagents.tools.alsoAllow (sub-agents)
 3. Restart the gateway
 
-This gives both the main agent AND any spawned sub-agents native access to the ArchGuard
-tools. Sub-agents can call archguard_get_architectural_guidance themselves before writing
+This gives both the main agent AND any spawned sub-agents native access to the SnoutGuard
+tools. Sub-agents can call snoutguard_get_architectural_guidance themselves before writing
 code — no need to paste CLAUDE.md into task prompts.
 
 Show me the decisions found, the generated CLAUDE.md, and confirm the MCP tools are live.
@@ -304,7 +304,7 @@ Your agents will thank you. Your architecture will survive them.
 
 ## MCP Client Plugin Source
 
-The OpenClaw MCP client plugin is a generic bridge between any MCP server and OpenClaw's native tool system. It's not ArchGuard-specific — you can use it with any MCP server.
+The OpenClaw MCP client plugin is a generic bridge between any MCP server and OpenClaw's native tool system. It's not SnoutGuard-specific — you can use it with any MCP server.
 
 ### Plugin Manifest
 
@@ -330,7 +330,7 @@ Save as `~/.openclaw/extensions/mcp-client/openclaw.plugin.json`:
             "args": { "type": "array", "items": { "type": "string" } },
             "env": { "type": "object", "additionalProperties": { "type": "string" } },
             "cwd": { "type": "string" },
-            "toolPrefix": { "type": "string", "description": "Prefix for tool names (e.g. 'archguard_')" },
+            "toolPrefix": { "type": "string", "description": "Prefix for tool names (e.g. 'snoutguard_')" },
             "enabled": { "type": "boolean", "default": true },
             "timeoutMs": { "type": "number", "default": 30000 }
           },
@@ -511,4 +511,4 @@ export default function register(api: any) {
 }
 ```
 
-This plugin is generic — it works with any MCP server, not just ArchGuard. Configure multiple servers in the `servers` object to wire up different MCP tools into your agent.
+This plugin is generic — it works with any MCP server, not just SnoutGuard. Configure multiple servers in the `servers` object to wire up different MCP tools into your agent.

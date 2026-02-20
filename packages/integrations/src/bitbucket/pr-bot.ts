@@ -1,5 +1,5 @@
 /**
- * Bitbucket PR comment integration for ArchGuard.
+ * Bitbucket PR comment integration for SnoutGuard.
  * Posts inline comments on pull requests via the Bitbucket API when
  * architectural violations are found. Uses Bitbucket Code Insights API
  * to create build statuses reflecting review pass/fail.
@@ -9,7 +9,7 @@ import type {
   ReviewResult,
   Violation,
   ViolationSeverity,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   getDiff,
   getPR,
@@ -79,8 +79,8 @@ const DEFAULT_OPTIONS: Required<Omit<BitbucketPRBotOptions, 'reviewFunction'>> =
 
 // ─── Constants ────────────────────────────────────────────────────
 
-const BUILD_STATUS_KEY = 'archguard-review';
-const BUILD_STATUS_NAME = 'ArchGuard Architectural Review';
+const BUILD_STATUS_KEY = 'snoutguard-review';
+const BUILD_STATUS_NAME = 'SnoutGuard Architectural Review';
 
 // ─── Main Handler ─────────────────────────────────────────────────
 
@@ -179,7 +179,7 @@ export async function handleBitbucketPREvent(
         // Continue posting other comments even if one fails
         const message = error instanceof Error ? error.message : String(error);
         console.error(
-          `[ArchGuard Bitbucket Bot] Failed to post inline comment: ${message}`
+          `[SnoutGuard Bitbucket Bot] Failed to post inline comment: ${message}`
         );
       }
     }
@@ -194,7 +194,7 @@ export async function handleBitbucketPREvent(
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.error(
-          `[ArchGuard Bitbucket Bot] Failed to post summary comment: ${message}`
+          `[SnoutGuard Bitbucket Bot] Failed to post summary comment: ${message}`
         );
       }
     }
@@ -220,7 +220,7 @@ export async function handleBitbucketPREvent(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(
-      `[ArchGuard Bitbucket Bot] Error reviewing ${ctx.repoRef.workspace}/${ctx.repoRef.repoSlug}#${ctx.prRef.prId}: ${message}`
+      `[SnoutGuard Bitbucket Bot] Error reviewing ${ctx.repoRef.workspace}/${ctx.repoRef.repoSlug}#${ctx.prRef.prId}: ${message}`
     );
 
     // Update build status to stopped on error
@@ -242,7 +242,7 @@ export async function handleBitbucketPREvent(
     // Post error comment
     try {
       await createComment(ctx.client, ctx.prRef, {
-        content: `## ArchGuard Review Error\n\nAn error occurred while running the architectural review:\n\n\`\`\`\n${message}\n\`\`\`\n\nPlease check the ArchGuard configuration and try again.`,
+        content: `## SnoutGuard Review Error\n\nAn error occurred while running the architectural review:\n\n\`\`\`\n${message}\n\`\`\`\n\nPlease check the SnoutGuard configuration and try again.`,
       });
     } catch {
       // Swallow comment error
@@ -270,7 +270,7 @@ async function setBuildStatus(
     key: BUILD_STATUS_KEY,
     name: BUILD_STATUS_NAME,
     description,
-    url: url || 'https://archguard.dev',
+    url: url || 'https://snoutguard.dev',
   });
 }
 
@@ -282,7 +282,7 @@ async function setBuildStatus(
 function formatViolationComment(violation: Violation): string {
   const icon = getSeverityIcon(violation.severity);
   const parts: string[] = [
-    `${icon} **ArchGuard: ${violation.rule}** [${violation.severity}]`,
+    `${icon} **SnoutGuard: ${violation.rule}** [${violation.severity}]`,
     '',
     violation.message,
   ];
@@ -309,7 +309,7 @@ function buildSummaryComment(
   const statusIcon = passed ? '\u2705' : '\u274C';
 
   const parts: string[] = [
-    `## ${statusIcon} ArchGuard Architectural Review: ${statusText}`,
+    `## ${statusIcon} SnoutGuard Architectural Review: ${statusText}`,
     '',
     `| Severity | Count |`,
     `|----------|-------|`,
@@ -347,7 +347,7 @@ function buildSummaryComment(
   parts.push(
     '',
     '---',
-    '_Review by [ArchGuard](https://archguard.dev) | Architectural code review_'
+    '_Review by [SnoutGuard](https://snoutguard.dev) | Architectural code review_'
   );
 
   return parts.join('\n');

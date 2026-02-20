@@ -13,16 +13,16 @@
 import { z } from 'zod';
 import type {
   ArchDecision,
-  ArchGuardConfig,
+  SnoutGuardConfig,
   Violation,
   ViolationSeverity,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   createLlmClient,
   analyzeWithLlmValidated,
   generateId,
   LlmError,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import type { DiffAnalysis, ChangeContext } from './diff-analyzer.js';
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -154,7 +154,7 @@ Here are examples of well-formed violation objects:
 export async function runLlmReview(
   diffAnalysis: DiffAnalysis,
   decisions: ArchDecision[],
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   options: LlmReviewOptions
 ): Promise<Violation[]> {
   // Nothing to review if there are no changes

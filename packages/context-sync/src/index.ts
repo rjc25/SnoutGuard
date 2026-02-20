@@ -1,5 +1,5 @@
 /**
- * @archguard/context-sync - Generate AI agent context files from architectural decisions.
+ * @snoutguard/context-sync - Generate AI agent context files from architectural decisions.
  *
  * All standard formats (CLAUDE.md, .cursorrules, copilot-instructions.md, etc.) are
  * generated via LLM-powered intelligent compression. Only the 'custom' format uses

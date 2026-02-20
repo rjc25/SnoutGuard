@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/mcp-server",
+  "name": "@snoutguard/mcp-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "archguard-mcp": "./dist/index.js"
+    "snoutguard-mcp": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -20,8 +20,8 @@
     "start": "node --loader ts-node/esm src/index.ts"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
-    "@archguard/analyzer": "workspace:*",
+    "@snoutguard/core": "workspace:*",
+    "@snoutguard/analyzer": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "drizzle-orm": "^0.38.0",
     "express": "^5.0.0",

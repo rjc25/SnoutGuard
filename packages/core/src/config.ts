@@ -1,5 +1,5 @@
 /**
- * YAML configuration loader for .archguard.yml files.
+ * YAML configuration loader for .snoutguard.yml files.
  * Handles loading, validation, and default values.
  */
 
@@ -7,9 +7,9 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import yaml from 'js-yaml';
 import { z } from 'zod';
-import type { ArchGuardConfig } from './types.js';
+import type { SnoutGuardConfig } from './types.js';
 
-const CONFIG_FILENAME = '.archguard.yml';
+const CONFIG_FILENAME = '.snoutguard.yml';
 
 const customRuleSchema = z.object({
   name: z.string(),
@@ -205,16 +205,16 @@ const configSchema = z.object({
   rules: z.array(customRuleSchema).default([]),
 });
 
-/** Default configuration when no .archguard.yml is found */
-export function getDefaultConfig(): ArchGuardConfig {
-  return configSchema.parse({}) as ArchGuardConfig;
+/** Default configuration when no .snoutguard.yml is found */
+export function getDefaultConfig(): SnoutGuardConfig {
+  return configSchema.parse({}) as SnoutGuardConfig;
 }
 
 /**
- * Load and validate an .archguard.yml config file.
+ * Load and validate an .snoutguard.yml config file.
  * Falls back to defaults if the file doesn't exist.
  */
-export function loadConfig(projectDir: string): ArchGuardConfig {
+export function loadConfig(projectDir: string): SnoutGuardConfig {
   const configPath = path.join(projectDir, CONFIG_FILENAME);
 
   if (!fs.existsSync(configPath)) {
@@ -227,11 +227,11 @@ export function loadConfig(projectDir: string): ArchGuardConfig {
   // Convert snake_case YAML keys to camelCase for TS
   const normalized = normalizeKeys(parsed as Record<string, unknown>);
   const result = configSchema.parse(normalized);
-  return result as ArchGuardConfig;
+  return result as SnoutGuardConfig;
 }
 
 /**
- * Write a default .archguard.yml config file to the project directory.
+ * Write a default .snoutguard.yml config file to the project directory.
  */
 export function writeDefaultConfig(projectDir: string): string {
   const configPath = path.join(projectDir, CONFIG_FILENAME);

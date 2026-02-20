@@ -1,5 +1,5 @@
 /**
- * `archguard summary` command.
+ * `snoutguard summary` command.
  *
  * Generates work summaries using Claude (Sonnet by default).
  * Requires an Anthropic API key.
@@ -17,7 +17,7 @@ import {
   LlmAuthError,
   type SummaryType,
   type WorkSummary,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Valid summary types */
 const VALID_TYPES: SummaryType[] = [
@@ -128,7 +128,7 @@ export function registerSummaryCommand(program: Command): void {
         if (!config.summaries.enabled) {
           console.log(
             chalk.yellow(
-              '\n  Work summaries are disabled in .archguard.yml.\n' +
+              '\n  Work summaries are disabled in .snoutguard.yml.\n' +
                 '  Set summaries.enabled to true to enable them.\n'
             )
           );
@@ -153,7 +153,7 @@ export function registerSummaryCommand(program: Command): void {
         ).start();
 
         try {
-          const { generateSummary, collectData } = await import('@archguard/work-summary');
+          const { generateSummary, collectData } = await import('@snoutguard/work-summary');
 
           // Calculate period dates based on the selected period
           const nowDate = new Date();

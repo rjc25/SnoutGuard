@@ -1,16 +1,16 @@
 /**
  * RBAC (Role-Based Access Control) middleware for Hono.
  * Checks permissions based on the authenticated user's role within
- * the current organization context, using hasPermission from @archguard/core.
+ * the current organization context, using hasPermission from @snoutguard/core.
  */
 
 import type { Context, Next } from 'hono';
-import { hasPermission, type Permission, type Role } from '@archguard/core';
+import { hasPermission, type Permission, type Role } from '@snoutguard/core';
 import { isRoleAtLeast } from './roles.js';
 
 /** When true, all permission/role checks are bypassed (local CLI mode) */
 function isAuthDisabled(): boolean {
-  return process.env.ARCHGUARD_DISABLE_AUTH === 'true';
+  return process.env.SNOUTGUARD_DISABLE_AUTH === 'true';
 }
 
 /** Shape of the auth user stored on the Hono context */

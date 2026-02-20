@@ -1,5 +1,5 @@
 {
-  "name": "archguard",
+  "name": "snoutguard",
   "version": "0.1.0",
   "private": true,
   "description": "Open-source architectural guardrails & engineering intelligence platform",
@@ -11,8 +11,8 @@
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
-    "db:migrate": "pnpm --filter @archguard/core db:migrate",
-    "db:seed": "pnpm --filter @archguard/core db:seed",
+    "db:migrate": "pnpm --filter @snoutguard/core db:migrate",
+    "db:seed": "pnpm --filter @snoutguard/core db:seed",
     "install-cli": "pnpm build && cd packages/cli && npm link",
     "bundle": "pnpm build && node scripts/bundle-cli.mjs",
     "publish-npm": "./scripts/publish-npm.sh"

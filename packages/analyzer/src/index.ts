@@ -1,5 +1,5 @@
 /**
- * @archguard/analyzer - Architecture Agent: Codebase Analysis
+ * @snoutguard/analyzer - Architecture Agent: Codebase Analysis
  *
  * Scans codebases to extract architectural decisions using LLM analysis,
  * maps dependencies with real coupling metrics, detects layer violations,
@@ -31,7 +31,7 @@ export {
 } from './cache.js';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import type { ArchDecision, ArchGuardConfig, ArchSnapshot, LayerViolation } from '@archguard/core';
+import type { ArchDecision, SnoutGuardConfig, ArchSnapshot, LayerViolation } from '@snoutguard/core';
 import {
   createLlmClient,
   getHeadSha,
@@ -41,7 +41,7 @@ import {
   getCallHistory,
   getLogger,
   type LlmCallRecord,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import { scanCodebase } from './scanner.js';
 import { extractDecisions } from './decision-extractor.js';
 import { buildDependencyGraph } from './dependency-mapper.js';
@@ -93,7 +93,7 @@ export interface AnalysisProgressEvent {
  */
 export async function runAnalysis(
   projectDir: string,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   options: {
     repoId: string;
     previousSnapshot?: ArchSnapshot;

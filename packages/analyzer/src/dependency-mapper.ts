@@ -19,10 +19,10 @@ import type {
   DependencyNode,
   CircularDependency,
   CouplingMetrics,
-} from '@archguard/core';
-import { generateId, now } from '@archguard/core';
+} from '@snoutguard/core';
+import { generateId, now } from '@snoutguard/core';
 
-export type { CouplingMetrics } from '@archguard/core';
+export type { CouplingMetrics } from '@snoutguard/core';
 
 // ─── Public Interface ───────────────────────────────────────────────
 
@@ -348,7 +348,7 @@ function resolveGoImport(
 
 /**
  * Resolve a monorepo cross-package import using workspace package mappings.
- * e.g., "@archguard/core" -> packages/core/src/index.ts
+ * e.g., "@snoutguard/core" -> packages/core/src/index.ts
  */
 function resolveWorkspaceImport(
   importPath: string,

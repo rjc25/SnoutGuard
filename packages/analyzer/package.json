@@ -1,5 +1,5 @@
 {
-  "name": "@archguard/analyzer",
+  "name": "@snoutguard/analyzer",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@archguard/core": "workspace:*",
+    "@snoutguard/core": "workspace:*",
     "@anthropic-ai/sdk": "^0.39.0",
     "glob": "^11.0.0",
     "minimatch": "^10.0.0",

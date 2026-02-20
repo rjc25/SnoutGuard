@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @archguard/cli - Main CLI entry point for ArchGuard.
+ * @snoutguard/cli - Main CLI entry point for SnoutGuard.
  * Provides commands for architectural analysis, context sync,
  * code review, velocity tracking, and more.
  */
@@ -57,7 +57,7 @@ import { registerCostsCommand } from './commands/costs.js';
 const program = new Command();
 
 program
-  .name('archguard')
+  .name('snoutguard')
   .version('0.1.0')
   .description(
     'Open-source architectural guardrails & engineering intelligence platform'
@@ -86,7 +86,7 @@ async function main(): Promise<void> {
   } catch (error: unknown) {
     if (error instanceof Error && error.message !== '(outputHelp)') {
       console.error(chalk.red(`\nError: ${error.message}`));
-      if (process.env.ARCHGUARD_DEBUG) {
+      if (process.env.SNOUTGUARD_DEBUG) {
         console.error(chalk.gray(error.stack ?? ''));
       }
       process.exit(1);

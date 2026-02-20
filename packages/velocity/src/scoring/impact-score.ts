@@ -5,9 +5,9 @@
  * Normalized to a 0-100 scale.
  */
 
-import { clamp } from '@archguard/core';
-import type { ArchDecision, Violation } from '@archguard/core';
-import type { DependencyGraph } from '@archguard/analyzer';
+import { clamp } from '@snoutguard/core';
+import type { ArchDecision, Violation } from '@snoutguard/core';
+import type { DependencyGraph } from '@snoutguard/analyzer';
 import type { GitMetrics, ImpactScore } from '../types.js';
 
 // ─── Configuration ──────────────────────────────────────────────────

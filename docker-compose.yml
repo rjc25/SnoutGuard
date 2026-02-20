@@ -3,15 +3,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: archguard
-      POSTGRES_USER: archguard
-      POSTGRES_PASSWORD: archguard
+      POSTGRES_DB: snoutguard
+      POSTGRES_USER: snoutguard
+      POSTGRES_PASSWORD: snoutguard
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U archguard"]
+      test: ["CMD-SHELL", "pg_isready -U snoutguard"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -35,7 +35,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://archguard:archguard@postgres:5432/archguard
+      DATABASE_URL: postgresql://snoutguard:snoutguard@postgres:5432/snoutguard
       REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
@@ -43,7 +43,7 @@ services:
       GITHUB_APP_ID: ${GITHUB_APP_ID:-}
       GITHUB_PRIVATE_KEY: ${GITHUB_PRIVATE_KEY:-}
       GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-}
-      SESSION_SECRET: ${SESSION_SECRET:-archguard-dev-secret}
+      SESSION_SECRET: ${SESSION_SECRET:-snoutguard-dev-secret}
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,7 +67,7 @@ services:
       target: worker
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://archguard:archguard@postgres:5432/archguard
+      DATABASE_URL: postgresql://snoutguard:snoutguard@postgres:5432/snoutguard
       REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:

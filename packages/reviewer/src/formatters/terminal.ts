@@ -4,7 +4,7 @@
  * shows line numbers, severity icons, and suggestions.
  */
 
-import type { ReviewResult, Violation, ViolationSeverity } from '@archguard/core';
+import type { ReviewResult, Violation, ViolationSeverity } from '@snoutguard/core';
 import {
   getSeverityIcon,
   getSeverityLabel,
@@ -76,7 +76,7 @@ export function formatForTerminal(result: ReviewResult): string {
 
   // Header
   lines.push('');
-  lines.push(colorize('  ArchGuard Review Results  ', ANSI.bold, ANSI.white));
+  lines.push(colorize('  SnoutGuard Review Results  ', ANSI.bold, ANSI.white));
   lines.push(colorize('─'.repeat(60), ANSI.dim));
   lines.push('');
 

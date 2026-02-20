@@ -14,15 +14,15 @@ import type {
   Evidence,
   Violation,
   ViolationSeverity,
-  ArchGuardConfig,
-} from '@archguard/core';
+  SnoutGuardConfig,
+} from '@snoutguard/core';
 import {
   generateId,
   schema,
   parseJsonSafe,
   createLlmClient,
   analyzeWithLlmValidated,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Input schema for check_architectural_compliance tool */
 export interface CheckPatternInput {
@@ -114,7 +114,7 @@ If the code is compliant with all constraints, return compliant: true and an emp
 export async function executeCheckPattern(
   db: DbClient,
   input: CheckPatternInput,
-  config: ArchGuardConfig
+  config: SnoutGuardConfig
 ): Promise<ComplianceResult> {
   const { code, filePath, intent } = input;
 
@@ -160,7 +160,7 @@ export async function executeCheckPattern(
     return {
       compliant: true,
       violations: [],
-      suggestions: ['No architectural decisions found. Run `archguard analyze` first.'],
+      suggestions: ['No architectural decisions found. Run `snoutguard analyze` first.'],
     };
   }
 

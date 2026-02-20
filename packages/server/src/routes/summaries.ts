@@ -1,12 +1,12 @@
 /**
- * Summary routes for the ArchGuard server.
+ * Summary routes for the SnoutGuard server.
  * Provides endpoints for listing, viewing, generating,
  * and editing work summaries.
  */
 
 import { Hono } from 'hono';
 import { eq, desc } from 'drizzle-orm';
-import { schema, now, type DbClient, type SummaryType } from '@archguard/core';
+import { schema, now, type DbClient, type SummaryType } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 import { enqueueSummary } from '../jobs/queue.js';

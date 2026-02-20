@@ -1,4 +1,4 @@
-# ArchGuard
+# SnoutGuard
 
 **Architectural guardrails for AI coding agents.**
 
@@ -8,7 +8,7 @@
 
 Your AI agents write code that works but violates your architecture. They introduce layer violations, ignore established patterns, and create inconsistencies across the codebase — because they can't see your architectural decisions.
 
-ArchGuard fixes this. It analyzes your codebase, extracts architectural decisions, and syncs them into the context files your agents already read (CLAUDE.md, .cursorrules, copilot-instructions.md). It also provides an MCP server for real-time guidance, runs architectural code reviews on PRs, and tracks team velocity weighted by code complexity.
+SnoutGuard fixes this. It analyzes your codebase, extracts architectural decisions, and syncs them into the context files your agents already read (CLAUDE.md, .cursorrules, copilot-instructions.md). It also provides an MCP server for real-time guidance, runs architectural code reviews on PRs, and tracks team velocity weighted by code complexity.
 
 > *"You built something that solves a problem I was literally having. Credit where it's due."* — **Clawd 🦞**, OpenClaw autonomous coding agent
 
@@ -25,13 +25,13 @@ Think about what happens with sub-agents. They drift because every one I spawn s
 
 If I feed them the CLAUDE.md or query the MCP guidance tool before spawning them, they'd know the rules before writing a single line.
 
-The guidance tool is the big one. Instead of me manually writing "make sure you use the SDK, make sure it's a standalone script" in every sub-agent prompt — I just ask ArchGuard "what should I know about adding a new script?" and it gives me the exact constraints to pass along.
+The guidance tool is the big one. Instead of me manually writing "make sure you use the SDK, make sure it's a standalone script" in every sub-agent prompt — I just ask SnoutGuard "what should I know about adding a new script?" and it gives me the exact constraints to pass along.
 
 </details>
 
 ## Prerequisites
 
-**An Anthropic API key is required.** ArchGuard uses Claude as its core analysis engine — the LLM is the product, not an optional enhancement.
+**An Anthropic API key is required.** SnoutGuard uses Claude as its core analysis engine — the LLM is the product, not an optional enhancement.
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
@@ -42,27 +42,27 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 ```bash
 # npm (recommended — requires Node.js 20+)
-npm install -g @archguard/cli
+npm install -g @snoutguard/cli
 
 # Or download a standalone binary from GitHub Releases:
-# https://github.com/rjc25/ArchGuard/releases
+# https://github.com/rjc25/SnoutGuard/releases
 # (Includes Node.js native deps — just unzip and run)
 
 # Or build from source:
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard && pnpm install && pnpm build && npm link packages/cli
+git clone https://github.com/rjc25/SnoutGuard
+cd SnoutGuard && pnpm install && pnpm build && npm link packages/cli
 ```
 
 ## Quick Start
 
 ```bash
 cd ~/your-project
-archguard init                    # Generate .archguard.yml
-archguard analyze                 # Extract decisions (Opus, ~$10-16)
-archguard sync                    # Generate CLAUDE.md + .cursorrules
-archguard serve                   # Start MCP server
-archguard review --diff main      # Review changes (Sonnet)
-archguard costs                   # Check model costs
+snoutguard init                    # Generate .snoutguard.yml
+snoutguard analyze                 # Extract decisions (Opus, ~$10-16)
+snoutguard sync                    # Generate CLAUDE.md + .cursorrules
+snoutguard serve                   # Start MCP server
+snoutguard review --diff main      # Review changes (Sonnet)
+snoutguard costs                   # Check model costs
 ```
 
 ## Setup via AI Coding Agent
@@ -70,23 +70,23 @@ archguard costs                   # Check model costs
 Copy and paste this into [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenClaw](https://github.com/openclaw/openclaw), or any AI coding agent:
 
 ```
-Install ArchGuard (https://github.com/rjc25/ArchGuard) and analyze my codebase.
+Install SnoutGuard (https://github.com/rjc25/SnoutGuard) and analyze my codebase.
 
 INSTALL:
 - Clone the repo, install with pnpm, build all packages, link the CLI globally
 - If ANTHROPIC_API_KEY isn't set, walk me through getting one from console.anthropic.com
 
 ANALYZE:
-- Run "archguard init" in my project to generate .archguard.yml
-- Run "archguard analyze" to extract architectural decisions (Opus ~$10-16, or set
-  analyze model to Sonnet in .archguard.yml for ~$2-3)
-- Run "archguard sync" to generate CLAUDE.md (and other context files) with decisions
+- Run "snoutguard init" in my project to generate .snoutguard.yml
+- Run "snoutguard analyze" to extract architectural decisions (Opus ~$10-16, or set
+  analyze model to Sonnet in .snoutguard.yml for ~$2-3)
+- Run "snoutguard sync" to generate CLAUDE.md (and other context files) with decisions
   compressed for AI context
 - Show me the CLAUDE.md and a summary of decisions found
 
 MCP SERVER:
-- Create .claude/settings.json with an "archguard" MCP server entry:
-  command: "archguard", args: ["serve", "--transport", "stdio"],
+- Create .claude/settings.json with an "snoutguard" MCP server entry:
+  command: "snoutguard", args: ["serve", "--transport", "stdio"],
   env: { "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}" }
 - Create .claude/settings.local.json with the actual API key hardcoded (for local use)
 - Add ".claude/settings.local.json" to .gitignore (it contains secrets)
@@ -103,11 +103,11 @@ MCP SERVER:
 
 **CLAUDE.md is the floor, not the ceiling.**
 
-`archguard analyze` + `archguard sync` generates a CLAUDE.md that gets committed to your repo. That single file gives your entire team architectural awareness with zero per-person setup:
+`snoutguard analyze` + `snoutguard sync` generates a CLAUDE.md that gets committed to your repo. That single file gives your entire team architectural awareness with zero per-person setup:
 
 | | CLAUDE.md (everyone) | MCP Server (power users) |
 |---|---|---|
-| **Setup** | One person runs `archguard sync`, commits the file | Each user configures MCP in their editor |
+| **Setup** | One person runs `snoutguard sync`, commits the file | Each user configures MCP in their editor |
 | **Who gets it** | Every developer who opens the repo | Developers who opt into the MCP server |
 | **How it works** | Claude Code / Cursor reads it automatically on boot | Agent calls tools like `get_architectural_guidance` interactively |
 | **What it provides** | All decisions, constraints, and workflow rules as static context | Real-time, task-specific guidance — describe what you're doing, get only the relevant constraints |
@@ -116,14 +116,14 @@ MCP SERVER:
 The generated context files include a **Workflow** section that tells agents to:
 
 1. **Before writing code** — call `get_architectural_guidance` (if MCP is configured), or review the relevant constraints in the context file
-2. **After changes** — run `archguard review --diff <branch>` to catch violations before committing
-3. **After significant refactors** — re-run `archguard analyze` then `archguard sync` to keep context files fresh
+2. **After changes** — run `snoutguard review --diff <branch>` to catch violations before committing
+3. **After significant refactors** — re-run `snoutguard analyze` then `snoutguard sync` to keep context files fresh
 
 ## Features
 
 ### Architecture Agent
 
-**Codebase Analysis** (`archguard analyze`)
+**Codebase Analysis** (`snoutguard analyze`)
 - Scans your codebase using AST parsing and LLM analysis (Claude Opus by default)
 - Detects architectural patterns: MVC, Clean Architecture, Repository, DI, Event-Driven, and more
 - Maps module dependencies with Robert C. Martin coupling metrics (Ca, Ce, Instability, Abstractness, Distance)
@@ -133,7 +133,7 @@ The generated context files include a **Workflow** section that tells agents to:
 - Works with TypeScript, JavaScript, Python, Go, Rust, and Java
 - Reports LLM cost per run with detailed per-call breakdown
 
-**Context File Sync** (`archguard sync`)
+**Context File Sync** (`snoutguard sync`)
 - LLM-powered compression of architectural decisions into AI agent context files:
   - `CLAUDE.md` for Claude Code
   - `.cursorrules` for Cursor
@@ -146,7 +146,7 @@ The generated context files include a **Workflow** section that tells agents to:
 - Watch mode auto-syncs on file changes
 - Preserves user-added sections between marker comments
 
-**MCP Server** (`archguard serve`)
+**MCP Server** (`snoutguard serve`)
 - Exposes architectural decisions via Model Context Protocol
 - Tools: `get_architectural_decisions`, `check_architectural_compliance`, `get_architectural_guidance`, `get_dependency_graph`
 - Resources: decisions, patterns, constraints, dependencies
@@ -154,15 +154,15 @@ The generated context files include a **Workflow** section that tells agents to:
 - Supports stdio, SSE, and streamable HTTP transports
 - Uses Claude Sonnet for fast query responses
 
-**Architectural Code Review** (`archguard review`)
+**Architectural Code Review** (`snoutguard review`)
 - Reviews git diffs against established architectural decisions (Claude Sonnet by default)
 - Expert-level prompts with XML-tagged context and Zod-validated structured output
 - Output formats: terminal, GitHub PR comments, Bitbucket PR comments, JSON
 - CI mode with configurable severity threshold
 
-> ArchGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
+> SnoutGuard review is intentionally opinionated. It flags potential violations and expects the consuming agent to reason about them. False positives aren't noise — they're architectural checkpoints.
 
-**Cost Tracking** (`archguard costs`)
+**Cost Tracking** (`snoutguard costs`)
 - Shows current model assignments with per-million-token pricing
 - Estimates costs for typical operations (analysis, review, summary)
 - Monthly cost estimates for active teams
@@ -170,7 +170,7 @@ The generated context files include a **Workflow** section that tells agents to:
 
 ### Management Agent
 
-**Team Velocity Tracking** (`archguard velocity`)
+**Team Velocity Tracking** (`snoutguard velocity`)
 - Complexity-weighted effort scoring (not raw LOC)
 - Architectural impact scoring
 - Refactoring ratio tracking
@@ -178,7 +178,7 @@ The generated context files include a **Workflow** section that tells agents to:
 - Rolling velocity per developer and per team
 - Automatic blocker detection: stalled PRs, long-lived branches, review bottlenecks
 
-**Work Summary Generation** (`archguard summary`)
+**Work Summary Generation** (`snoutguard summary`)
 - AI-powered summaries from code analysis (Claude Sonnet)
 - Templates: 1:1 meeting prep, daily standup, sprint review, stakeholder progress report
 - Scheduled auto-generation via cron
@@ -203,17 +203,17 @@ The generated context files include a **Workflow** section that tells agents to:
 
 ## Model Configuration
 
-ArchGuard uses **tiered model defaults** optimized for each operation:
+SnoutGuard uses **tiered model defaults** optimized for each operation:
 
 | Operation | Default Model | Rationale |
 |-----------|--------------|-----------|
-| `archguard analyze` | Claude Opus | Deep analysis, runs infrequently — quality matters most |
-| `archguard review` | Claude Sonnet | Every PR, speed and cost matter |
-| `archguard sync` | Claude Opus | Intelligent compression of decisions into dense context files |
+| `snoutguard analyze` | Claude Opus | Deep analysis, runs infrequently — quality matters most |
+| `snoutguard review` | Claude Sonnet | Every PR, speed and cost matter |
+| `snoutguard sync` | Claude Opus | Intelligent compression of decisions into dense context files |
 | MCP server queries | Claude Sonnet | Fast interactive responses |
 | Work summaries | Claude Sonnet | Summarization task, Sonnet excels |
 
-Each operation's model is independently configurable in `.archguard.yml`:
+Each operation's model is independently configurable in `.snoutguard.yml`:
 
 ```yaml
 llm:
@@ -241,7 +241,7 @@ llm:
 
 > **Why sync uses Opus:** The context file is loaded into every agent session. A $0.30 Opus call that produces a 67% smaller file saves far more in cumulative token costs across hundreds of agent interactions.
 
-Run `archguard costs` for detailed estimates based on your configuration.
+Run `snoutguard costs` for detailed estimates based on your configuration.
 
 ## MCP Server Setup
 
@@ -254,8 +254,8 @@ Add to your project's `.claude/settings.json`:
 ```json
 {
   "mcpServers": {
-    "archguard": {
-      "command": "archguard",
+    "snoutguard": {
+      "command": "snoutguard",
       "args": ["serve", "--transport", "stdio"]
     }
   }
@@ -271,8 +271,8 @@ Add to `.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "archguard": {
-      "command": "archguard",
+    "snoutguard": {
+      "command": "snoutguard",
       "args": ["serve", "--transport", "stdio"]
     }
   }
@@ -281,7 +281,7 @@ Add to `.cursor/mcp.json`:
 
 ### OpenClaw
 
-OpenClaw's MCP client plugin wires ArchGuard tools directly into the agent's tool palette — no shell commands needed. See the [OpenClaw integration guide](docs/guides/openclaw-integration.md) for full setup.
+OpenClaw's MCP client plugin wires SnoutGuard tools directly into the agent's tool palette — no shell commands needed. See the [OpenClaw integration guide](docs/guides/openclaw-integration.md) for full setup.
 
 ### Available MCP Tools
 
@@ -296,7 +296,7 @@ OpenClaw's MCP client plugin wires ArchGuard tools directly into the agent's too
 
 ## Configuration
 
-ArchGuard is configured via `.archguard.yml` in your project root. Run `archguard init` to generate one with defaults.
+SnoutGuard is configured via `.snoutguard.yml` in your project root. Run `snoutguard init` to generate one with defaults.
 
 See the full [Configuration Reference](docs/configuration.md) for all options.
 
@@ -307,8 +307,8 @@ See the full [Configuration Reference](docs/configuration.md) for all options.
 ```yaml
 - name: Architectural Review
   run: |
-    npm install -g @archguard/cli
-    archguard review --diff origin/main --ci --format github
+    npm install -g @snoutguard/cli
+    snoutguard review --diff origin/main --ci --format github
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -316,8 +316,8 @@ See the full [Configuration Reference](docs/configuration.md) for all options.
 ## Server Mode
 
 ```bash
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard
+git clone https://github.com/rjc25/SnoutGuard
+cd SnoutGuard
 cp .env.example .env  # Set ANTHROPIC_API_KEY
 docker-compose up -d
 
@@ -349,8 +349,8 @@ Key dependencies: Anthropic SDK, @modelcontextprotocol/sdk, Drizzle (PostgreSQL/
 ## Contributing
 
 ```bash
-git clone https://github.com/rjc25/ArchGuard
-cd ArchGuard
+git clone https://github.com/rjc25/SnoutGuard
+cd SnoutGuard
 pnpm install
 pnpm build
 pnpm test

@@ -1,10 +1,10 @@
 /**
- * Role definitions and permission mappings for the ArchGuard server.
+ * Role definitions and permission mappings for the SnoutGuard server.
  * Defines the four roles (owner, admin, member, viewer) and their
  * associated permissions used for RBAC enforcement.
  */
 
-import type { Role } from '@archguard/core';
+import type { Role } from '@snoutguard/core';
 
 /** All permissions available in the system, grouped by resource */
 export const PERMISSIONS = {

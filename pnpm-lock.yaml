@@ -26,7 +26,7 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.39.0
         version: 0.39.0
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
       glob:
@@ -48,28 +48,28 @@ importers:
 
   packages/cli:
     dependencies:
-      '@archguard/analyzer':
+      '@snoutguard/analyzer':
         specifier: workspace:*
         version: link:../analyzer
-      '@archguard/context-sync':
+      '@snoutguard/context-sync':
         specifier: workspace:*
         version: link:../context-sync
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
-      '@archguard/mcp-server':
+      '@snoutguard/mcp-server':
         specifier: workspace:*
         version: link:../mcp-server
-      '@archguard/reviewer':
+      '@snoutguard/reviewer':
         specifier: workspace:*
         version: link:../reviewer
-      '@archguard/server':
+      '@snoutguard/server':
         specifier: workspace:*
         version: link:../server
-      '@archguard/velocity':
+      '@snoutguard/velocity':
         specifier: workspace:*
         version: link:../velocity
-      '@archguard/work-summary':
+      '@snoutguard/work-summary':
         specifier: workspace:*
         version: link:../work-summary
       chalk:
@@ -94,7 +94,7 @@ importers:
 
   packages/context-sync:
     dependencies:
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
       chokidar:
@@ -205,16 +205,16 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
-      '@archguard/reviewer':
+      '@snoutguard/reviewer':
         specifier: workspace:*
         version: link:../reviewer
-      '@archguard/velocity':
+      '@snoutguard/velocity':
         specifier: workspace:*
         version: link:../velocity
-      '@archguard/work-summary':
+      '@snoutguard/work-summary':
         specifier: workspace:*
         version: link:../work-summary
       '@octokit/app':
@@ -239,10 +239,10 @@ importers:
 
   packages/mcp-server:
     dependencies:
-      '@archguard/analyzer':
+      '@snoutguard/analyzer':
         specifier: workspace:*
         version: link:../analyzer
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
       '@modelcontextprotocol/sdk':
@@ -270,10 +270,10 @@ importers:
 
   packages/reviewer:
     dependencies:
-      '@archguard/analyzer':
+      '@snoutguard/analyzer':
         specifier: workspace:*
         version: link:../analyzer
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
       zod:
@@ -289,25 +289,25 @@ importers:
 
   packages/server:
     dependencies:
-      '@archguard/analyzer':
+      '@snoutguard/analyzer':
         specifier: workspace:*
         version: link:../analyzer
-      '@archguard/context-sync':
+      '@snoutguard/context-sync':
         specifier: workspace:*
         version: link:../context-sync
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
-      '@archguard/integrations':
+      '@snoutguard/integrations':
         specifier: workspace:*
         version: link:../integrations
-      '@archguard/reviewer':
+      '@snoutguard/reviewer':
         specifier: workspace:*
         version: link:../reviewer
-      '@archguard/velocity':
+      '@snoutguard/velocity':
         specifier: workspace:*
         version: link:../velocity
-      '@archguard/work-summary':
+      '@snoutguard/work-summary':
         specifier: workspace:*
         version: link:../work-summary
       '@hono/node-server':
@@ -338,10 +338,10 @@ importers:
 
   packages/velocity:
     dependencies:
-      '@archguard/analyzer':
+      '@snoutguard/analyzer':
         specifier: workspace:*
         version: link:../analyzer
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
       simple-git:
@@ -357,7 +357,7 @@ importers:
 
   packages/work-summary:
     dependencies:
-      '@archguard/core':
+      '@snoutguard/core':
         specifier: workspace:*
         version: link:../core
       cron:

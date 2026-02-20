@@ -1,4 +1,4 @@
-# ArchGuard Helm Chart Values
+# SnoutGuard Helm Chart Values
 
 replicaCount:
   server: 2
@@ -7,24 +7,24 @@ replicaCount:
 
 image:
   server:
-    repository: ghcr.io/archguard/server
+    repository: ghcr.io/snoutguard/server
     tag: latest
     pullPolicy: IfNotPresent
   dashboard:
-    repository: ghcr.io/archguard/dashboard
+    repository: ghcr.io/snoutguard/dashboard
     tag: latest
     pullPolicy: IfNotPresent
   worker:
-    repository: ghcr.io/archguard/worker
+    repository: ghcr.io/snoutguard/worker
     tag: latest
     pullPolicy: IfNotPresent
 
 # External secrets (must be created separately)
 existingSecrets:
-  anthropicApiKey: archguard-secrets
-  sessionSecret: archguard-secrets
-  githubApp: archguard-github-secrets
-  slack: archguard-slack-secrets
+  anthropicApiKey: snoutguard-secrets
+  sessionSecret: snoutguard-secrets
+  githubApp: snoutguard-github-secrets
+  slack: snoutguard-slack-secrets
 
 # Server configuration
 server:
@@ -40,7 +40,7 @@ server:
 # Dashboard configuration
 dashboard:
   port: 3000
-  apiUrl: http://archguard-server:3000
+  apiUrl: http://snoutguard-server:3000
   resources:
     requests:
       cpu: 100m
@@ -71,7 +71,7 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: archguard.example.com
+    - host: snoutguard.example.com
       paths:
         - path: /api
           pathType: Prefix
@@ -80,17 +80,17 @@ ingress:
           pathType: Prefix
           service: dashboard
   tls:
-    - secretName: archguard-tls
+    - secretName: snoutguard-tls
       hosts:
-        - archguard.example.com
+        - snoutguard.example.com
 
 # PostgreSQL subchart
 postgresql:
   enabled: true
   auth:
-    username: archguard
+    username: snoutguard
     password: ""  # Set via secret
-    database: archguard
+    database: snoutguard
   primary:
     persistence:
       size: 20Gi
@@ -109,9 +109,9 @@ externalDatabase:
   enabled: false
   host: ""
   port: 5432
-  username: archguard
+  username: snoutguard
   password: ""
-  database: archguard
+  database: snoutguard
 
 # Use external Redis instead of subchart
 externalRedis:

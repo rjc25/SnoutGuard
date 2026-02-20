@@ -16,7 +16,7 @@ import {
   loadConfig,
   requireApiKey,
   type DbClient,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import {
   QUEUE_NAMES,
   registerWorker,
@@ -58,7 +58,7 @@ async function processAnalysis(job: Job<AnalysisJobData>): Promise<{ snapshotId:
   await job.updateProgress(15);
 
   // Dynamically import analyzer to avoid circular dependencies at startup
-  const { runAnalysis } = await import('@archguard/analyzer');
+  const { runAnalysis } = await import('@snoutguard/analyzer');
 
   // Load previous snapshot for drift comparison
   const previousSnapshots = await db

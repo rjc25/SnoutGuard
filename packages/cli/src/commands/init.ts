@@ -1,8 +1,8 @@
 /**
- * `archguard init` command.
+ * `snoutguard init` command.
  *
  * Interactive setup that detects languages, asks configuration preferences,
- * writes .archguard.yml, validates the Anthropic API key, and initializes
+ * writes .snoutguard.yml, validates the Anthropic API key, and initializes
  * the local SQLite database.
  */
 
@@ -19,7 +19,7 @@ import {
   findProjectRoot,
   type SupportedLanguage,
   type SyncFormat,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** Prompt the user for a line of input */
 function prompt(question: string): Promise<string> {
@@ -82,21 +82,21 @@ function detectProjectLanguages(projectDir: string): SupportedLanguage[] {
 export function registerInitCommand(program: Command): void {
   program
     .command('init')
-    .description('Initialize ArchGuard in the current project')
+    .description('Initialize SnoutGuard in the current project')
     .option('--path <dir>', 'Project directory', '.')
     .option('--non-interactive', 'Use defaults without prompting')
     .action(async (options: { path: string; nonInteractive?: boolean }) => {
       const projectDir = path.resolve(options.path);
 
-      console.log(chalk.bold('\n  ArchGuard Setup\n'));
+      console.log(chalk.bold('\n  SnoutGuard Setup\n'));
 
       // Check if config already exists
-      const configPath = path.join(projectDir, '.archguard.yml');
+      const configPath = path.join(projectDir, '.snoutguard.yml');
       if (fs.existsSync(configPath)) {
         const overwrite = options.nonInteractive
           ? 'n'
           : await prompt(
-              chalk.yellow('  .archguard.yml already exists. Overwrite? (y/N): ')
+              chalk.yellow('  .snoutguard.yml already exists. Overwrite? (y/N): ')
             );
         if (overwrite.toLowerCase() !== 'y') {
           console.log(chalk.gray('  Keeping existing configuration.\n'));
@@ -111,7 +111,7 @@ export function registerInitCommand(program: Command): void {
         console.log(chalk.green('  ✓ ANTHROPIC_API_KEY is set\n'));
       } else {
         console.log(chalk.yellow('  ⚠ ANTHROPIC_API_KEY is not set or invalid.\n'));
-        console.log(chalk.white('  ArchGuard requires an Anthropic API key to function.'));
+        console.log(chalk.white('  SnoutGuard requires an Anthropic API key to function.'));
         console.log(chalk.white('  Get one at: https://console.anthropic.com/settings/keys\n'));
         console.log(chalk.white('  Then set it:\n'));
         console.log(chalk.cyan('    export ANTHROPIC_API_KEY=sk-ant-...\n'));
@@ -165,7 +165,7 @@ export function registerInitCommand(program: Command): void {
 
       // Step 4: Write config
       console.log(chalk.bold('\n  Step 4: Configuration\n'));
-      const writeSpinner = ora('Writing .archguard.yml...').start();
+      const writeSpinner = ora('Writing .snoutguard.yml...').start();
       const writtenPath = writeDefaultConfig(projectDir);
 
       // Patch the config with user selections
@@ -195,7 +195,7 @@ export function registerInitCommand(program: Command): void {
         fs.writeFileSync(writtenPath, configContent, 'utf-8');
       }
 
-      writeSpinner.succeed(`Configuration written to ${chalk.bold('.archguard.yml')}`);
+      writeSpinner.succeed(`Configuration written to ${chalk.bold('.snoutguard.yml')}`);
 
       // Step 5: Initialize database
       const dbSpinner = ora('Initializing local SQLite database...').start();
@@ -208,7 +208,7 @@ export function registerInitCommand(program: Command): void {
       }
 
       console.log(
-        chalk.green('\n  ArchGuard initialized successfully!')
+        chalk.green('\n  SnoutGuard initialized successfully!')
       );
       console.log('');
       console.log(chalk.bold('  Model defaults:'));
@@ -216,12 +216,12 @@ export function registerInitCommand(program: Command): void {
       console.log(chalk.gray('    review:   claude-sonnet-4-6 (PR reviews)'));
       console.log(chalk.gray('    summary:  claude-sonnet-4-6 (work summaries)'));
       console.log(chalk.gray('    mcp:      claude-sonnet-4-6 (real-time queries)'));
-      console.log(chalk.gray('  Customize in .archguard.yml under llm.models.*'));
+      console.log(chalk.gray('  Customize in .snoutguard.yml under llm.models.*'));
       console.log('');
       console.log(chalk.white('  Next steps:'));
-      console.log(chalk.cyan('    archguard analyze   ') + chalk.gray('# Scan your codebase'));
-      console.log(chalk.cyan('    archguard sync      ') + chalk.gray('# Generate AI context files'));
-      console.log(chalk.cyan('    archguard review    ') + chalk.gray('# Review code changes'));
+      console.log(chalk.cyan('    snoutguard analyze   ') + chalk.gray('# Scan your codebase'));
+      console.log(chalk.cyan('    snoutguard sync      ') + chalk.gray('# Generate AI context files'));
+      console.log(chalk.cyan('    snoutguard review    ') + chalk.gray('# Review code changes'));
       console.log('');
     });
 }

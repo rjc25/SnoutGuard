@@ -1,5 +1,5 @@
 #!/bin/bash
-# Publish @archguard/cli to npm
+# Publish @snoutguard/cli to npm
 # Usage: ./scripts/publish-npm.sh [--dry-run]
 set -euo pipefail
 
@@ -20,7 +20,7 @@ rm -rf "$PUBLISH_DIR"
 mkdir -p "$PUBLISH_DIR/dist"
 
 # Copy the bundle
-cp "$CLI_DIR/dist/archguard.cjs" "$PUBLISH_DIR/dist/"
+cp "$CLI_DIR/dist/snoutguard.cjs" "$PUBLISH_DIR/dist/"
 
 # Copy the npm-specific package.json
 cp "$CLI_DIR/package.npm.json" "$PUBLISH_DIR/package.json"
@@ -37,7 +37,7 @@ if [[ "${1:-}" == "--dry-run" ]]; then
   echo "✅ Dry run complete"
 else
   npm publish --access public
-  echo "✅ Published @archguard/cli to npm"
+  echo "✅ Published @snoutguard/cli to npm"
 fi
 
 # Cleanup

@@ -15,10 +15,10 @@ import {
   loadConfig,
   generateId,
   now,
-  type ArchGuardConfig,
+  type SnoutGuardConfig,
   type SummaryType,
   type WorkSummary,
-} from '@archguard/core';
+} from '@snoutguard/core';
 
 /** LLM client type inferred from the core createLlmClient factory */
 type LlmClient = ReturnType<typeof createLlmClient>;
@@ -45,8 +45,8 @@ export interface SummaryOptions {
   teamId: string;
   /** Path to the project directory for loading config (defaults to cwd) */
   projectDir?: string;
-  /** Pre-loaded config to avoid re-reading .archguard.yml */
-  config?: ArchGuardConfig;
+  /** Pre-loaded config to avoid re-reading .snoutguard.yml */
+  config?: SnoutGuardConfig;
   /** Pre-created LLM client */
   client?: LlmClient;
 }
@@ -98,7 +98,7 @@ export async function generateSummary(options: SummaryOptions): Promise<WorkSumm
  */
 async function generateLlmSummary(
   client: LlmClient,
-  config: ArchGuardConfig,
+  config: SnoutGuardConfig,
   data: CollectedData,
   type: SummaryType,
   developerName: string,

@@ -4,7 +4,7 @@
  * and to aggregate violation counts by severity level.
  */
 
-import type { Violation, ViolationSeverity, ReviewResult } from '@archguard/core';
+import type { Violation, ViolationSeverity, ReviewResult } from '@snoutguard/core';
 
 /** Numeric weight for each severity level (higher = more severe) */
 const SEVERITY_WEIGHT: Record<ViolationSeverity, number> = {

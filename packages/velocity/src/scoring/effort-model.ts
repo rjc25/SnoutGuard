@@ -5,7 +5,7 @@
  * Scores are normalized to a 0-100 scale.
  */
 
-import { clamp } from '@archguard/core';
+import { clamp } from '@snoutguard/core';
 import type { GitMetrics, ComplexityDelta, EffortScore } from '../types.js';
 
 // ─── Configuration ──────────────────────────────────────────────────

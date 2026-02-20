@@ -1,5 +1,5 @@
 /**
- * Repository management routes for the ArchGuard server.
+ * Repository management routes for the SnoutGuard server.
  * Provides endpoints for listing, connecting, disconnecting,
  * and viewing repository details.
  */
@@ -13,7 +13,7 @@ import {
   hash,
   type DbClient,
   type GitProvider,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 

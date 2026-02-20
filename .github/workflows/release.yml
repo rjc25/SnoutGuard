@@ -38,16 +38,16 @@ jobs:
         shell: bash
         run: |
           VERSION="${GITHUB_REF#refs/tags/v}"
-          DIST_DIR="archguard-dist"
+          DIST_DIR="snoutguard-dist"
           mkdir -p "$DIST_DIR"
 
           # Copy the bundled CLI
-          cp packages/cli/dist/archguard.cjs "$DIST_DIR/"
+          cp packages/cli/dist/snoutguard.cjs "$DIST_DIR/"
 
           # Create a minimal package.json for npm install of native deps
           cat > "$DIST_DIR/package.json" << EOF
           {
-            "name": "archguard-standalone",
+            "name": "snoutguard-standalone",
             "version": "${VERSION}",
             "private": true,
             "dependencies": {
@@ -67,21 +67,21 @@ jobs:
           if [[ "${{ matrix.target }}" == "win-x64" ]]; then
             cp "$(which node).exe" "$NODE_DIR/node.exe" 2>/dev/null || cp "$(which node)" "$NODE_DIR/node.exe"
             # Launcher script
-            cat > "$DIST_DIR/archguard.cmd" << 'BATCH'
+            cat > "$DIST_DIR/snoutguard.cmd" << 'BATCH'
           @echo off
-          "%~dp0node\node.exe" "%~dp0archguard.cjs" %*
+          "%~dp0node\node.exe" "%~dp0snoutguard.cjs" %*
           BATCH
-            EXEC_NAME="archguard.cmd"
+            EXEC_NAME="snoutguard.cmd"
           else
             cp "$(which node)" "$NODE_DIR/node"
             chmod +x "$NODE_DIR/node"
             # Launcher script
-            cat > "$DIST_DIR/archguard" << 'SH'
+            cat > "$DIST_DIR/snoutguard" << 'SH'
           #!/bin/sh
-          exec "$(dirname "$0")/node/node" "$(dirname "$0")/archguard.cjs" "$@"
+          exec "$(dirname "$0")/node/node" "$(dirname "$0")/snoutguard.cjs" "$@"
           SH
-            chmod +x "$DIST_DIR/archguard"
-            EXEC_NAME="archguard"
+            chmod +x "$DIST_DIR/snoutguard"
+            EXEC_NAME="snoutguard"
           fi
 
       - name: Download warp-packer
@@ -102,17 +102,17 @@ jobs:
         run: |
           VERSION="${GITHUB_REF#refs/tags/v}"
           if [[ "${{ matrix.target }}" == "win-x64" ]]; then
-            $PACKER --arch windows-x64 --input_dir archguard-dist --exec archguard.cmd --output "archguard-${VERSION}-win-x64.exe"
+            $PACKER --arch windows-x64 --input_dir snoutguard-dist --exec snoutguard.cmd --output "snoutguard-${VERSION}-win-x64.exe"
           else
-            $PACKER --arch linux-x64 --input_dir archguard-dist --exec archguard --output "archguard-${VERSION}-linux-x64"
-            chmod +x "archguard-${VERSION}-linux-x64"
+            $PACKER --arch linux-x64 --input_dir snoutguard-dist --exec snoutguard --output "snoutguard-${VERSION}-linux-x64"
+            chmod +x "snoutguard-${VERSION}-linux-x64"
           fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: archguard-${{ matrix.target }}
-          path: archguard-*-${{ matrix.target }}*
+          name: snoutguard-${{ matrix.target }}
+          path: snoutguard-*-${{ matrix.target }}*
 
   publish-npm:
     runs-on: ubuntu-latest
@@ -135,7 +135,7 @@ jobs:
       - name: Prepare npm package
         run: |
           mkdir -p .publish/dist
-          cp packages/cli/dist/archguard.cjs .publish/dist/
+          cp packages/cli/dist/snoutguard.cjs .publish/dist/
           cp packages/cli/package.npm.json .publish/package.json
           cp README.md .publish/
           cp LICENSE .publish/
@@ -154,17 +154,17 @@ jobs:
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          name: archguard-linux-x64
+          name: snoutguard-linux-x64
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: archguard-win-x64
+          name: snoutguard-win-x64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            archguard-*-linux-x64
-            archguard-*-win-x64.exe
+            snoutguard-*-linux-x64
+            snoutguard-*-win-x64.exe

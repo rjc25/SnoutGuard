@@ -15,7 +15,7 @@ import {
   type DriftEvent,
   type DriftEventType,
   type LayerViolation,
-} from '@archguard/core';
+} from '@snoutguard/core';
 import type { DependencyGraph } from './dependency-mapper.js';
 
 /** Result of drift detection */

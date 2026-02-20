@@ -1,12 +1,12 @@
 /**
- * Analysis routes for the ArchGuard server.
+ * Analysis routes for the SnoutGuard server.
  * Provides endpoints for triggering analyses, checking status,
  * and viewing analysis history.
  */
 
 import { Hono } from 'hono';
 import { eq, desc } from 'drizzle-orm';
-import { schema, type DbClient } from '@archguard/core';
+import { schema, type DbClient } from '@snoutguard/core';
 import { requirePermission } from '../auth/rbac.js';
 import type { AuthUser } from '../auth/rbac.js';
 import {
