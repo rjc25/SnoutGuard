@@ -521,7 +521,13 @@ export async function* streamAnalysis(
  * or surrounding text.
  */
 export function extractJson(text: string): string | null {
-  const trimmed = text.trim();
+  // Strip markdown fences before parsing — handles both complete
+  // (```json ... ```) and truncated (```json ... <eof>) responses
+  const trimmed = text
+    .trim()
+    .replace(/^```(?:json)?\s*\n?/m, '')
+    .replace(/\n?```\s*$/m, '')
+    .trim();
 
   // Try direct parse first
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
