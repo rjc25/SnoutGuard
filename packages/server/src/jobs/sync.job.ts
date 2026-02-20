@@ -116,7 +116,7 @@ async function processSync(job: Job<SyncJobData>): Promise<{ syncedFormats: stri
   await job.updateProgress(60);
 
   // Run the sync
-  const result = engine.sync();
+  const result = await engine.sync();
 
   await job.updateProgress(80);
 
