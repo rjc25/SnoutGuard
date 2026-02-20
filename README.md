@@ -19,14 +19,20 @@ ArchGuard solves both problems:
 - **Architecture Agent** keeps AI coding assistants aligned with your team's architectural decisions
 - **Management Agent** provides complexity-weighted velocity tracking and AI-generated work summaries
 
-## Quick Start (CLI)
+## Quick Start
 
 ```bash
-# Install globally
-npm install -g @archguard/cli
+# Clone and build
+git clone https://github.com/rjc25/ArchGuard.git
+cd ArchGuard
+pnpm install
+pnpm build
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your ANTHROPIC_API_KEY
 
 # Initialize in your project
-cd your-project
 archguard init
 
 # Analyze your codebase
@@ -42,20 +48,10 @@ archguard serve
 archguard review --diff main
 ```
 
-## Quick Start (Server Mode)
+## Server Mode
 
 ```bash
-# Clone and run with Docker
-git clone https://github.com/rjc25/ArchGuard.git
-cd ArchGuard
-pnpm install
-pnpm build
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your ANTHROPIC_API_KEY
-
-# Start all services
+# Start all services with Docker
 docker-compose up -d
 
 # Dashboard available at http://localhost:3001
@@ -219,7 +215,8 @@ See the full [Configuration Reference](docs/configuration.md) for all options.
 ```yaml
 - name: Architectural Review
   run: |
-    npm install -g @archguard/cli
+    pnpm install
+    pnpm build
     archguard review --diff origin/main --ci --format github
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
