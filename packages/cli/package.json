@@ -8,7 +8,10 @@
     "archguard": "./dist/index.js"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./src/index.ts"
+    }
   },
   "scripts": {
     "build": "tsc",

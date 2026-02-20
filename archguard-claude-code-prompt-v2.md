@@ -1405,6 +1405,9 @@ Build in this order, verifying each module works before moving on:
 - **Git integration:** Auto-detect CI environment (GitHub Actions, GitLab CI, Bitbucket Pipelines) and adjust output format.
 - **Velocity charts** should use Recharts with rolling 7-day and 30-day averages. Show per-developer and team aggregate views.
 - **Dependency graph visualization** should use react-flow or d3-force for an interactive node graph in the dashboard.
+- **Package exports** use conditional exports: `{ "import": "./dist/index.js", "types": "./src/index.ts" }`. The `import` condition points to compiled output so the CLI works after `pnpm build`. The `types` condition points to source for IDE type resolution. Do not change exports back to `"./src/index.ts"` — that breaks the compiled CLI.
+- **Zod is a direct dependency** of `core`, `analyzer`, `reviewer`, and `mcp-server`. Any package that imports `zod` directly must list it in its own `package.json` dependencies — do not rely on hoisting.
+- **Global CLI install** uses `npm link packages/cli` from the repo root (not `pnpm link --global`). The root `package.json` has an `install-cli` script: `pnpm build && cd packages/cli && npm link`.
 
 ---
 
@@ -1413,7 +1416,7 @@ Build in this order, verifying each module works before moving on:
 1. One-liner description + badges (npm, license, CI, Discord)
 2. Hero screenshot of the dashboard
 3. Why this exists (AI agents + architectural drift problem statement)
-4. Quick start — CLI mode (npm install, archguard init, archguard analyze)
+4. Quick start — CLI mode (git clone, pnpm install, pnpm build, npm link packages/cli, archguard init)
 5. Quick start — Server mode (docker-compose up)
 6. Feature walkthrough:
    - Architecture Agent (analyze, sync, review, MCP)

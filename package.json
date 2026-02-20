@@ -12,7 +12,8 @@
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "db:migrate": "pnpm --filter @archguard/core db:migrate",
-    "db:seed": "pnpm --filter @archguard/core db:seed"
+    "db:seed": "pnpm --filter @archguard/core db:seed",
+    "install-cli": "pnpm build && cd packages/cli && npm link"
   },
   "devDependencies": {
     "turbo": "^2.3.0",
