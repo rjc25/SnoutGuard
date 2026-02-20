@@ -41,7 +41,7 @@ const configSchema = z.object({
     .optional(),
   analysis: z
     .object({
-      include: z.array(z.string()).default(['src/**', 'lib/**']),
+      include: z.array(z.string()).default(['**']),
       exclude: z
         .array(z.string())
         .default([
@@ -219,8 +219,7 @@ export function writeDefaultConfig(projectDir: string): string {
 # Analysis settings
 analysis:
   include:
-    - "src/**"
-    - "lib/**"
+    - "**"
   exclude:
     - "**/*.test.*"
     - "**/*.spec.*"
