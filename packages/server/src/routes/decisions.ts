@@ -27,7 +27,7 @@ export function createDecisionsRouter(db: DbClient): Hono {
 
   // ─── GET /api/decisions - List decisions with filters ─────────
   router.get('/', requirePermission('decisions:read'), async (c) => {
-    const orgId = c.get('orgId') as string;
+    const orgId = c.get('orgId') as string | undefined;
     const category = c.req.query('category') as ArchCategory | undefined;
     const status = c.req.query('status') as DecisionStatus | undefined;
     const search = c.req.query('search');
@@ -35,29 +35,41 @@ export function createDecisionsRouter(db: DbClient): Hono {
     const limit = parseInt(c.req.query('limit') ?? '50', 10);
     const offset = parseInt(c.req.query('offset') ?? '0', 10);
 
-    // Build query - first get repos for this org
-    const orgRepos = await db
-      .select({ id: schema.repositories.id })
-      .from(schema.repositories)
-      .where(eq(schema.repositories.orgId, orgId));
+    let allDecisions: any[] = [];
 
-    const repoIds = repoId
-      ? [repoId]
-      : orgRepos.map((r) => r.id);
-
-    if (repoIds.length === 0) {
-      return c.json({ decisions: [], total: 0 });
-    }
-
-    // Load all decisions for the org's repos
-    let allDecisions = [];
-    for (const rid of repoIds) {
-      const rows = await db
+    if (repoId) {
+      // Filter by specific repo
+      allDecisions = await db
         .select()
         .from(schema.decisions)
-        .where(eq(schema.decisions.repoId, rid))
+        .where(eq(schema.decisions.repoId, repoId))
         .orderBy(desc(schema.decisions.detectedAt));
-      allDecisions.push(...rows);
+    } else if (orgId) {
+      // Multi-tenant: scope to org's repos
+      const orgRepos = await db
+        .select({ id: schema.repositories.id })
+        .from(schema.repositories)
+        .where(eq(schema.repositories.orgId, orgId));
+
+      const repoIds = orgRepos.map((r) => r.id);
+      if (repoIds.length === 0) {
+        return c.json({ decisions: [], total: 0 });
+      }
+
+      for (const rid of repoIds) {
+        const rows = await db
+          .select()
+          .from(schema.decisions)
+          .where(eq(schema.decisions.repoId, rid))
+          .orderBy(desc(schema.decisions.detectedAt));
+        allDecisions.push(...rows);
+      }
+    } else {
+      // Local mode (no org context): return all decisions
+      allDecisions = await db
+        .select()
+        .from(schema.decisions)
+        .orderBy(desc(schema.decisions.detectedAt));
     }
 
     // Apply filters

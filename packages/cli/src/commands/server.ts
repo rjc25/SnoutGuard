@@ -1,6 +1,11 @@
 /**
  * `archguard server` subcommand.
  * Manage the local ArchGuard API server and database.
+ *
+ * Starts the full Hono API server from @archguard/server with:
+ * - REST API endpoints for decisions, reviews, velocity, summaries
+ * - SSE for real-time dashboard events
+ * - Optional BullMQ workers (requires Redis, disabled by default locally)
  */
 
 import { Command } from 'commander';
@@ -21,71 +26,90 @@ export function registerServerCommand(program: Command): void {
     .option('--port <number>', 'Port to listen on', '3200')
     .option('--host <host>', 'Host to bind to', '127.0.0.1')
     .option('--path <dir>', 'Project directory', '.')
+    .option('--workers', 'Enable BullMQ workers (requires Redis)', false)
+    .option('--no-auth', 'Disable authentication (for local development)')
     .action(
       async (options: {
         port: string;
         host: string;
         path: string;
+        workers: boolean;
+        auth: boolean;
       }) => {
         const projectDir = path.resolve(options.path);
         const config = loadConfig(projectDir);
         const port = parseInt(options.port, 10) || 3200;
         const host = options.host;
 
-        console.log(chalk.bold('\n  ArchGuard API Server\n'));
+        console.log(chalk.bold('\n  🏗  ArchGuard API Server\n'));
         console.log(chalk.gray(`  Host:    ${host}`));
         console.log(chalk.gray(`  Port:    ${port}`));
         console.log(chalk.gray(`  Project: ${projectDir}`));
+        console.log(chalk.gray(`  Workers: ${options.workers ? 'enabled' : 'disabled (use --workers to enable)'}`));
+        console.log(chalk.gray(`  Auth:    ${options.auth ? 'enabled' : 'disabled (--no-auth)'}`));
         console.log('');
 
         const spinner = ora('Starting server...').start();
 
         try {
+          // Set environment variables for the server
+          process.env.PORT = String(port);
+          process.env.HOST = host;
+          process.env.ARCHGUARD_PROJECT_DIR = projectDir;
+
+          // Disable workers by default for local usage (requires Redis)
+          if (!options.workers) {
+            process.env.ENABLE_WORKERS = 'false';
+          }
+
+          // Disable auth for local development
+          if (!options.auth) {
+            process.env.ARCHGUARD_DISABLE_AUTH = 'true';
+          }
+
           // Ensure database is initialized
           spinner.text = 'Initializing database...';
           initializeDatabase();
 
           spinner.text = 'Starting API server...';
 
-          // Start the MCP server as the local API layer (stdio transport)
-          const { startMcpServer } = await import('@archguard/mcp-server');
-
-          await startMcpServer({
-            projectDir,
-          });
+          // Import and start the full Hono API server
+          await import('@archguard/server');
 
           spinner.succeed(
             `Server running at ${chalk.bold(`http://${host}:${port}`)}`
           );
+
+          console.log('');
+          console.log(chalk.bold('  Available endpoints:'));
+          console.log(chalk.gray('    GET  /api/health              Health check'));
+          console.log(chalk.gray('    GET  /api/decisions           List decisions'));
+          console.log(chalk.gray('    GET  /api/decisions/:id       Get decision'));
+          console.log(chalk.gray('    POST /api/analysis/trigger    Trigger analysis'));
+          console.log(chalk.gray('    GET  /api/reviews             List reviews'));
+          console.log(chalk.gray('    GET  /api/velocity            Velocity metrics'));
+          console.log(chalk.gray('    GET  /api/velocity/:devId     Developer velocity'));
+          console.log(chalk.gray('    GET  /api/summaries           Work summaries'));
+          console.log(chalk.gray('    POST /api/sync/trigger        Trigger context sync'));
+          console.log(chalk.gray('    GET  /api/repos               List repositories'));
+          console.log(chalk.gray('    GET  /api/teams               List teams'));
+          console.log(chalk.gray('    GET  /api/events              SSE event stream'));
+          console.log('');
           console.log(chalk.gray('  Press Ctrl+C to stop\n'));
 
-          // API endpoints info
-          console.log(chalk.bold('  Available endpoints:'));
-          console.log(chalk.gray('    GET  /api/v1/decisions'));
-          console.log(chalk.gray('    GET  /api/v1/snapshots'));
-          console.log(chalk.gray('    GET  /api/v1/drift'));
-          console.log(chalk.gray('    GET  /api/v1/velocity'));
-          console.log(chalk.gray('    GET  /api/v1/reviews'));
-          console.log(chalk.gray('    POST /api/v1/analyze'));
-          console.log(chalk.gray('    POST /api/v1/sync'));
-          console.log('');
-
-          // Keep alive and handle shutdown
-          const shutdown = () => {
-            console.log(chalk.gray('\n  Shutting down server...'));
-            process.exit(0);
-          };
-
-          process.on('SIGINT', shutdown);
-          process.on('SIGTERM', shutdown);
-
-          await new Promise<void>(() => {
-            // Keep event loop alive
-          });
         } catch (error: unknown) {
           spinner.fail('Failed to start server');
           const message = error instanceof Error ? error.message : String(error);
           console.error(chalk.red(`\n  ${message}\n`));
+
+          // Common troubleshooting
+          if (message.includes('Redis') || message.includes('ECONNREFUSED')) {
+            console.log(chalk.yellow('  Tip: Workers require Redis. Use --workers=false or start Redis first.\n'));
+          }
+          if (message.includes('EADDRINUSE')) {
+            console.log(chalk.yellow(`  Tip: Port ${port} is already in use. Try --port <different-port>\n`));
+          }
+
           process.exit(1);
         }
       }

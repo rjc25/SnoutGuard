@@ -31,6 +31,12 @@ export function authMiddleware(
   return async (c: Context, next: Next) => {
     const path = c.req.path;
 
+    // In local/CLI mode, auth can be disabled entirely
+    if (process.env.ARCHGUARD_DISABLE_AUTH === 'true') {
+      await next();
+      return;
+    }
+
     // Skip auth for public paths
     if (publicPaths.some((pp) => path.startsWith(pp))) {
       await next();

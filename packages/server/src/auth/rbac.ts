@@ -8,6 +8,11 @@ import type { Context, Next } from 'hono';
 import { hasPermission, type Permission, type Role } from '@archguard/core';
 import { isRoleAtLeast } from './roles.js';
 
+/** When true, all permission/role checks are bypassed (local CLI mode) */
+function isAuthDisabled(): boolean {
+  return process.env.ARCHGUARD_DISABLE_AUTH === 'true';
+}
+
 /** Shape of the auth user stored on the Hono context */
 export interface AuthUser {
   id: string;
@@ -19,23 +24,19 @@ export interface AuthUser {
 
 /**
  * Create an RBAC middleware that requires a specific permission.
- * The middleware reads the user from context variables (set by auth middleware)
- * and checks if their role grants the requested permission.
- *
- * @param permission - The permission string to check (e.g., "decisions:write")
- * @param options - Optional configuration for scoped checks
  */
 export function requirePermission(
   permission: Permission,
   options?: { ownerIdParam?: string }
 ) {
   return async (c: Context, next: Next) => {
+    if (isAuthDisabled()) { await next(); return; }
+
     const user = c.get('user') as AuthUser | undefined;
     if (!user) {
       return c.json({ error: 'Authentication required' }, 401);
     }
 
-    // For scoped permissions (e.g., velocity:read:own), extract the owner ID
     let ownerId: string | undefined;
     if (options?.ownerIdParam) {
       ownerId = c.req.param(options.ownerIdParam) ?? undefined;
@@ -44,10 +45,7 @@ export function requirePermission(
     const allowed = hasPermission(user.role, permission, ownerId, user.id);
     if (!allowed) {
       return c.json(
-        {
-          error: 'Forbidden',
-          message: `Insufficient permissions. Required: ${permission}`,
-        },
+        { error: 'Forbidden', message: `Insufficient permissions. Required: ${permission}` },
         403
       );
     }
@@ -58,13 +56,11 @@ export function requirePermission(
 
 /**
  * Create an RBAC middleware that requires a minimum role level.
- * This is a simpler alternative to permission-based checks for
- * broad access control (e.g., "admin or above").
- *
- * @param minimumRole - The minimum role required (e.g., "admin")
  */
 export function requireRole(minimumRole: Role) {
   return async (c: Context, next: Next) => {
+    if (isAuthDisabled()) { await next(); return; }
+
     const user = c.get('user') as AuthUser | undefined;
     if (!user) {
       return c.json({ error: 'Authentication required' }, 401);
@@ -72,10 +68,7 @@ export function requireRole(minimumRole: Role) {
 
     if (!isRoleAtLeast(user.role, minimumRole)) {
       return c.json(
-        {
-          error: 'Forbidden',
-          message: `Minimum role required: ${minimumRole}`,
-        },
+        { error: 'Forbidden', message: `Minimum role required: ${minimumRole}` },
         403
       );
     }
@@ -86,10 +79,11 @@ export function requireRole(minimumRole: Role) {
 
 /**
  * Create a middleware that checks multiple permissions (ANY match = allowed).
- * Useful for endpoints that can be accessed by different permission sets.
  */
 export function requireAnyPermission(permissions: Permission[]) {
   return async (c: Context, next: Next) => {
+    if (isAuthDisabled()) { await next(); return; }
+
     const user = c.get('user') as AuthUser | undefined;
     if (!user) {
       return c.json({ error: 'Authentication required' }, 401);
@@ -101,10 +95,7 @@ export function requireAnyPermission(permissions: Permission[]) {
 
     if (!hasAny) {
       return c.json(
-        {
-          error: 'Forbidden',
-          message: `Insufficient permissions. Required one of: ${permissions.join(', ')}`,
-        },
+        { error: 'Forbidden', message: `Insufficient permissions. Required one of: ${permissions.join(', ')}` },
         403
       );
     }

@@ -60,6 +60,9 @@ importers:
       '@archguard/reviewer':
         specifier: workspace:*
         version: link:../reviewer
+      '@archguard/server':
+        specifier: workspace:*
+        version: link:../server
       '@archguard/velocity':
         specifier: workspace:*
         version: link:../velocity
@@ -245,6 +248,9 @@ importers:
       drizzle-orm:
         specifier: ^0.38.0
         version: 0.38.4(@types/better-sqlite3@7.6.13)(@types/react@18.3.28)(better-sqlite3@11.10.0)(postgres@3.4.8)(react@18.3.1)
+      express:
+        specifier: ^5.0.0
+        version: 5.2.1
       zod:
         specifier: ^3.24.0
         version: 3.25.76

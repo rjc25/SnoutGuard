@@ -25,6 +25,7 @@
     "@archguard/analyzer": "workspace:*",
     "@archguard/context-sync": "workspace:*",
     "@archguard/mcp-server": "workspace:*",
+    "@archguard/server": "workspace:*",
     "@archguard/reviewer": "workspace:*",
     "@archguard/velocity": "workspace:*",
     "@archguard/work-summary": "workspace:*",
