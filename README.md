@@ -297,6 +297,29 @@ Use the same stdio command pattern:
 archguard serve --transport stdio
 ```
 
+### Available MCP Tools
+
+Once the MCP server is running, your AI agent gets access to these tools:
+
+| Tool | What It Does | When to Use |
+|------|-------------|-------------|
+| `get_architectural_guidance` | Returns relevant decisions + constraints for a task description | **Before writing code** — describe what you're about to do |
+| `get_architectural_decisions` | Search decisions by keyword, category, or file path | Looking up specific patterns or conventions |
+| `check_architectural_compliance` | Check a code snippet against architectural constraints | Validating code before committing |
+| `get_dependency_graph` | Query the dependency graph for a module | Understanding coupling and dependencies |
+
+**`get_architectural_guidance` is the most valuable tool.** It takes a plain-English task description and returns all relevant architectural decisions, constraints, and code examples — so the agent writes architecturally compliant code from the start, instead of fixing violations after the fact.
+
+### CLI Usage (without MCP)
+
+You can also query the MCP server from the command line via JSON-RPC over stdio:
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"cli","version":"1.0"}}}
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_architectural_guidance","arguments":{"task":"add a new webhook handler"}}}' \
+  | archguard serve --transport stdio 2>/dev/null | tail -1 | python3 -m json.tool
+```
+
 ## Configuration
 
 ArchGuard is configured via `.archguard.yml` in your project root. Run `archguard init` to generate one with defaults.
