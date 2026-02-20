@@ -239,7 +239,7 @@ llm:
     review: claude-sonnet-4-6       # For PR review
     mcp: claude-sonnet-4-6          # For MCP server queries
     summary: claude-sonnet-4-6      # For work summaries
-  max_cost_per_run: 5.00            # Safety limit in USD (0 = unlimited)
+  max_cost_per_run: 10.00           # Safety limit in USD (0 = unlimited)
 ```
 
 ### Estimated Costs
@@ -333,7 +333,7 @@ llm:
   max_retries: 3
   retry_base_delay_ms: 1000
   request_timeout_ms: 120000
-  max_cost_per_run: 5.00
+  max_cost_per_run: 10.00
 
 sync:
   formats:
