@@ -264,7 +264,14 @@ install dependencies with pnpm, build all packages, and link the CLI globally. T
 my current project: run "archguard init", "archguard analyze", and "archguard sync" to
 generate CLAUDE.md.
 
-Then wire up native MCP tools:
+CLAUDE CODE SETUP:
+- Create .claude/settings.json with an "archguard" MCP server entry
+  (command: "archguard", args: ["serve", "--transport", "stdio"],
+  env: { "ANTHROPIC_API_KEY": "<key>" })
+- Create .claude/settings.local.json with the actual API key (gitignore it)
+- Add ".claude/settings.local.json" to .gitignore
+
+OPENCLAW NATIVE MCP SETUP:
 1. Create the MCP client plugin at ~/.openclaw/extensions/mcp-client/ (manifest + index.ts
    from the ArchGuard OpenClaw integration guide)
 2. Apply a gateway config.patch to enable the mcp-client plugin with an archguard server

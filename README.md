@@ -105,10 +105,14 @@ ANALYZE:
 - Show me the CLAUDE.md and a summary of decisions found
 
 MCP SERVER:
-- Configure "archguard serve" as an MCP server (stdio transport) in my editor's MCP config:
-  Claude Code: .claude/settings.json
-  Cursor: .cursor/mcp.json
-  Windsurf: equivalent config
+- Create .claude/settings.json with an "archguard" MCP server entry:
+  command: "archguard", args: ["serve", "--transport", "stdio"],
+  env: { "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}" }
+- Create .claude/settings.local.json with the actual API key hardcoded (for local use)
+- Add ".claude/settings.local.json" to .gitignore (it contains secrets)
+- For Cursor: same config in .cursor/mcp.json
+- For OpenClaw: see the OpenClaw section under MCP Server Setup below for native tool
+  integration via the mcp-client plugin (tools appear directly in the agent's palette)
 - The server exposes 4 tools: get_architectural_guidance (describe a task, get relevant
   constraints), get_architectural_decisions (search by keyword), check_architectural_compliance
   (validate code), get_dependency_graph (query module coupling)
