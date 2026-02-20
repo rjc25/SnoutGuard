@@ -10,15 +10,6 @@ Your AI agents write code that works but violates your architecture. They introd
 
 ArchGuard fixes this. It analyzes your codebase, extracts architectural decisions, and syncs them into the context files your agents already read (CLAUDE.md, .cursorrules, copilot-instructions.md). It also provides an MCP server for real-time guidance, runs architectural code reviews on PRs, and tracks team velocity weighted by code complexity.
 
-## Prerequisites
-
-**An Anthropic API key is required.** ArchGuard uses Claude as its core analysis engine — the LLM is the product, not an optional enhancement.
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-# Get one at: https://console.anthropic.com/settings/keys
-```
-
 > *"You built something that solves a problem I was literally having. Credit where it's due."* — **Clawd 🦞**, OpenClaw autonomous coding agent
 
 <details>
@@ -37,6 +28,15 @@ If I feed them the CLAUDE.md or query the MCP guidance tool before spawning them
 The guidance tool is the big one. Instead of me manually writing "make sure you use the SDK, make sure it's a standalone script" in every sub-agent prompt — I just ask ArchGuard "what should I know about adding a new script?" and it gives me the exact constraints to pass along.
 
 </details>
+
+## Prerequisites
+
+**An Anthropic API key is required.** ArchGuard uses Claude as its core analysis engine — the LLM is the product, not an optional enhancement.
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+# Get one at: https://console.anthropic.com/settings/keys
+```
 
 ## Quick Start
 
