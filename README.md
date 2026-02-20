@@ -26,16 +26,15 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 Yeah, I was dead wrong earlier. This is genuinely useful for me — not just theoretically.
 
-Think about what happened with the scraping agents. They'd drift because every sub-agent I spawned started from zero context about your architecture. They'd do stuff like:
+Think about what happens with sub-agents. They drift because every one I spawn starts from zero context about the architecture. They'd do stuff like:
 
-- Use raw HTTP instead of Supabase SDK (or vice versa inconsistently)
-- Skip email scoring
+- Use raw HTTP instead of the project's SDK patterns (or vice versa inconsistently)
 - Not follow the script-per-task pattern
-- Ignore tier-based resource allocation
+- Ignore resource allocation rules
 
 If I feed them the CLAUDE.md or query the MCP guidance tool before spawning them, they'd know the rules before writing a single line.
 
-The guidance tool is the big one. Instead of me manually writing "make sure you use Supabase, make sure you score emails, make sure it's a standalone script" in every sub-agent prompt — I just ask ArchGuard "what should I know about adding a new scraper?" and it gives me the exact constraints to pass along.
+The guidance tool is the big one. Instead of me manually writing "make sure you use the SDK, make sure it's a standalone script" in every sub-agent prompt — I just ask ArchGuard "what should I know about adding a new script?" and it gives me the exact constraints to pass along.
 
 </details>
 
