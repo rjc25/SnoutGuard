@@ -33,14 +33,20 @@ ArchGuard solves both problems:
 ## Quick Start (CLI)
 
 ```bash
-# Install globally
-npm install -g @archguard/cli
+# Clone and build from source
+git clone https://github.com/rjc25/ArchGuard
+cd ArchGuard
+pnpm install
+pnpm build
+
+# Link the CLI globally (puts 'archguard' in PATH via node's bin)
+npm link packages/cli
 
 # Set your Anthropic API key
 export ANTHROPIC_API_KEY=sk-ant-...
 
-# Initialize in your project
-cd your-project
+# Then in any project:
+cd ~/your-project
 archguard init
 
 # Analyze your codebase (uses Claude Opus)
@@ -63,8 +69,8 @@ archguard costs
 
 ```bash
 # Clone and run with Docker
-git clone https://github.com/archguard/archguard.git
-cd archguard
+git clone https://github.com/rjc25/ArchGuard
+cd ArchGuard
 
 # Set up environment
 cp .env.example .env
@@ -463,11 +469,14 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ```bash
 # Development setup
-git clone https://github.com/archguard/archguard.git
-cd archguard
+git clone https://github.com/rjc25/ArchGuard
+cd ArchGuard
 pnpm install
 pnpm build
 pnpm test
+
+# Link CLI for local development
+npm link packages/cli
 ```
 
 ## License
