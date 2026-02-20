@@ -47,14 +47,11 @@ export function registerServerCommand(program: Command): void {
 
           spinner.text = 'Starting API server...';
 
-          // Dynamic import to avoid loading server code unless needed
-          const { createServer } = await import('@archguard/core');
+          // Start the MCP server as the local API layer (stdio transport)
+          const { startMcpServer } = await import('@archguard/mcp-server');
 
-          const serverInstance = (createServer as any)({
-            port,
-            host,
+          await startMcpServer({
             projectDir,
-            config,
           });
 
           spinner.succeed(
@@ -76,9 +73,6 @@ export function registerServerCommand(program: Command): void {
           // Keep alive and handle shutdown
           const shutdown = () => {
             console.log(chalk.gray('\n  Shutting down server...'));
-            if (serverInstance && typeof serverInstance.close === 'function') {
-              serverInstance.close();
-            }
             process.exit(0);
           };
 

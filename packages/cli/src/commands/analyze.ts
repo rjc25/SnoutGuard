@@ -61,7 +61,7 @@ export function registerAnalyzeCommand(program: Command): void {
             `    Decisions found:  ${chalk.cyan(String(result.decisions.length))}`
           );
           console.log(
-            `    Drift score:      ${formatDriftScore(result.drift.overallScore)}`
+            `    Drift score:      ${formatDriftScore(result.drift.driftScore)}`
           );
           console.log(
             `    Drift events:     ${chalk.cyan(String(result.drift.events.length))}`

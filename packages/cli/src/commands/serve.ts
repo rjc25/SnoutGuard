@@ -27,35 +27,22 @@ export function registerServeCommand(program: Command): void {
         const config = loadConfig(projectDir);
         const port = parseInt(options.port, 10) || 3100;
 
-        const transport = options.transport as 'stdio' | 'sse';
-        if (transport !== 'stdio' && transport !== 'sse') {
+        const transport = options.transport;
+        if (transport !== 'stdio') {
           console.error(
-            chalk.red(`\n  Invalid transport: ${options.transport}. Use "stdio" or "sse".\n`)
+            chalk.red(`\n  Invalid transport: ${options.transport}. Only "stdio" is currently supported.\n`)
           );
           process.exit(1);
         }
 
-        if (transport === 'sse') {
-          console.log(
-            chalk.bold('\n  ArchGuard MCP Server\n')
-          );
-          console.log(chalk.gray(`  Transport: ${transport}`));
-          console.log(chalk.gray(`  Port:      ${port}`));
-          console.log(chalk.gray(`  Project:   ${projectDir}`));
-          console.log('');
-        }
-
-        const spinner =
-          transport === 'sse' ? ora('Starting MCP server...').start() : null;
+        const spinner: ReturnType<typeof ora> | null = null;
 
         try {
           const { startMcpServer } = await import('@archguard/mcp-server');
 
           await startMcpServer({
             transport,
-            port,
             projectDir,
-            config,
           });
 
           if (spinner) {

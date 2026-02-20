@@ -185,9 +185,9 @@ export function registerReviewCommand(program: Command): void {
 
           // Run the review
           const { reviewChanges } = await import('@archguard/reviewer');
-          const result = await reviewChanges(fileDiffs, config, {
-            projectDir,
-            useLlm: config.analysis.llmAnalysis,
+          const diffRef = options.commit ?? options.diff!;
+          const result = await reviewChanges(projectDir, config, diffRef, {
+            skipLlm: !config.analysis.llmAnalysis,
           });
 
           spinner.succeed(
