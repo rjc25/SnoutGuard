@@ -281,6 +281,11 @@ Return your analysis as JSON matching the schema in the system prompt.
 
 /**
  * Find decisions relevant to the given file and code.
+ *
+ * Uses a scoring approach: each decision gets relevance points from
+ * multiple signals. Decisions above a threshold are included.
+ * High-confidence cross-cutting decisions (data, deployment, security)
+ * get a baseline score so they're always considered.
  */
 function findRelevantDecisions(
   decisions: ArchDecision[],
@@ -292,31 +297,70 @@ function findRelevantDecisions(
   const codeLower = code.toLowerCase();
   const intentLower = intent?.toLowerCase() ?? '';
 
-  return decisions.filter((decision) => {
-    // Skip deprecated decisions
-    if (decision.status === 'deprecated') return false;
+  // Tokenize the code into meaningful words for constraint matching
+  const codeTokens = new Set(
+    codeLower.match(/[a-z_][a-z0-9_]{2,}/g) ?? []
+  );
 
-    // Check if any evidence file paths are related
-    const evidenceMatch = decision.evidence.some((ev) => {
-      const evDir = ev.filePath.split('/').slice(0, -1).join('/').toLowerCase();
-      const fileDir = filePath.split('/').slice(0, -1).join('/').toLowerCase();
-      return evDir === fileDir || filePathLower.includes(evDir) || evDir.includes(fileDir);
+  const scored = decisions
+    .filter((d) => d.status !== 'deprecated')
+    .map((decision) => {
+      let score = 0;
+
+      // 1. High-confidence cross-cutting decisions always get baseline relevance.
+      //    Data, deployment, and security decisions can be violated from anywhere.
+      const crossCutting = ['data', 'deployment', 'security'].includes(decision.category);
+      if (crossCutting && decision.confidence >= 0.8) {
+        score += 2;
+      }
+
+      // 2. Evidence file path overlap
+      const evidenceMatch = decision.evidence.some((ev) => {
+        const evDir = ev.filePath.split('/').slice(0, -1).join('/').toLowerCase();
+        const fileDir = filePath.split('/').slice(0, -1).join('/').toLowerCase();
+        return evDir === fileDir || filePathLower.includes(evDir) || evDir.includes(fileDir);
+      });
+      if (evidenceMatch) score += 3;
+
+      // 3. Tags match file path or code content
+      const tagMatch = decision.tags.some(
+        (tag: string) =>
+          filePathLower.includes(tag.toLowerCase()) ||
+          codeLower.includes(tag.toLowerCase())
+      );
+      if (tagMatch) score += 3;
+
+      // 4. Intent matches decision title or description
+      if (
+        intentLower &&
+        (decision.title.toLowerCase().includes(intentLower) ||
+          decision.description.toLowerCase().includes(intentLower) ||
+          intentLower.includes(decision.title.toLowerCase()))
+      ) {
+        score += 2;
+      }
+
+      // 5. Constraint text contains keywords found in the code.
+      //    e.g. constraint says "no local databases" → code has "database"
+      //    or constraint says "environment variables" → code has "os.environ"
+      const constraintMatch = decision.constraints.some((constraint: string) => {
+        const constraintWords = constraint.toLowerCase().match(/[a-z_][a-z0-9_]{2,}/g) ?? [];
+        const overlap = constraintWords.filter((w: string) => codeTokens.has(w));
+        return overlap.length >= 2; // At least 2 overlapping tokens
+      });
+      if (constraintMatch) score += 1;
+
+      // 6. Description keywords match code tokens
+      const descWords = decision.description.toLowerCase().match(/[a-z_][a-z0-9_]{3,}/g) ?? [];
+      const descOverlap = descWords.filter((w: string) => codeTokens.has(w)).length;
+      if (descOverlap >= 3) score += 1;
+
+      return { decision, score };
     });
 
-    // Check if tags match the file path or code content
-    const tagMatch = decision.tags.some(
-      (tag) =>
-        filePathLower.includes(tag.toLowerCase()) ||
-        codeLower.includes(tag.toLowerCase())
-    );
-
-    // Check if intent matches decision title or description
-    const intentMatch =
-      intentLower &&
-      (decision.title.toLowerCase().includes(intentLower) ||
-        decision.description.toLowerCase().includes(intentLower) ||
-        intentLower.includes(decision.title.toLowerCase()));
-
-    return evidenceMatch || tagMatch || intentMatch;
-  });
+  // Include any decision with score >= 2 (cross-cutting alone qualifies)
+  return scored
+    .filter((s) => s.score >= 2)
+    .sort((a, b) => b.score - a.score)
+    .map((s) => s.decision);
 }
