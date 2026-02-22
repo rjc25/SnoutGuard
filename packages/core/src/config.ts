@@ -100,7 +100,7 @@ const configSchema = z.object({
       cacheTtlHours: z.number().default(720),
       maxRetries: z.number().default(3),
       retryBaseDelayMs: z.number().default(1000),
-      requestTimeoutMs: z.number().default(120_000),
+      requestTimeoutMs: z.number().default(600_000),
       maxCostPerRun: z.number().default(10.0),
     })
     .default({}),
@@ -288,7 +288,7 @@ llm:
   cache_ttl_hours: 720
   max_retries: 3
   retry_base_delay_ms: 1000
-  request_timeout_ms: 120000
+  request_timeout_ms: 600000
   max_cost_per_run: 10.00
 
 # Context file sync (no LLM needed — pure templating)
